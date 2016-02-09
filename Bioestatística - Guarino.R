@@ -1,4 +1,3 @@
-
 ###Non-parametric tests
 ##Kruskal-Wallis (equivalent to an ANOVA)
 #plotting the data
@@ -15,7 +14,7 @@ summary(C)
 summary(D)
 
 #Taking a better look at the differences between samples
-boxplot(A,B,C,D, names=c("A","B","C","D"), ylab="No. orquÌdeas",
+boxplot(A,B,C,D, names=c("A","B","C","D"), ylab="No. orqu√≠deas",
 col=3)
 
 #Puts the data on a vertical format
@@ -55,7 +54,7 @@ str(peixe)
 attach(peixe)
 head(peixe)
 
-#VisualizaÁ„o de Dados
+#Visualiza√ß√£o de Dados
 boxplot(nadadeira~correnteza, col="red",ylab="Nadadeira")
 
 #To rotate boxplot labels, add las=2 to the general formula
@@ -72,7 +71,7 @@ shapiro.test(motut$P.mesoamericanus_normal)
 #Testa premissa de homocedasticidade
 bartlett.test(nadadeira~correnteza)
 
-#Calcula mÈdia
+#Calcula m√©dia
 (x.forte<-mean(nadadeira[correnteza=="forte"]))
 (x.fraco<-mean(nadadeira[correnteza=="fraco"]))
 (x.moderado<-mean(nadadeira[correnteza=="moderado"]))
@@ -89,7 +88,7 @@ bartlett.test(nadadeira~correnteza)
 (ss.entre.moderado<-7*(x.moderado-x.total)^2)
 (ss.entre<-ss.entre.forte+ss.entre.fraco+ss.entre.moderado)
 
-#Calcula vari‚ncia (MS)
+#Calcula vari√¢ncia (MS)
 (ms.entre<-ss.entre/(3-1))
 (ms.dentro<-ss.dentro/((7-1)*3))
 
@@ -98,19 +97,19 @@ bartlett.test(nadadeira~correnteza)
 curve(df(x,2,18),0,5)
 abline(v=f,col="red",lwd=2)
 1-(pf(f,2,18)) #valor de p
-qf(0.95,2,18) #valor crÌtico para alfa=0,05
+qf(0.95,2,18) #valor cr√≠tico para alfa=0,05
 
 #Faz ANOVA
 a<-aov(nadadeira~correnteza)
 summary(a)
 
-#ProporÁ„o da variaÁ„o total explicada por correnteza (r≤)
+#Propor√ß√£o da varia√ß√£o total explicada por correnteza (r¬≤)
 ss.entre/ss.total
 
-#Teste de comparaÁ„o m˙ltipla
+#Teste de compara√ß√£o m√∫ltipla
 TukeyHSD(a)
 
-#ANOVA n„o-paramÈtrica
+#ANOVA n√£o-param√©trica
 kruskal.test(nadadeira~correnteza)
 
 r.nadadeira<-rank(nadadeira)
@@ -121,7 +120,7 @@ h<-522.9/var(r.nadadeira)
 h
 
 14/01/2013
-#Define o diretÛrio de trabalho
+#Define o diret√≥rio de trabalho
 setwd("/Users/grcolli_on_bachia/Desktop")
 getwd
 
@@ -132,27 +131,27 @@ attach(beija.flor)
 class(beija.flor)
 
 #Visualiza dados
-table(bloco,acucar) (mostra quantas combinaÁıes existem para os blocos e os aÁ˙cares)
-table(bloco) (mostra quantas observaÁıes existem oara cada bloco)
-table(acucar) (mostra quantas observaÁıes existem para cada vari·vel aÁ˙car)
+table(bloco,acucar) (mostra quantas combina√ß√µes existem para os blocos e os a√ß√∫cares)
+table(bloco) (mostra quantas observa√ß√µes existem oara cada bloco)
+table(acucar) (mostra quantas observa√ß√µes existem para cada vari√°vel a√ß√∫car)
 par(mfro=c(1,2))
-plot(frequencia~bloco+acucar,las=1,col="cyan") (faz um gr·fico pra blocos mais um gr·fico para aÁ˙cares)
+plot(frequencia~bloco+acucar,las=1,col="cyan") (faz um gr√°fico pra blocos mais um gr√°fico para a√ß√∫cares)
 par(mfrow=c(1,1))
 
-#Faz ANOVA de Blocos AleatÛrios
-anova.beija.flor<-aov(frequencia-bloco+acucar) (como eu n„o estou interessado na interaÁ„o entre o bloco e aÁ˙car, colocasse o sinal de adiÁ„o(+). Caso houvesse interesse em verificar a interaÁ„o, deveria ser colocado o sinal de vezes (*)) 
-                                               (se ele estivesse interessado na interaÁ„o, ele teria colocado Vezes no lugar de sinal de adiÁ„o)
-#Calcula mÈdias
-model.tables(anova.beija.flor,"means",se=T) (ele È interessante porque ele d· a mÈdia total por blocos e por tratamento, alÈm do erro-padr„o para as diferenÁas de mÈdia)
+#Faz ANOVA de Blocos Aleat√≥rios
+anova.beija.flor<-aov(frequencia-bloco+acucar) (como eu n√£o estou interessado na intera√ß√£o entre o bloco e a√ß√∫car, colocasse o sinal de adi√ß√£o(+). Caso houvesse interesse em verificar a intera√ß√£o, deveria ser colocado o sinal de vezes (*)) 
+                                               (se ele estivesse interessado na intera√ß√£o, ele teria colocado Vezes no lugar de sinal de adi√ß√£o)
+#Calcula m√©dias
+model.tables(anova.beija.flor,"means",se=T) (ele √© interessante porque ele d√° a m√©dia total por blocos e por tratamento, al√©m do erro-padr√£o para as diferen√ßas de m√©dia)
 model.tables(anova.beija.flor,"effects",se=T)
 plot.design(frequencia~bloco+acucar)
 
-#Testes de comparaÁ„o m˙ltiplo
+#Testes de compara√ß√£o m√∫ltiplo
 TukeyHSD(anova.beija.flor)
 parwise.t.test(frequencia,acucar,p.adj="bonf")
 parwise.t.test(frequencia,acucar,p.adj="holm")
 
-#Testa premissas (o teste de premissas muitas vezes È feito por meio da an·lise dos resÌduos)
+#Testa premissas (o teste de premissas muitas vezes √© feito por meio da an√°lise dos res√≠duos)
 par(mfrow=c(2,2))
 plot(anova.beija.flor)
 par(mfrow=c(1,1))
@@ -166,9 +165,9 @@ shapiro.test(porcentagem[RB])
 shapiro.test(porcentagem[RB=="RB"])
 shapiro.test(frequencia[acucar=="sacarose"])
 shapiro.test(anova.beija.flor$residuals)
-print.deafult(anova.beija.flor) (imprime tudo o que existe dentro do objeto entre parÍnteses)
+print.deafult(anova.beija.flor) (imprime tudo o que existe dentro do objeto entre par√™nteses)
 bartlett.test(RB~porcentagem)
-fligner.test(frequencia~acucar) (Outro teste possÌvel para homocedasticidade)
+fligner.test(frequencia~acucar) (Outro teste poss√≠vel para homocedasticidade)
 class(anova.beija.flor)
 summary(aov(frequencia~bloco+acucar))
 summary(aov(frequencia~acucar))
@@ -195,15 +194,15 @@ interaction.plot(trecho,isca,capturas)
 anova.peixes<-aov(capturas~isca+trecho)
 summary(anova.peixes)
 
-#Calcula mÈdias
+#Calcula m√©dias
 tapply(capturas,isca,mean)
 model.tables(anova.peixes,"means")
 
-#Teste de ComparaÁ„o M˙ltipla
+#Teste de Compara√ß√£o M√∫ltipla
 TukeyHSD(anova.peixes)
 parwise.t.test(capturas,isca,p.adj="holm")
 
-#Testa premissas (o teste de premissas muitas vezes È feito por meio da an·lise dos resÌduos)
+#Testa premissas (o teste de premissas muitas vezes √© feito por meio da an√°lise dos res√≠duos)
 par(mfrow=c(2,2))
 plot(anova.peixes)
 par(mfrow=c(1,1))
@@ -237,16 +236,16 @@ length(massa)
 #Faz ANOVA normal
 summary(aov(massa~especie))
 
-#Faz ANOVA Hier·rquica
+#Faz ANOVA Hier√°rquica
 anova.lagartos<-aov(massa~especie+Error(individuo/especie)) 
-(quando se coloca error, vai se dizer qual È a variaÁ„o individual)
+(quando se coloca error, vai se dizer qual √© a varia√ß√£o individual)
 summary(anova.lagartos)
 curve(df(x,2,21),col="red",lwd=3,xlim=c(0,4),ylim=c(0,1))
 curve(df(x,2,9),col="blue",lwd=3,xlim=c(0,4),ylim=c(0,1),add=T)
 qf(0.95,2,21)
 qf(0.95,2,9)
 
-#Calcula mÈdias
+#Calcula m√©dias
 medias.ovos<-aggregate(massa,list(Individuo=individuo),mean)
 medias.ovos
 m<-tapply(massa,individuo,mean)
@@ -258,7 +257,7 @@ sp<-c(rep("G.amarali",4),rep("G.darwini",4),rep("G.geckoides",4)
 anova.medias<-aov(massa~especie+Error(individuo/especie)) 
 
 
-#Faz ANOVA com mÈdias
+#Faz ANOVA com m√©dias
 summary(aov(medias.ovos$x-sp))
 
 ##ANOVA de Medidas Repetidas
@@ -277,7 +276,7 @@ tatu
 summary(aov(berne~mes))
 
 #ANOVA de Medidas Repetidas
-anova.tatu<-aov(berne~mes+Error(sujeito/mes)) (caso se estivesse interessado na interaÁ„o, seria mes*tratamento em todos os casos. Quando se coloca mes*tratamento, ele calcula o valor do tratamento, o valor do mes e o valor da interaÁ„o entre os dois)) anova.tatu<-aov(berne~mes*tratamento+Error(sujeito/mes*tratamento))
+anova.tatu<-aov(berne~mes+Error(sujeito/mes)) (caso se estivesse interessado na intera√ß√£o, seria mes*tratamento em todos os casos. Quando se coloca mes*tratamento, ele calcula o valor do tratamento, o valor do mes e o valor da intera√ß√£o entre os dois)) anova.tatu<-aov(berne~mes*tratamento+Error(sujeito/mes*tratamento))
 summary(anova.tatu)
 
 #ANOVA de Medidas Repetidas Fatorial
@@ -295,7 +294,7 @@ interaction.plot(mes,sujeito,berne)
 
 16/01/2013
 
-***** CorrelaÁ„o linear
+***** Correla√ß√£o linear
 library(MASS)
 data(crabs)
 head(crabs)
@@ -304,28 +303,28 @@ attach(crabs)
 
 #Covariancia
 cov(CL,CL)
-var(CL) #a covari‚ncia de uma variavel consigo mesma e a sua variancia
-cov(CL,FL) #a covari‚ncia de duas variaveis independentes È zero.
+var(CL) #a covari√¢ncia de uma variavel consigo mesma e a sua variancia
+cov(CL,FL) #a covari√¢ncia de duas variaveis independentes √© zero.
 cov(FL,CL)
 sum(((CL-mean(CL))*FL-mean(FL)))/(length(FL)-1))
 constante<-rep(50,200)
 constante
 cov(CL,constante)
 cov(crabs[,-c(1:3)])
-cov(crabs[,4:8]) #como as covari‚ncias dependem da escala, elas devem ser padronizadas de acordo com o desvio-padr„o para que o problema da escala seja resolvido e isso È feito
+cov(crabs[,4:8]) #como as covari√¢ncias dependem da escala, elas devem ser padronizadas de acordo com o desvio-padr√£o para que o problema da escala seja resolvido e isso √© feito
 var(FL)                   
-cor(CL,CW) #a partir desse valor, ainda tem que ser testada a signific‚ncia
+cor(CL,CW) #a partir desse valor, ainda tem que ser testada a signific√¢ncia
 cov(CL,CW)
-plot(CL,CW,type="p",pch=1,cex=2,col="red") #pch= plot character #dica: mexer em nomes do gr·fico em outro programa (corel)
-pairs(crabs[,4:8],col="red") #faz a correlaÁ„o entre vari·veis par a par
+plot(CL,CW,type="p",pch=1,cex=2,col="red") #pch= plot character #dica: mexer em nomes do gr√°fico em outro programa (corel)
+pairs(crabs[,4:8],col="red") #faz a correla√ß√£o entre vari√°veis par a par
 cor(crabs[,4:8])
 cor.test(CL,CW)
 shapiro.test(CW)
 shapiro.test(CL)
 
-#CorrelaÁ„o de Spearman(nao-parametrica)
+#Correla√ß√£o de Spearman(nao-parametrica)
 cor.test(porcentagem,RB,method="spearman")
-cor.test(rank(CW),rank(CL)) #estes dois comandos s„o equivalentes
+cor.test(rank(CW),rank(CL)) #estes dois comandos s√£o equivalentes
 
 #Regressao
 modelo<-lm(CW~CL)
@@ -341,7 +340,7 @@ SS.modelo<-sum((predict(modelo)~mean(CW))^2)
 SS.total
 SS.residuals
 SS.modelo
-SS.modelo/SS.total #coeficiente de determinaÁ„o
+SS.modelo/SS.total #coeficiente de determina√ß√£o
 cor(CL,CW)^2
 curve(df(x,1,198))
 
@@ -350,10 +349,10 @@ plot(mfrow=c(2,2))
 plot(modelo)
 
 shapiro.test(residuals(modelo))
-plot(rstandard(modelo)) #gr·fico dos resÌduos padronizados
+plot(rstandard(modelo)) #gr√°fico dos res√≠duos padronizados
 plot(rstudent(modelo))
-influence.measures(modelo) # o melhor indicador È a dist‚ncia de cook e o asterisco representa a influÍncia
-plot(cooks.distance(modelo,type="h")) #faz um gr·fico somente sobre a dist‚ncia de cook. SÛ È preocupante se a dist‚ncia de Cook for maior do que 2.
+influence.measures(modelo) # o melhor indicador √© a dist√¢ncia de cook e o asterisco representa a influ√™ncia
+plot(cooks.distance(modelo,type="h")) #faz um gr√°fico somente sobre a dist√¢ncia de cook. S√≥ √© preocupante se a dist√¢ncia de Cook for maior do que 2.
 boxplot(rstandard(modelo))
 qnorm(0,99)
 
@@ -365,9 +364,9 @@ data(crabs)
 head(crabs)
 
 #Faz regressao multipla
-reg<-lm(CW~FL+RW+BD+CL, crabs) #a ordem das vari·veis n„o È importante. Se houver interesse nas interaÁıes, basta colocar um asterisco entre as vari·veis da fÛrmula)
+reg<-lm(CW~FL+RW+BD+CL, crabs) #a ordem das vari√°veis n√£o √© importante. Se houver interesse nas intera√ß√µes, basta colocar um asterisco entre as vari√°veis da f√≥rmula)
 summary(reg)
-anova(reg) #Usa-se o comando anova quando j· se tem os valores. Caso 
+anova(reg) #Usa-se o comando anova quando j√° se tem os valores. Caso 
 attach(crabs)
 var(CW)*199
 
@@ -375,20 +374,20 @@ var(CW)*199
 reg.std<-lm(CW~scale(FL)+scale(RW)+scale(CL)+scale(BD))
 summary(reg.std)
 
-#Faz seleÁ„o autom·tica de modelos
+#Faz sele√ß√£o autom√°tica de modelos
 summary(step(reg))
 stepAIC(reg,direction="backward",trace=2)
 
-#Faz seleÁ„o manual de modelos
+#Faz sele√ß√£o manual de modelos
 modelo.nulo<-lm(CW~1,crabs)
 modelo.completo<-lm(CW~FL+RW+CL+BD)
 
-#Tenta remover vari·veis do modelo completo
-drop1(modelo.completo,test=c("F"),trace=T) #o p mostrar· se a retirada do modelo È significativo ou n„o
+#Tenta remover vari√°veis do modelo completo
+drop1(modelo.completo,test=c("F"),trace=T) #o p mostrar√° se a retirada do modelo √© significativo ou n√£o
 ?drop1
 
-#Tenta acrescentar vari·veis do modelo nulo
-add1(modelo.nulo,scope=formula(modelo.completo),test=c("F")) #o scope servir· para dizer de onde ele retirar· os dados das vari·veis para acrescentar ao modelo. Nesse caso, ele retirar· as vari·veis da fÛrmula do modelo.completo que j· foi colocado antes. 
+#Tenta acrescentar vari√°veis do modelo nulo
+add1(modelo.nulo,scope=formula(modelo.completo),test=c("F")) #o scope servir√° para dizer de onde ele retirar√° os dados das vari√°veis para acrescentar ao modelo. Nesse caso, ele retirar√° as vari√°veis da f√≥rmula do modelo.completo que j√° foi colocado antes. 
 
 #Acrescenta CL ao modelo
 modelo.nulo<-update(modelo.nulo,.~.+CL) # .~. significa manter tudo o que estava antes
@@ -396,8 +395,8 @@ modelo.nulo<-update(modelo.nulo,.~.+CL) # .~. significa manter tudo o que estava
 #Tenta remover variaveis do modelo
 drop1(modelo.nulo,test=c("F"),trace=T)
 
-#Tenta acrescentar vari·veis do modelo nulo
-add1(modelo.nulo,scope=formula(modelo.completo),test=c("F")) #o scope servir· para dizer de onde ele retirar· os dados das vari·veis para acrescentar ao modelo. Nesse caso, ele retirar· as vari·veis da fÛrmula do modelo.completo que j· foi colocado antes. 
+#Tenta acrescentar vari√°veis do modelo nulo
+add1(modelo.nulo,scope=formula(modelo.completo),test=c("F")) #o scope servir√° para dizer de onde ele retirar√° os dados das vari√°veis para acrescentar ao modelo. Nesse caso, ele retirar√° as vari√°veis da f√≥rmula do modelo.completo que j√° foi colocado antes. 
 
 #Acrescenta CL ao modelo
 modelo.nulo<-update(modelo.nulo,.~.+RW) # .~. significa manter tudo o que estava antes
@@ -411,7 +410,7 @@ library(MuMIn)
 dd.reg<-dredge(reg)
 dd.reg
 
-modelos.selecionados<-get.models(dd.reg,delta<60) #60 È o valor de delta observado na tabela para o qual parece existir uma piora significativa na qualidade de explicaÁ„o do modelo
+modelos.selecionados<-get.models(dd.reg,delta<60) #60 √© o valor de delta observado na tabela para o qual parece existir uma piora significativa na qualidade de explica√ß√£o do modelo
 summary(modelos.selecionados)
 summary(model.avg(modelos.selecionados))
 summary(reg)
@@ -427,11 +426,11 @@ cor(crabs[,4:8])
 attach(crabs)
 plot(CL,CW,pch=1,col=c("blue","orange")[as.numeric(sp)],cex=2)
 cor.test(CW,CL)
-summary(lm(CW~CL*sp)) #testa premissa de ausÍncia de interaÁ„o
-summary(lm(CW~CL+sp)) #faz ANCOVA (invalido nesse caso devido · interaÁ„o, mas o comando da ancova È esse)
+summary(lm(CW~CL*sp)) #testa premissa de aus√™ncia de intera√ß√£o
+summary(lm(CW~CL+sp)) #faz ANCOVA (invalido nesse caso devido √° intera√ß√£o, mas o comando da ancova √© esse)
 
 
-#### An·lise de Componentes Principais
+#### An√°lise de Componentes Principais
 #**********************************
 
 #Carrega os dados
@@ -440,51 +439,51 @@ data(crabs)
 attach(crabs)
 head(crabs)
 
-#VisualizaÁ„o de Dados Multivariados
+#Visualiza√ß√£o de Dados Multivariados
 pairs(crabs[,4:8],pch=19,col="red")
 
-#Matrizes de correlaÁ„o e covariancia
+#Matrizes de correla√ß√£o e covariancia
 cor(crabs[,4:8])
-cor(crabs[,c(4,5,8)) #correlaciona vari·veis especÌficas
+cor(crabs[,c(4,5,8)) #correlaciona vari√°veis espec√≠ficas
 
-#Matrizes de correlaÁ„o e covari‚ncia
+#Matrizes de correla√ß√£o e covari√¢ncia
 cov.crabs<-cor(crabs[,4:8])
 round(cov.crabs,2)
-sum(diag(cov.crabs)) #a diagonal principal tem as vari‚ncias e os outros dados s„o as covari‚ncias.
+sum(diag(cov.crabs)) #a diagonal principal tem as vari√¢ncias e os outros dados s√£o as covari√¢ncias.
 sscp.crabs<-cov.crabs*199
 round(sscp.crabs,2)
 sum(sscp.crabs)
 sum(diag(sscp.crabs))
-round(cor(crabs[,4:8]),2) #numa matriz de 5 x 5, existem 10 correlaÁıes importantes a serem verificadas.
+round(cor(crabs[,4:8]),2) #numa matriz de 5 x 5, existem 10 correla√ß√µes importantes a serem verificadas.
 diag(sscp.crabs)
 
 #Faz PCA
 pca.crabs<-prcomp(crabs[,4:8])
 pca.crabs
 summary(pca.crabs) #autovaloes
-round(pca.crabs$rotation,2) #autovetores #o coeficiente n„o significa 
+round(pca.crabs$rotation,2) #autovetores #o coeficiente n√£o significa 
 diag(cov.crabs)
 plot(pca.crabs)
-biplot(pca.crabs) #os scores est„o padronizados
+biplot(pca.crabs) #os scores est√£o padronizados
 biplot(pca.crabs,pch=1,col=as.number)
 abline(h=0,lwd=1,lty=2,col="blue")
 pca.crabs$rotation[,1]
 pca.crabs$rotation[1]
-pca.crabs$x       #os scores n„o est„o padronizados aqui
+pca.crabs$x       #os scores n√£o est√£o padronizados aqui
 
-#Faz PCA com matriz de correlaÁ„o
+#Faz PCA com matriz de correla√ß√£o
 pca.crabs<-prcomp(crabs[,4:8], scale=T)  #resultados independentes da escala
 pca.crabs
 summary(pca.crabs) #autovaloes
-round(pca.crabs$rotation,2) #autovetores #o coeficiente n„o significa 
+round(pca.crabs$rotation,2) #autovetores #o coeficiente n√£o significa 
 diag(cov.crabs)
 plot(pca.crabs)
-biplot(pca.crabs) #os scores est„o padronizados
+biplot(pca.crabs) #os scores est√£o padronizados
 biplot(pca.crabs,pch=1,col=as.number)
 abline(h=0,lwd=1,lty=2,col="blue")
 pca.crabs$rotation[,1]
 pca.crabs$rotation[1]
-pca.crabs$x       #os scores n„o est„o padronizados aqui
+pca.crabs$x       #os scores n√£o est√£o padronizados aqui
 cor(pca.crabs$x)
 
 #Calcula os scores
@@ -492,8 +491,8 @@ autovetores<-pca.crabs$rotation
 autovetores
 class(autovetores)
 dados<-as.matrix(crabs[,4:8])
-scores.pca<-dados%*%autovetores #o sinal de % È devido ‡ multiplicaÁ„o de matrizes
-var(scores.pca)  #os scores representam a variaÁ„o total dos dados, mas a variaÁ„o est· redistribuÌda
+scores.pca<-dados%*%autovetores #o sinal de % √© devido √† multiplica√ß√£o de matrizes
+var(scores.pca)  #os scores representam a varia√ß√£o total dos dados, mas a varia√ß√£o est√° redistribu√≠da
 sum(diag(var(scores.pca))
 cor(scores.pca)
 plot(scores.pca[,1],scores.pca[,2])
@@ -501,7 +500,7 @@ plot(scale(scores.pca[,1]),scale(scores.pca[,2]))
 
 
 21/01/2013
-##An·lise de CorrespondÍncia
+##An√°lise de Correspond√™ncia
 #-----------
 
 install.packages("vegan",dependencies=T)
@@ -517,11 +516,11 @@ cor(dune)
 
 #Calcula qui-quadrado
 soma.linhas<-apply(dune,1,sum) #quando se coloca 1 no comando apply, o R soma linhas
-soma.linhas #observÁıes (indivÌduos) por sÌtios
+soma.linhas #observ√ß√µes (indiv√≠duos) por s√≠tios
 plot(sort(soma.linhas,decreasing=T),type="h",lwd=10,col="blue")
 
 soma.colunas<-apply(dune,2,sum) #quando se coloca 2 no comando apply, O R soma linhas
-soma.colunas #observÁıes (indivÌduos) por espÈcies
+soma.colunas #observ√ß√µes (indiv√≠duos) por esp√©cies
 plot(sort(soma.colunas,decreasing=T),type="h",lwd=10,col="red")
 
 soma.total<-sum(dune)
@@ -542,7 +541,7 @@ qui.quadrado/soma.total #inertia
 
 plot(dune.ca)
 biplot(prcomp(dune),pc.biplot=T)
-plot(dune.ca,scaling=1) #o scaling provoca mais uma mudanÁa nas escalas dos dados, mas n„o modifica o reusltado da an·lise
+plot(dune.ca,scaling=1) #o scaling provoca mais uma mudan√ßa nas escalas dos dados, mas n√£o modifica o reusltado da an√°lise
 
 library(MASS)
 ca.dune<-corresp(dune)
@@ -554,7 +553,7 @@ install.packages("ca",dependencies=T)
 chisq.test(dune)
 
 22/01/2013
-## An·lise de agrupamento (vamos tentar agrupar os caranguejos apenas por meio de suas medidas corporais)
+## An√°lise de agrupamento (vamos tentar agrupar os caranguejos apenas por meio de suas medidas corporais)
 
 #carrega pacotes
 library(vegan)
@@ -563,7 +562,7 @@ library(MASS)
 #Carrega os dados
 data(crabs)
 head(crabs)
-obs<-sample(1:200,20) #seleciona 20 n˙meros ao acaso da amostra de 200 repetiÁıes sem reposiÁ„o
+obs<-sample(1:200,20) #seleciona 20 n√∫meros ao acaso da amostra de 200 repeti√ß√µes sem reposi√ß√£o
 obs
 sort(obs) #ordena os valores
 amostras<-c(12,21,23,24,28,41,47,54,70,76,91,92,93,101,112,115,131,146,177,197)
@@ -571,7 +570,7 @@ sum(amostras)
 crabs.20<-crabs[amostras,]
 crabs.20
 
-#Visualiza 20 observaÁıes
+#Visualiza 20 observa√ß√µes
 pc.crabs.20<-prcomp(crabs.20[,4:8],scale=T)
 pc.crabs.20
 par(mfrow=c(1,2))
@@ -579,30 +578,30 @@ plot(pc.crabs.20$x[,1],pc.crabs.20$x[,2],pch=c("F","M")[as.numeric(crabs.20$sex)
 plot(pc.crabs.20$x[,1],pc.crabs.20$x[,2],col=c("blue","orange")[as.numeric(crabs.20$sp)])
 par(mfrow=c(1,1))
 
-#Calcula a matriz de dist‚ncias
-crabs.dist<-vegdist(crabs.20[,4:8],method="euclidean") #faz uma matriz de dist‚ncias utilizando a dist‚ncia euclidiana
+#Calcula a matriz de dist√¢ncias
+crabs.dist<-vegdist(crabs.20[,4:8],method="euclidean") #faz uma matriz de dist√¢ncias utilizando a dist√¢ncia euclidiana
 round(crabs.dist,1)
 crabs.dist
 ?vegdist
-row.names(crabs) #lista o n˙mero das linhas
+row.names(crabs) #lista o n√∫mero das linhas
 
-#Esperimenta diferentes aÁgoritmos
-crabs.single<-hclust(crabs.dist,method="single") #hclust manda fazer um agrupamento hier·rquico e manda fazer um dendrograma  #o mÈtodo single È o mÈtodo de agrupamento pelo vizinho mais prÛximo. Ele pergunta qual a menor dist‚ncia entre dois caranguejos.
+#Esperimenta diferentes a√ßgoritmos
+crabs.single<-hclust(crabs.dist,method="single") #hclust manda fazer um agrupamento hier√°rquico e manda fazer um dendrograma  #o m√©todo single √© o m√©todo de agrupamento pelo vizinho mais pr√≥ximo. Ele pergunta qual a menor dist√¢ncia entre dois caranguejos.
 plot(crabs.single,pch)
 
-crabs.complete<-hclust(crabs.dist,method="complete") #o complete manda fazer a menor dist‚ncia ao vizinho mais distante
+crabs.complete<-hclust(crabs.dist,method="complete") #o complete manda fazer a menor dist√¢ncia ao vizinho mais distante
 plot(crabs.complete)
 
-crabs.UPGMA<-hclust(crabs.dist,method="average") #o average manda fazer a menor dist‚ncia mÈdia
+crabs.UPGMA<-hclust(crabs.dist,method="average") #o average manda fazer a menor dist√¢ncia m√©dia
 plot(crabs.UPGMA)
 
-crabs.UPGMC<-hclust(crabs.dist,method="centroid") #faz a menor dist‚ncia entre as dist‚ncias dos centrÛides # mostra um encadeamento entre os grupos
+crabs.UPGMC<-hclust(crabs.dist,method="centroid") #faz a menor dist√¢ncia entre as dist√¢ncias dos centr√≥ides # mostra um encadeamento entre os grupos
 plot(crabs.UPGMC)
 
-crabs.ward<-hclust(crabs.dist,method="ward") #minimiza a vari‚ncia entre as dist‚ncias
+crabs.ward<-hclust(crabs.dist,method="ward") #minimiza a vari√¢ncia entre as dist√¢ncias
 plot(crabs.ward)
 
-#CorrelaÁ„o cofrenÈtica
+#Correla√ß√£o cofren√©tica
 crabs.single.cof<-cophenetic(crabs.single)
 cor(crabs.dist,crabs.single.cof)
 
@@ -618,14 +617,14 @@ cor(crabs.dist,crabs.UPGMC.cof)
 crabs.ward.cof<-cophenetic(crabs.ward)
 cor(crabs.dist,crabs.ward.cof)
 
-#Dist‚ncia de Gower (somas de quadrados) -> È uma medida dos ajustes. Seria a soma dos quadrados dos resÌduos. O melhor mÈtodo seria aquele que tem o meor valor, pois representa que existe uma menor diferenÁa entre o observado e o esperado.
+#Dist√¢ncia de Gower (somas de quadrados) -> √© uma medida dos ajustes. Seria a soma dos quadrados dos res√≠duos. O melhor m√©todo seria aquele que tem o meor valor, pois representa que existe uma menor diferen√ßa entre o observado e o esperado.
 gower.dist.simples<-sum((crabs.single.cof-crabs.dist)^2)
 gower.dist.complete<-sum((crabs.complete.cof-crabs.dist)^2)
 gower.dist.UPGMA<-sum((crabs.UPGMA.cof-crabs.dist)^2)
 gower.dist.UPGMC<-sum((crabs.UPGMC.cof-crabs.dist)^2)
 gower.dist.ward<-sum((crabs.ward.cof-crabs.dist)^2)
 
-#Gr·fico da largura da silhueta
+#Gr√°fico da largura da silhueta
 library(cluster)
 mls<-numeric(nrow(crabs.20))
 mls
@@ -633,10 +632,10 @@ for (k in 2:(nrow(crabs.20)-1)){
     sil<-silhouette(cutree(crabs.UPGMA,k=k),crabs.dist)   
     mls[k]<-summary(sil)$avg.width
 }
-melhor.k<-which.max(mls) #indica qual È o valor m·ximo
+melhor.k<-which.max(mls) #indica qual √© o valor m√°ximo
 melhor.k
 
-kmeans(crabs.dist,centers=2) #ir· dividir os dados em K grupos de 2 a 2 porque foi colocado centers=2 # esse teste È usado quando se tem um n˙mero prÈ-definido de grupos a serem formados, ou seja vocÍ indica para o programa quantos grupos vocÍ quer que sejam formados
+kmeans(crabs.dist,centers=2) #ir√° dividir os dados em K grupos de 2 a 2 porque foi colocado centers=2 # esse teste √© usado quando se tem um n√∫mero pr√©-definido de grupos a serem formados, ou seja voc√™ indica para o programa quantos grupos voc√™ quer que sejam formados
 crabs.cascade.KM<-
 cascadeKM(crabs.dist,inf.gr=2,sup.gr=19,criterion="ssi")
 ?cascadeKM
@@ -647,7 +646,7 @@ crabs.cascade.KM$partition
   
 23/01/2013
 
-##An·lise Multivariada de Vari‚ncia (MANOVA)
+##An√°lise Multivariada de Vari√¢ncia (MANOVA)
 
 #Carrega os dados
 haynes<-read.table("haynes.dat",h=T)
@@ -659,19 +658,19 @@ table(site)
 pairs(haynes[,2:5],pch=c("D","S","H","W")[as.numeric(site)])
 biplot(prcomp(haynes[,2:5]))
 
-#Calcula mÈdia das vari·veis
+#Calcula m√©dia das vari√°veis
 m<-colMeans(haynes[,-1])
 m
 
-#Cria matriz de mÈdias
+#Cria matriz de m√©dias
 mm<-matrix(rep(m,12),12,4,byrow=T)
 mm
 
-#Cria matrix com mÈdias dos sÌtios
-delray<-apply(haynes[site=="Delray",-1],2,mean)   #o apply d· a mÈdia do grupo todo. Faz a mÈdia para todo o data.frame
+#Cria matrix com m√©dias dos s√≠tios
+delray<-apply(haynes[site=="Delray",-1],2,mean)   #o apply d√° a m√©dia do grupo todo. Faz a m√©dia para todo o data.frame
 delray
 
-seaspray<-apply(haynes[site=="Seaspray",-1],2,mean) #2 È por coluna
+seaspray<-apply(haynes[site=="Seaspray",-1],2,mean) #2 √© por coluna
 seaspray
 
 woodside<-apply(haynes[site=="Woodside",-1],2,mean)
@@ -698,12 +697,12 @@ dt<-mh-mm
 dt
 
 #Calcula matriz SSCP total
-sscp.total<-t(dt)%*%dt #o t È de transposiÁ„o
+sscp.total<-t(dt)%*%dt #o t √© de transposi√ß√£o
 sscp.total
 round(sscp.total,2)
 cov(mh)
 
-#Calcula os desvios das mÈdias dos grupos
+#Calcula os desvios das m√©dias dos grupos
 dg<-mg-mm
 dg
 
@@ -721,41 +720,41 @@ sscp.dentro
 
 #Prova
 sscp.total
-sscp.grupos+sscp.dentro # esses dois valores tem que ser iguais. Se eles n„od erem iguais, existe alguma coisa errada.
+sscp.grupos+sscp.dentro # esses dois valores tem que ser iguais. Se eles n√£od erem iguais, existe alguma coisa errada.
 
 #Calcula lambda de Wilk
-det(sscp.dentro)/det(sscp.grupos+sscp.dentro) #quanto menor o valor de lambda de wilk, maior È o valor da diferenÁa
+det(sscp.dentro)/det(sscp.grupos+sscp.dentro) #quanto menor o valor de lambda de wilk, maior √© o valor da diferen√ßa
 
 #Faz MANOVA
 mh<-as.matrix(haynes[,-1])
 mh
-mhaynes<-manova(mh~site) # mh tem que ser uma matriz. N„o pode ser um data.frame
-summary(mhaynes,test="Wilks") #resultado. Existe diferenÁa entre os sites com relaÁ„o aos metais pesados tomados simultaneamente.
+mhaynes<-manova(mh~site) # mh tem que ser uma matriz. N√£o pode ser um data.frame
+summary(mhaynes,test="Wilks") #resultado. Existe diferen√ßa entre os sites com rela√ß√£o aos metais pesados tomados simultaneamente.
 print.default(summary(mhaynes))
 
-#VerificaÁıes que o Guarino fez
+#Verifica√ß√µes que o Guarino fez
 sum(summary(mhaynes)$Eigenvalues)
 sum(diag(sscp.grupos))
 sum(diag(sscp.dentro))
 sum(diag(cov(mh)))
 var(lcu)
 
-##An·lise Discriminante
+##An√°lise Discriminante
 
 library(MASS)
-haynes.discr<-lda(site~lcu+lpb+lni+lmn) #lda= linear discriminant analysis #È sempre importante padronizar as medidas dos dados com o scale, mesmo que os dados estejam com as mesmas unidades.
-haynes.discr #a quantidade de direÁıes de m·xima variaÁ„o vai ser sempre igual ao n˙mero de grupos -1.
-             #porporÁ„o de traÁos seria a proporÁ„o de variaÁ„o dos grupos que È explicada por cada dimens„o
+haynes.discr<-lda(site~lcu+lpb+lni+lmn) #lda= linear discriminant analysis #√© sempre importante padronizar as medidas dos dados com o scale, mesmo que os dados estejam com as mesmas unidades.
+haynes.discr #a quantidade de dire√ß√µes de m√°xima varia√ß√£o vai ser sempre igual ao n√∫mero de grupos -1.
+             #porpor√ß√£o de tra√ßos seria a propor√ß√£o de varia√ß√£o dos grupos que √© explicada por cada dimens√£o
 (haynes.discr<-lda(site~scale(lcu)+scale(lpb)+scale(lni)+scale(lmn)))
 
 #Calcula grupos esperados
-(haynes.discr.fit<-predict(haynes.discr)) #d· as probabilidades de cada observaÁ„o a pertencer a esses sÌtios. A observaÁ„o se encaixa naquela que tiver a maior probabilidade.
+(haynes.discr.fit<-predict(haynes.discr)) #d√° as probabilidades de cada observa√ß√£o a pertencer a esses s√≠tios. A observa√ß√£o se encaixa naquela que tiver a maior probabilidade.
 haynes.discr.fit$class
 
-#Avalia a EficiÍncia do modelo
-table(site,haynes.discr.fit$class) #verifica onde as vari·veis foram classificadas
+#Avalia a Efici√™ncia do modelo
+table(site,haynes.discr.fit$class) #verifica onde as vari√°veis foram classificadas
 
-# Gr·fico das funÁıes discriminantes
+# Gr√°fico das fun√ß√µes discriminantes
 plot(haynes.discr.fit$x[,1],haynes.discr.fit$x[,2],pch=("D","S","W")[as.numeric(site)])
 plot(haynes.discr,dimen=2)
 
@@ -766,18 +765,18 @@ dataEllipse(scores[1:4,1],scores[1:4,2],levels=c(0.95),pch="D",center.pch=19,cen
 dataEllipse(scores[5:8,1],scores[5:8,2],levels=c(0.95),pch="D",center.pch=19,center.cex=1.5,robust=T,xlim=c(-8,8),ylim=c(-6,6),col="red",xlab="LDA'",ylab="LDA2",las=1,add=T)
 dataEllipse(scores[9:12,1],scores[9:12,2],levels=c(0.95),pch="D",center.pch=19,center.cex=1.5,robust=T,xlim=c(-8,8),ylim=c(-6,6),col="darkgreen",xlab="LDA'",ylab="LDA2",las=1,add=T)
 
-#pode-se olhar tambÈm a matriz de confus„o para verificar o qu„o bom È o modelo.
+#pode-se olhar tamb√©m a matriz de confus√£o para verificar o qu√£o bom √© o modelo.
 #Jacknife 
 #Bootstrap
 
 24/01/2013
-##An·lise de CorrelaÁ„o CanÙnica
+##An√°lise de Correla√ß√£o Can√¥nica
 #.............
 
 bolger<-read.table("bolgeretal997.txt",h=T)
 head(bolger)
 pairs(bolger[,-1],col="blue")
-biplot(prcomp(bolger[,-1])) #precisa dar o scale pq os dados n„o est„o padronizados
+biplot(prcomp(bolger[,-1])) #precisa dar o scale pq os dados n√£o est√£o padronizados
 biplot(prcomp(bolger[,-1],scale=T))
 
 install.packages("calibrate",dependencies=T)
@@ -785,13 +784,13 @@ library(calibrate)
 ccora.bolger<-canocor(bolger[,5:13],bolger[,2:4])
 ccora.bolger
 
-$ccor #CorrelaÁıes CanÙnicas (matriz de correlaÁ„o canÙnica dos dados bolger)
-          [,1]      [,2]      [,3]   #esses dados sugerem que a correlaÁ„o entre esses conjuntos de dados ocorrem em mais de uma dimens„o
+$ccor #Correla√ß√µes Can√¥nicas (matriz de correla√ß√£o can√¥nica dos dados bolger)
+          [,1]      [,2]      [,3]   #esses dados sugerem que a correla√ß√£o entre esses conjuntos de dados ocorrem em mais de uma dimens√£o
 [1,] 0.9529602 0.0000000 0.0000000
 [2,] 0.0000000 0.7635846 0.0000000
 [3,] 0.0000000 0.0000000 0.6248061
 
-$A #Coeficientes canÙnicos dos roedores  (s„o 9 linhas pq s„o nove espÈcies de roedores e 3 colunas pq s„o 3 vari·veis)
+$A #Coeficientes can√¥nicos dos roedores  (s√£o 9 linhas pq s√£o nove esp√©cies de roedores e 3 colunas pq s√£o 3 vari√°veis)
               [,1]        [,2]       [,3]
  [1,] -0.002850132 -0.80107782 -0.6845661
  [2,] -0.002584390  0.09098132 -0.8481207
@@ -803,13 +802,13 @@ $A #Coeficientes canÙnicos dos roedores  (s„o 9 linhas pq s„o nove espÈcies de r
  [8,] -0.076840527 -0.38966869 -0.4752606
  [9,] -0.289454443  1.77032288  1.5435431
 
-$B #Coeficientes canonicos das vari·veis dos fragmentos
+$B #Coeficientes canonicos das vari√°veis dos fragmentos
            [,1]       [,2]       [,3]
 [1,]  0.9414336  0.3784044 -0.1252203
 [2,] -0.1670719 -0.1777184 -1.0109448
 [3,] -0.1627896  1.0357372  0.1407953
 
-$U #Scores das vari·veis canÙnicas dos roedores #tem um score para cada fragmento
+$U #Scores das vari√°veis can√¥nicas dos roedores #tem um score para cada fragmento
              [,1]       [,2]        [,3]
  [1,]  3.46144486  0.9683528 -1.26511715
  [2,]  0.82428660 -0.2552042 -0.40835272
@@ -863,7 +862,7 @@ $V #Scores dos fragmentos
 [23,] -0.60271800 -0.4317551 -0.01653333
 [24,] -0.82659283  1.4372139  0.76563502
 
-$Fs #CorrelaÁıes entre vari·veis canÙnicas dos roedores e abund‚ncias das espÈcies dos roedores
+$Fs #Correla√ß√µes entre vari√°veis can√¥nicas dos roedores e abund√¢ncias das esp√©cies dos roedores
               [,1]          [,2]        [,3]
 rrattus -0.2607352 -5.275054e-01 -0.45438755
 mmus    -0.2512870  4.783745e-01 -0.56533023
@@ -875,13 +874,13 @@ nlepid   0.6159802  1.206470e-06  0.09032640
 pfallax  0.4681222 -2.003904e-02  0.31518707
 mcalif   0.8646334  1.972227e-01  0.09416046
 
-$Gs #CorrelaÁıes entre as vari·veis canÙnicas dos fragmentos e as vari·veis dos fragmentos
+$Gs #Correla√ß√µes entre as vari√°veis can√¥nicas dos fragmentos e as vari√°veis dos fragmentos
             [,1]      [,2]        [,3]
 area   0.9654196 0.1776720 -0.19078193
 distx -0.1728344 0.1059498 -0.97923589
 age   -0.3823700 0.9187633 -0.09832173
 
-$Fp  #CorrelaÁıes entre vari·veis canÙnicas dos fragmentos e vari·veis dos roedores (abund‚ncia dos roedores nesse caso_
+$Fp  #Correla√ß√µes entre vari√°veis can√¥nicas dos fragmentos e vari√°veis dos roedores (abund√¢ncia dos roedores nesse caso_
               [,1]          [,2]        [,3]
 rrattus -0.2484703 -4.027950e-01 -0.28390412
 mmus    -0.2394665  3.652794e-01 -0.35322179
@@ -893,34 +892,34 @@ nlepid   0.5870045  9.212415e-07  0.05643649
 pfallax  0.4461018 -1.530150e-02  0.19693081
 mcalif   0.8239612  1.505962e-01  0.05883203
 
-$Gp #CorrelaÁıes entre vari·veis canÙnicas dos roedores e vari·veis dos fragmentos
+$Gp #Correla√ß√µes entre vari√°veis can√¥nicas dos roedores e vari√°veis dos fragmentos
             [,1]       [,2]        [,3]
 area   0.9200064 0.13566758 -0.11920172
 distx -0.1647043 0.08090161 -0.61183258
 age   -0.3643833 0.70155352 -0.06143202
 
-$fitRxy #Autovalores da matriz de correlaÁ„o canÙnica
+$fitRxy #Autovalores da matriz de correla√ß√£o can√¥nica
           [,1]      [,2]      [,3]
 lamb 0.9081331 0.5830614 0.3903827
 frac 0.4826446 0.3098791 0.2074763
 cumu 0.4826446 0.7925237 1.0000000
 
-$fitXs #ProporÁ„o da variaÁ„o dos roedores explicada por suas vari·veis canÙnicas
+$fitXs #Propor√ß√£o da varia√ß√£o dos roedores explicada por suas vari√°veis can√¥nicas
            [,1]       [,2]       [,3]
 AdeX  0.4068346 0.08647758 0.09638558
 cAdeX 0.4068346 0.49331218 0.58969776
 
-$fitXp #ProporÁ„o da variaÁ„o dos par‚metros dos roedores explicados pos suas vari·veis can}onicas
+$fitXp #Propor√ß√£o da varia√ß√£o dos par√¢metros dos roedores explicados pos suas vari√°veis can}onicas
            [,1]       [,2]       [,3]
 RedX  0.3694599 0.05042174 0.03762726
 cRedX 0.3694599 0.41988169 0.45750896
 
-$fitYs #ProporÁ„o da variaÁ„o dos fragmentos explicada pelas suas vari·veis canÙnicas  # Essa soma d· um porque foram geradas 3 vari·veis canÙnicas,e s„o 3 vari·veis medidas (·rea, idade e dist‚ncia)
+$fitYs #Propor√ß√£o da varia√ß√£o dos fragmentos explicada pelas suas vari√°veis can√¥nicas  # Essa soma d√° um porque foram geradas 3 vari√°veis can√¥nicas,e s√£o 3 vari√°veis medidas (√°rea, idade e dist√¢ncia)
            [,1]      [,2]      [,3]
 AdeY  0.3693711 0.2956396 0.3349893
 cAdeY 0.3693711 0.6650107 1.0000000
 
-$fitYp #ProporÁ„o da variaÁ„o dos fragmentos explicada pelas vari·veis canÙnnicas dos roedores
+$fitYp #Propor√ß√£o da varia√ß√£o dos fragmentos explicada pelas vari√°veis can√¥nnicas dos roedores
            [,1]      [,2]      [,3]
 RedY  0.3354382 0.1723760 0.1307740
 cRedY 0.3354382 0.5078142 0.6385882
@@ -928,7 +927,7 @@ cRedY 0.3354382 0.5078142 0.6385882
 cor(ccora.bolger$U[,1],ccora.bolger$V[,1])
 plot(cor(ccora.bolger$U[,1],ccora.bolger$V[,1]))
  
-##An·lise de redund‚ncia
+##An√°lise de redund√¢ncia
 #...............
 
 install.packages("vegan",dependencies=T)
@@ -936,7 +935,7 @@ library(vegan)
 especies<-bolger[,5:13]
 ambientes<-bolger[,2:4]
 
-bolger.rda<-rda(especies~area+distx+age,ambientes) #diz a proporÁ„o da variaÁ„o explicada
+bolger.rda<-rda(especies~area+distx+age,ambientes) #diz a propor√ß√£o da varia√ß√£o explicada
 summary(bolger.rda)
 
 sum(diag(cov(especies)))
@@ -944,7 +943,7 @@ sum(diag(cov(especies)))
 Call:
 rda(formula = especies ~ area + distx + age, data = ambientes) 
 
-Partitioning of variance: #d· a vari‚ncia explicada e n„o explicada pelo modelo
+Partitioning of variance: #d√° a vari√¢ncia explicada e n√£o explicada pelo modelo
               Inertia Proportion
 Total          1015.0     1.0000
 Constrained     547.9     0.5399
@@ -962,7 +961,7 @@ Eigenvalue            11.71459 3.66700 2.39675 0.43059 0.35389 0.01212
 Proportion Explained   0.01154 0.00361 0.00236 0.00042 0.00035 0.00001
 Cumulative Proportion  0.99324 0.99685 0.99922 0.99964 0.99999 1.00000
 
-Accumulated constrained eigenvalues #Da variaÁ„o explicada pelo modelo, o primeiro componente explicou  ~96% da variaÁ„o
+Accumulated constrained eigenvalues #Da varia√ß√£o explicada pelo modelo, o primeiro componente explicou  ~96% da varia√ß√£o
 Importance of components:
                           RDA1     RDA2    RDA3
 Eigenvalue            527.0849 19.72285 1.13755
@@ -975,7 +974,7 @@ Scaling 2 for species and site scores
 * General scaling constant of scores:  12.36079 
 
 
-Species scores #As RDA1 e RDA2 seriam as coordenadas de onde as setas de cada uma das espÈcies e ambientes ficariam no gr·fico
+Species scores #As RDA1 e RDA2 seriam as coordenadas de onde as setas de cada uma das esp√©cies e ambientes ficariam no gr√°fico
 
             RDA1     RDA2     RDA3       PC1      PC2      PC3
 rrattus  0.07988 -0.07880  0.19725 -0.080380  0.01562 -0.11629
@@ -1058,7 +1057,7 @@ age    0.5702 0.6669 -0.47971   0   0   0
 coef(bolger.rda)
 plot(bolger.rda)
 plot(bolger.rda,scaling=1)
-anova.cca(bolger.rda,step=1000) #teste de signific‚ncia do modelo com aleatorizaÁ„o (a aleatorizaÁ„o È necess·ria)
+anova.cca(bolger.rda,step=1000) #teste de signific√¢ncia do modelo com aleatoriza√ß√£o (a aleatoriza√ß√£o √© necess√°ria)
 anova.cca(bolger.rda,by="axis",step=1000)
 anova.cca(bolger.rda,by="terms",step=1000)
 m.nula<-rda(especies~1,ambientes)
@@ -1074,7 +1073,7 @@ ordistep(m.nula,scope=formula(m.complete),direction="both",pstep=1000)
 
 25/01/2013
 
-#Aula 14 - An·lise de CorrespondÍncia CanÙnica (CCA)
+#Aula 14 - An√°lise de Correspond√™ncia Can√¥nica (CCA)
 
 bolger<-read.table("Bolgeretal1997.txt",h=T)
 head(bolger)
@@ -1140,5 +1139,5 @@ orgltext(bolger.cca,display="species",type="t",scaling=2,col="purple")
 
 #Hotelling test (Teste t mulivariado)
 ## Carregar pacote Hotelling
-fit<-hotelling.test(cc+ecto~preservacao, data = slil, perm = T,B = 10000) #Hotelling com permutaÁıes #data=aos dados que eu estou testando
+fit<-hotelling.test(cc+ecto~preservacao, data = slil, perm = T,B = 10000) #Hotelling com permuta√ß√µes #data=aos dados que eu estou testando
  
