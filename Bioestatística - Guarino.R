@@ -26,8 +26,7 @@ orq.dados
 #Runs the Kruskal Wallis test
 kruskal.test(Orquideas~Campo, orq.dados)
 
-
-
+##########################################################
 
 #Mann-whitney Wilcoxon test
 A<-c(8,12,15,21,25,44,44,60)
