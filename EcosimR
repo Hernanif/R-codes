@@ -1,0 +1,577 @@
+EcoSimR Niche Overlap Tutorial
+
+Version 1.00
+
+Nicholas J. Gotelli & Aaron M. Ellison
+
+15 June 2013
+
+Introduction To Niche Overlap
+
+Based in part on Gause's (1934) classic laboratory experiments, the competitive exclusion principle (Hardin 1960) is that 
+coexisting species must differ in some aspect of their resource utilization. The idea was expanded into mathematical theories 
+of limiting similarity (MacArthur and Levins 1967) and more recent treatments of the ecological niche (Chase and Leibold 2003). 
+Ecologists have spent a lot of time measuring niche axes of potential resource competition, especially those related to the 
+utilization of food, space, or time (Schoener 1974). The ghost of competition past predicts that species currently coexisting
+should exhibit relatively low overlap in resource utilization (Connell 1980). Alternatively, if competition for limited resources 
+is current, there should be high overlap in the niches of two species.
+
+Whether niche overlap is high or low has to be first be measured relative to some null expectation. This module of EcoSimR 
+tests for overlap in resource use among a set of coexisting species using a set of unordered, discrete resource categories. The 
+analysis reveals whether the average niche overlapI calculated among all unique pairs of species is more or less than would be 
+expected if species used resource categories independently of one another. If the resources are measured on an ordered scale 
+(such as prey size) or even a circular scale (such as time of day), then other kinds of null models are more appropriate 
+Castro-Arellano et al. 2010). Different algorithms are also needed if the utilization data are collected on a continuous scale 
+(prey body size measured in g) versus a set of discrete categories (prey body size classified as small, medium or large).
+
+Seting Up And Running Niche Overlap In EcoSimR
+
+Begin by creating a new folder on your desktop and extracting all of the EcoSimR files into it. If you using the standard R 
+platform, open R, and then use the file menu to change the file directory to your folder. If you are working in RStudio, create 
+a new project that is located in your folder. Next, load the script file EcoSimR  Niche Overlap Shell.R. Run this script 
+(either by selecting and running all of the code, or stepping through running each line of code one at a time). If everything 
+has worked, you should see something like this in your graphics window and on your console screen:
+
+plot of chunk unnamed-chunk-1
+
+## Time Stamp:  Sat Jun 15 12:46:19 2013 
+## Data File:  Macarthur Warblers.csv 
+## Output File:  Niche Overlap Output.txt 
+## Random Number Seed:  1.873e+09 
+## Number of Replications:  1000 
+## Elapsed Time:  0.48 secs 
+## Metric:  Pianka 
+## Algorithm:  RA3 
+## Observed Index:  0.55514 
+## Mean Of Simulated Index:  0.39112 
+## Variance Of Simulated Index:  0.0024897 
+## Lower 95% (1-tail):  0.32126 
+## Upper 95% (1-tail):  0.48949 
+## Lower 95% (2-tail):  0.31237 
+## Upper 95% (2-tail):  0.50784 
+## P(Obs <= null) =  0.994 
+## P(Obs >= null) =  0.006 
+## P(Obs = null) =  0 
+## Standardized Effect Size (SES):  3.2872
+If the program did not run successfully, the most likely error message you might have received in the console window is:
+
+Error in plot.new() : figure margins too large
+If this happens, the plotting window is too small to accommodate the graphic. Either resize the plot window, or change the 
+default setting for the Plot.Output option from screen to file. With this change, the graphics output will be sent to two 
+pdf files that can be opened separately.
+
+Data Organization
+
+In this module, the data are organized in a data frame in which each row is a species, each column is a resource utilization 
+category, and the entries represent the quantity of the resource used by each species. Examples might be the amount of time a 
+species spends foraging in different microhabitats, the biomass of different prey types, or counts of the number of times an 
+adult female oviposits eggs on different species of a host plant.
+
+The entries in the data frame can be either integers or real numbers. Zeroes are allowed and indicate a particular resource 
+category that was not used by a particular species. The row totals for each species do not have to sum to 1.0 or 100, although 
+EcoSimR will convert all data to proportions for the calculation of niche overlap indices. Negative entries are not allowed, 
+and the algorithm cannot handle missing (NA) observations.
+
+Open the sample data set, MacArthur Warblers.csv. This file is from MacArthur's (1958) classic study of the foraging behavior 
+of five warbler species in coniferous forests of New England. Each row is a different species, and each column is a different 
+subregion of an idealized coniferous tree. Each entry in the data table is the percentage of time that a species was observed 
+foraging in one of 16 different subregions of the tree:
+
+##                               X1T  X1M X1B  X2T X2M X2B  X3T  X3M  X3B X4T
+## Cape May warbler             49.9 13.2 0.0 20.6 8.3 0.0  4.0  0.5  0.0 0.0
+## Myrtle warbler                6.6  4.1 0.3  7.8 4.9 1.3  9.3  9.8  3.6 1.7
+## Black-throated green warbler 12.1  5.7 0.0 17.3 8.8 0.7 21.8 14.1  1.5 6.2
+## Blackburnian warbler         34.8 10.5 3.2 15.1 8.3 2.7 13.1 11.0  0.7 0.3
+## Bay-breasted warbler          3.5  1.9 1.4  6.5 8.0 5.9 11.4 19.1 13.1 7.7
+##                              X4M  X4B X5T X5M  X5B   X6
+## Cape May warbler             0.0  0.0 0.0 0.0  0.0  3.5
+## Myrtle warbler               1.3  5.1 0.0 0.6 15.9 27.7
+## Black-throated green warbler 4.7  4.5 1.4 0.3  0.9  0.0
+## Blackburnian warbler         0.3  0.0 0.0 0.0  0.0  0.0
+## Bay-breasted warbler         8.8 10.1 0.0 0.1  2.5  0.0
+MacArthur (1958) presented all of the raw data, as well as diagrams illustrating how each species utilized the foraging regions 
+with differing frequencies, and argued that this was the basis for niche partitioning and species coexistence. As we will see, 
+the null model analysis of these original data gives an interesting and somewhat unexpected result.
+
+Setting Model Options
+
+Unless you are experienced programmer, the only part of the EcoSimR code that you should modify is the following section of 
+options in the file EcoSimR  Niche Overlap Shell.R:
+
+#############################################
+Data.File <- "Macarthur Warblers.csv"
+Output.File <- "Niche Overlap Output.txt"
+Algorithm <- "RA3"
+Metric <- "Pianka"
+N.Reps <- 1000
+Random.Seed <- 0
+Plot.Output <- "screen"
+Print.Output <- "screen"
+Display.About <- "none"
+Graphic <- "Niche.Overlap.Plot"
+#############################################
+For our initial analysis, we will change only the Random Number seed from its default setting of 0 to the integer 625:
+
+Random.Seed <- 625
+Default Output
+
+Keeping all of the other default values and running the entire script generates the following output:
+
+plot of chunk unnamed-chunk-6
+
+## Time Stamp:  Sat Jun 15 12:46:20 2013 
+## Data File:  Macarthur Warblers.csv 
+## Output File:  Niche Overlap Output.txt 
+## Random Number Seed:  625 
+## Number of Replications:  1000 
+## Elapsed Time:  0.44 secs 
+## Metric:  Pianka 
+## Algorithm:  RA3 
+## Observed Index:  0.55514 
+## Mean Of Simulated Index:  0.38681 
+## Variance Of Simulated Index:  0.0020823 
+## Lower 95% (1-tail):  0.32356 
+## Upper 95% (1-tail):  0.46223 
+## Lower 95% (2-tail):  0.31342 
+## Upper 95% (2-tail):  0.49374 
+## P(Obs <= null) =  0.997 
+## P(Obs >= null) =  0.003 
+## P(Obs = null) =  0 
+## Standardized Effect Size (SES):  3.6888
+The time stamp gives the exact time of the analysis. This same time stamp appears on all of the graphic output, allowing you to 
+keep track of your numerical and graphical outputs. The next 7 lines of output (Data File, Output File, Random Number Seed, 
+Number of Replications, Elapsed Time) provide basic information that was used to set up the run. The Elapsed Time (0.43 secs) 
+can be useful for large data files because you can run a trial with a smaller number of replications and then estimate how long 
+a full run would take.
+
+The remaining output gives the results of the analysis. The Observed Index (0.55) is calculated for the Data File, whereas the 
+Mean (0.39) and Variance (0.002) of Simulated Index are calculated for the set of simulated matrices (n = 1000 matrices for the 
+default, which can be changed with Number of Replications). The next 4 lines of output give a 1- or 2-tailed 95% confidence 
+interval.
+
+The next 2 lines give the estimated tail probability for the Observed Index compared to the histogram of simulated indices. In 
+this case, the lower tail = 0.997, and the upper tail = 0.003. The exact probability (P Obs = null) was 0 in this analysis 
+because none of the simulated index values were exactly the same as the observed value. In some analyses (especially with small 
+data sets), there can be ties, which are incorporated into the calculation of the tail probabilities.
+
+The last line of output is the Standardized Effect Size (SES), which converts the p value into a standardized deviate, which 
+can be used as a response variable in meta-analyses and comparisons among sets of results. Large positive values of the SES 
+indicate increasingly small upper-tail probabilities, and large negative values of SES indicate increasingly small lower-tail 
+probabilities. Non-significant tail probabilities usually fall between -2.0 and +2.0.
+
+Most of these numerical results are illustrated graphically in the upper panel of the output, which displays the histogram 
+(blue bars) of the simulated index values, the observed index value (red vertical line), and the one- and two-tailed 95% 
+confidence intervals (the pairs of black vertical thin-dashed and thick-dashed lines, respectively).
+
+The remaining part of the output figure gives a graphical portrayal of the input data (in red) and of the output data for one 
+of the null assemblages (in blue). For the niche overlap module, the x-axis of this graph is the niche overlap categories, in 
+the same order as they occur in the input file, and the y-axis is the species (ordered from first to last in the input file).
+
+At each position in the graph, a circle indicates the relative utilization of the resource category. The area of each circle is 
+proportional to utilization. If there is no circle present, there is a zero in the data set for that combination of species and 
+resource category. The lower panel (in blue) depicts the same arrangement for one of the simulated matrices.
+
+Options For Displaying The Output
+
+You can control the flow of graphical output and text output by setting values for Plot.Output and Print.Output to screen, 
+none, or file. If you choose file, the print output will be placed in a .csv file for which you specify the file name.
+
+During data analysis and exploration, we prefer to keep the default outputs to the screen because we like being able to scan 
+between the printed results and the plots. However, once you have settled on the analysis, you should run the results and print 
+the results to file output. For the plot, this call will generate two .pdf files, one of which contains the histogram, and the 
+other of which contains the two utilization matrices.
+
+For publication purposes, you will almost certainly need to modify the functions Null Model.Plot and Utilization.Plot, which 
+are both contained in the EcoSimR  Graphics Source.R script files. We suggest you copy and rename these two functions before 
+you begin editing them. Then carefully alter the Output Results function in EcoSimR  General Functions.R to make calls to your 
+new graphics functions. As always, annotate your code so you can be sure to have a record of how you have modified the script 
+files to get the output you need.
+
+For this tutorial, we have set the random number seed at 625, but in your work, you should use the default value of 0 so that a 
+different random number seed is generated each time. It is instructive to try a few runs with the seed set at 0, because each 
+run will be based on a different sequence of random numbers. This will give you a feeling for how variable the results from the 
+null model analysis are
+
+If want to cite EcoSimR in your publication (and we sincerely hope you will), change the Display.About option from none to 
+screen. This change will generate a text screen of the most current EcoSimR citation. This text will appear before your null 
+model output, so you will need to scroll up to find it:
+
+## ############################################################### 
+## 
+## EcoSimR - R Code For Null Model Analysis 
+## 
+## Nicholas J. Gotelli & Aaron M. Ellison 
+## 
+## website: http://www.uvm.edu/~ngotelli/EcoSim/EcoSim.html 
+## 
+## Version 1.00 
+## 15 June 2013 
+## ############################################################### 
+## 
+## Citation Format: 
+## Gotelli, N.J. and A.M. Ellison. 2013. EcoSimR. Version 1.00. 
+## http://www.uvm.edu/~ngotelli/EcoSim/EcoSim.html 
+## 
+## ############################################################### 
+## 
+## Contacting the authors: 
+## 
+## Nicholas J. Gotelli               Aaron M. Ellison 
+## ngotelli@uvm.edu                  aellison@fas.harvard.edu 
+## 
+## Department of Biology             Harvard University 
+## University of Vermont             Harvard Forest 
+## Burlington, Vermont               Petersham, Massachusetts 
+## 05405 USA                         01366 USA 
+## ###############################################################
+Options For The Niche Overlap Metric
+
+We have provided metrics for the mean, variance and skewness of the Pianka and Czekanowski niche overlap indices, which are 
+calculated for each pair of species. The formulas for the Pianka and Czekanowski indices are given in the EcoSimR User's Guide. 
+We have found almost no difference in the null model results using either of these overlap measures. The mean overlap is given 
+by the index Pianka or Czekanowski is the most straightforward measure of the community-wide pattern of niche overlap.
+
+We have also added indices for the variance (Pianka.var and Czekanowski.var) and skewness (Pianka.skew and Czekanowski.skew) of 
+pairwise niche overlap. If the observed variance is greater than expected by chance, then the assemblage includes a 
+heterogeneous mixture of species pairs with relatively high and relatively low overlap. If the observed skewness is greater 
+than expected by chance, a small number of species pairs show very high niche overlap (right-skewed), and if the observed 
+skewness is less than expected by chance, a small number of species pairs show very low niche overlap (left-skewed).
+
+For the MacArthur data, although the mean niche overlap is greater than expected (using the RA3 algorithm), neither the 
+variance nor the skewness differ from the null. Try the variance and skewness options yourself to confirm this result. Of 
+course, these higher moments are increasingly sensitive to outliers in the data, but these patterns can help you to understand 
+the basis for significant (or non-significant) results that you find with the mean index.
+
+Options For The Niche Overlap Randomization Algorithm
+
+Following the terminology of Lawlor (1980a) and the benchmark testing of Winemiller and Pianka (1990), EcoSimR provides four 
+randomization algorithm. We recommend the default RA3 or the slightly more conservative RA4.
+
+In brief, RA3 reshuffles the row values, and RA4 reshuffles the non-zero row values. Both of these algorithms retain the 
+observed niche breadth of each species– that is the relative degree of specialization, but they randomly alter which 
+particular resource categories are used.
+
+RA2 preserves the non-zero elements, but replaces the non-zero elements by a (0,1) random uniform value. RA1 replaces all 
+matrix entries by a random (0,1) uniform value, so the null hypothesis is that each species is an isotropic super-generalist.
+
+RA1 and RA2 are too liberal and do not give good results with artificial test matrices (Winemiller and Pianka 1990). For the 
+MacArthur data, try running these variations. Compared to RA1, the observed (Pianka) niche overlap is significantly greater 
+than expected. Compared to RA2, the observed (Pianka) niche overlap is not different from random, and compared to RA3 and RA4, 
+the observed (Pianka) niche overlap is significantly greater than expected. Run these options yourself in EcoSimR to confirm 
+these patterns.
+
+The statistical properties of RA3 and RA4 are good, although it is an open question whether resource categories that were never 
+utilized by a species might have been utilized in a null assemblage. All four of the algorithms assume that all resource 
+categories are equally abundant, which is often not the case.
+
+If independent data on resource abundance are available, the observed utilization can be divided by resource abundance to 
+create an electivity index (Lawlor 1980b). This index effectively provides more weight for resource categories that are rare. 
+Such a weighting is useful because we expect high overlap in abundant resource categories. However, the weightings may be 
+sensitive to sampling error for very scarce resource states.
+
+Although it might seem reasonable to do so, you should not sum the resource utilization across species in order to estimate 
+resource abundance. This estimate is not independent of observed utilization and can lead to Type I errors (incorrect rejection
+of a true null hypothesis).
+
+Some people are disturbed and suspicious of the fact that the null model results may depend on which algorithm is used and how 
+the data are processed. But this is exactly as it should be: the results depend on the assumptions of the model. In the more 
+familiar world of a simple ANOVA, the results will depend on whether the factors are treated as fixed or random and whether the
+data are transformed or not. And of course the results will depend on the sample size, the spatial scale of the study, and 
+whether the data were collected as random, haphazard, systematic, or representative samples. Although there is often a 
+preferred set of options for a null model analysis (which we have used in our defaults), we think it is always worthwhile to 
+explore different variations of the model so that you can understand the result. See Gotelli and Ulrich (2012) for a recent 
+discussion of other general issues in null model analysis.
+
+Advanced Users
+
+Once you have become comfortable working with the commands in the script file EcoSimR  Niche Overlap Shell.R, you can begin 
+accessing the functions in EcoSimR directly and calling them from the command line in the console.
+
+To begin, clear all of the objects in memory and close the current graphic device. Then load all of the EcoSimR functions by 
+sourcing the EcoSimR  Main Source.R file. These commands should all be entered one at a time from the command line in the 
+console:
+
+rm(list = ls())
+dev.off()
+source("EcoSimR - Main Source.R")
+The following command will recreate all of the output generated by the default values in the EcoSimR Niche Overlap shell:
+
+Output.Results(Param.List, Null.Model.Engine(Param.List))
+To alter any of the default settings, change the elements of Param.List
+
+My.Params <- Param.List
+My.Params$Random.Seed <- 54
+My.Params$Algorithm <- "RA1"
+My.Params$Display.About <- "screen"
+Then call Output.Results with the new parameter values:
+
+RandomInteger <- Set.The.Seed(My.Params)
+# this line is needed first if you alter the random number seed
+
+Output.Results(My.Params, Null.Model.Engine(My.Params))
+All of the algorithms, metrics, and graphics in EcoSimR can be accessed directly for your own calculations. For example, these 
+commands will calculate the Czekanowski.skew index for the data matrix My.Data:
+
+show(My.Data <- matrix(rpois(60, 2.5), nrow = 6))
+##      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10]
+## [1,]    3    5    1    2    2    1    3    0    1     2
+## [2,]    2    2    0    6    5    1    2    2    2     3
+## [3,]    3    2    3    1    0    1    1    6    4     1
+## [4,]    2    2    1    1    1    2    2    0    3     5
+## [5,]    2    0    0    2    4    3    1    1    2     4
+## [6,]    6    0    1    4    2    3    2    4    6     0
+Czekanowski.skew(My.Data)
+## [1] 0.04902
+To store the vector (of length N.Rep) of simulated index values from the model defined by My.Params, use the second element
+in the list output from the Null.Model.Engine function:
+
+My.Vector <- Null.Model.Engine(My.Params)[[2]]
+From this vector, any standard summary statistics from the output can be easily calculated. For example, the 95% confidence 
+interval (2-tailed) for the simulated values is given by:
+
+show(My.Confidence.Interval <- quantile(My.Vector, probs = c(0.025, 0.975)))
+##   2.5%  97.5% 
+## 0.6760 0.8284
+To create a list of 25 random matrices generated by applying RA4 to My.Data, use:
+
+My.Matrices <- replicate(25, RA4(My.Data), simplify = FALSE)
+# show the first randomized matrix in the list
+My.Matrices[[1]]
+##      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10]
+## [1,]    1    3    5    3    2    2    1    0    1     2
+## [2,]    2    2    0    1    2    2    3    6    5     2
+## [3,]    3    6    1    1    0    1    4    3    2     1
+## [4,]    1    2    2    2    2    1    3    0    1     5
+## [5,]    1    0    0    2    3    2    4    4    1     2
+## [6,]    4    0    4    2    6    3    6    2    1     0
+To create a histogram of simulated and observed values by directly calling Null.Model.Plot, use:
+
+Null.Model.Plot(Null.Model.Engine(My.Params))
+plot of chunk unnamed-chunk-16
+
+And to run Niche.Overlap.Plot for a data set and an algorithm without running a full null model analysis,
+
+par(mfrow = c(2, 1))
+Niche.Overlap.Plot(Data.Read("Macarthur Warblers.csv"), Algorithm = "RA2")
+plot of chunk unnamed-chunk-17
+
+These examples illustrate just a few of the ways you can use the sourced EcoSimR functions in your own programs.
+
+Literature Cited
+
+Castro-Arellano, I., T.E. Lacher, Jr., M.R. Willig, and T.F. Rangel. 2010. Assessment of assemblage-wide temporal niche 
+segregation using null models. Methods in Ecology & Evolution 1: 311-318.
+
+Chase, J.M. and M.A. Leibold. 2003. Ecological Niches: Linking Classical And Contemporary Approaches. University of Chicago 
+Press, Chicago.
+
+Connell, J.H. 1980. Diversity and the coevolution of competitors, or the ghost of competition past. Oikos 35: 131-138.
+
+Gause, G.F. 1934. The Struggle For Existence. Williams & Wilkins, Baltimore.
+
+Hardin, G. 1960. The competitive exclusion principle. Science 131: 1292-1297.
+
+Gotelli, N.J. and W. Ulrich. 2012. Statistical challenges in null model analysis. Oikos 121: 171-180.
+
+Lawlor, L.R. 1980b. Overlap, similarity, and competition coefficients. Ecology 61: 245-251.
+
+Lawlor, L.R. 1980a. Structure and stability in natural and randomly constructed model ecosystems. American Naturalist 116: 394-408.
+
+MacArthur, R.H. 1958. Population ecology of some warblers of northeastern coniferous forests. Ecology 39: 599-699.
+
+MacArthur, R.H. And R. Levins. 1967. The limiting similarity, convergence, and divergence of coexisting species. American Naturalist 101: 377-385.
+
+Schoener, T.S. 1974. Resource partitioning in ecological communities. Science 185: 27-39.
+
+Winemiller, K.O. and E.R. Pianka. 1990. Organization in natural assemblages of desert lizards and tropical fishes. Ecological Monographs 60: 27-55.
+
+
+
+
+
+
+Theory
+
+Based in part on Gause’s (1934) classic laboratory experiments, the competitive exclusion principle (Hardin 1960) is that 
+coexisting species must differ in some aspect of their resource utilization. The idea was expanded into mathematical theories 
+of limiting similarity (MacArthur and Levins 1967) and more recent treatments of the ecological niche (Chase and Leibold 2003). 
+Ecologists have spent a lot of time measuring niche axes of potential resource competition, especially those related to the 
+utilization of food, space, or time (Schoener 1974). The ?ghost of competition past? predicts that species currently coexisting 
+should exhibit relatively low overlap in resource utilization (Connell 1980). Alternatively, if competition for limited 
+resources is current, there should be high overlap in the niches of two species.
+
+Whether niche overlap is high or low has to first be measured relative to some null expectation. This module of EcoSimR tests 
+for overlap in resource use among a set of coexisting species using a set of unordered, discrete resource categories. 
+The analysis reveals whether the average niche overlap, calculated among all unique pairs of species, is more or less than 
+would be expected if species used resource categories independently of one another. If the resources are measured on an 
+ordered scale (such as prey size) or even a circular scale (such as time of day), then other kinds of null models are more 
+appropriate (Castro-Arellano et al. 2010). Different algorithms are also needed if the utilization data are collected on a 
+continuous scale (prey body size measured in g) versus a set of discrete categories (prey classified as invertebrates, small 
+fish, or large fish).
+
+Data
+
+The data for a niche overlap analysis consists of a data frame in which each row is a species and each column is a discrete, 
+unordered resource category (such as host plant species, diet categories, or microhabitats). The first column of the data frame 
+optionally contains the species names. Each entry is the utilization (measured in appropriate units) of a particular resource 
+category by a particular species. Entries must be non-negative real numbers. Zero values are allowed (some species may not use 
+certain resource categories), but missing NA values are not allowed. All entries must be in the same units, but they do not have 
+to be proportions or percentages. All of the niche overlap metrics first scale the data to proportions by dividing each entry by 
+its row sum.
+
+The supplied data set macwarb for niche overlap analysis is taken from Table 2 of MacArthur’s (1958) classic study on niche 
+overlap of coexisting warblers. Each row represents one of 5 species of warbler that coexist in northern New England. Each 
+column represents one of 16 subregions of an idealized coniferous tree. The entries are the percentage of time that each species 
+was observed foraging in a different subregion of a (hypothetical) tree. MacArthur (1958) proposed that the species specialized 
+on different subregions, and that this specialization was the basis for resource partitioning and coexistence. As we will see, 
+the null model analysis provides a different perspective on this classic data set.
+
+MacArthur’s (1958) warbler data.
+Species	X1T	X1M	X1B	X2T	X2M	X2B	X3T	X3M	X3B	X4T	X4M	X4B	X5T	X5M	X5B	X6
+Cape May warbler	49.9	13.2	0.0	20.6	8.3	0.0	4.0	0.5	0.0	0.0	0.0	0.0	0.0	0.0	0.0	3.5
+Myrtle warbler	6.6	4.1	0.3	7.8	4.9	1.3	9.3	9.8	3.6	1.7	1.3	5.1	0.0	0.6	15.9	27.7
+Black-throated green warbler	12.1	5.7	0.0	17.3	8.8	0.7	21.8	14.1	1.5	6.2	4.7	4.5	1.4	0.3	0.9	0.0
+Blackburnian warbler	34.8	10.5	3.2	15.1	8.3	2.7	13.1	11.0	0.7	0.3	0.3	0.0	0.0	0.0	0.0	0.0
+Bay-breasted warbler	3.5	1.9	1.4	6.5	8.0	5.9	11.4	19.1	13.1	7.7	8.8	10.1	0.0	0.1	2.5	0.0
+Metrics
+
+The basic metrics for niche overlap are either the pianka or the czekanowski index. The pianka index is similar to the 
+competition coefficient αα in the Lotka-Volterra equations, and the czekanowski index is the area of intersection of two 
+resource utilization histograms. These indices are calculated for an individual species pair, and are then averaged over all 
+possible pairs of species in the assemblage. Both indices range from 0.0 (no overlap) to 1.0 (complete overlap). They are highly 
+correlated with one another, and it makes little difference which one you use.
+
+The basic pianka and czekanowski indices give an index that is the mean overlap of all possible species pairs. You can also 
+analyze the variance of pairwise overlap with pianka_var and czekanowski_var, and the skewness of pairwise overlap with 
+pianka_skew and czekanowski_skew. A large value of the variance indicates that some species pairs have very high overlap and 
+others have very overlap, relative to the null model. A large positive value of skewness indicates asymmetry with some strong 
+high-overlap species pairs in the data matrix. A large negative value of skewness indicates asymmetry with some strong 
+low-overlap species pairs in the matrix. As with all higher moments of a distribution, the variance and skewness can be very 
+sensitive to outliers in the data, although the randomization test controls for this to some extent. The variance and skew 
+functions have not been well-tested, but they may provide some additional insight into the niche overlap patterns.
+
+Algorithms
+
+Following the terminology of Lawlor (1980a) and the benchmark testing of Winemiller and Pianka (1990), EcoSimR provides four 
+randomization algorithm. We recommend the default ra3 or the slightly more conservative ra4.
+
+In brief, ra3 reshuffles the row values, and ra4 reshuffles the non-zero row values. Both of these algorithms retain the 
+observed ?niche breadth? of each species- that is the relative degree of specialization, but they randomly alter which 
+particular resource categories are used.
+
+ra2 preserves the non-zero elements, but replaces the non-zero elements by a (0,1) random uniform value. ra1 replaces all 
+matrix entries by a random (0,1) uniform value, so the null hypothesis is that each species is an isotropic super-generalist.
+
+ra1 and ra2 are too liberal and do not give good results with artificial test matrices (Winemiller and Pianka 1990). For the 
+dataMacWarb, try running these variations. Compared to ra1, the observed (Pianka) niche overlap is significantly greater than 
+expected. Compared to ra2, the observed (Pianka) niche overlap is not different from random, and compared to ra3 and ra4, the 
+observed (Pianka) niche overlap is significantly greater than expected. Run these options yourself in EcoSimR to confirm these 
+patterns.
+
+The statistical properties of ra3 and ra4 are good, although it is an open question whether resource categories that were never 
+utilized by a species might have been utilized in a null assemblage. All four of the algorithms assume that all resource 
+categories are equally abundant, which is often not the case.
+
+If independent data on resource abundance are available, the observed utilization can be divided by resource abundance to 
+create an “electivity” index (Lawlor 1980b). This index effectively provides more weight for resource categories that are rare. 
+Such a weighting is useful because we expect high overlap in abundant resource categories. However, the weightings may be 
+sensitive to sampling error for very scarce resource states.
+
+Although it might seem reasonable to do so, you should not sum the resource utilization across species in order to estimate 
+resource abundance. This estimate is not independent of observed utilization and can lead to Type I errors (incorrect rejection 
+of a true null hypothesis).
+
+Some people are disturbed and suspicious of the fact that the null model results may depend on which algorithm is used and how 
+the data are processed. But this is exactly as it should be: the results depend on the assumptions of the model. In the more 
+familiar world of a simple ANOVA, the results will depend on whether the factors are treated as fixed or random and whether the 
+data are transformed or not. And of course the results will depend on the sample size, the spatial scale of the study, and 
+whether the data were collected as random, haphazard, systematic, or representative samples. Although there is often a 
+preferred set of options for a null model analysis (which we have used in our defaults), we think it is always worthwhile to 
+explore different variations of the model so that you can understand the result. See Gotelli and Ulrich (2012) for a discussion 
+of other general issues in null model analysis.
+
+Graphics
+
+The niche overlap module offers two graphic outputs. `plot(type=“hist”) generates a standard histogram of simulated metric 
+values (blue bars) based on the selected algorithm and metric. The vertical red line indicates the observed metric for the 
+original data, the pair of vertical long-dash lines indicate the 95% one-tailed cutpoints, and the short-dash lines indicate 
+the 95% two-tailed cutpoints. The latter would constitute a proper 95% confidence interval for the null distribution. Note 
+that these intervals are not based on a normal or other parametric distribution. Instead, they are always estimated directly 
+from the histogram, which means they could be asymmetric, and will be sensitive to the number of replicates used.
+
+
+
+plot(type="niche") generates a rendering of the species ×× utilization matrix for the original data matrix (red) and one 
+simulated data matrix (blue). The area of each circle depicted is proportional to the utilization of a resource category by a 
+species. If no circle is shown, the utilization was 0.0.
+
+plot(myModel,type="niche")
+
+
+Defaults
+
+speciesData          # user must supply a data frame; speciesData=dataMacWarb for default run
+algo = "ra3"           # reshuffle elements within each row of the matrix
+metric = "pianka"      # pianka niche overlap index
+nReps = 1000         # number of null assemblage created
+rowNames=TRUE        # reads speciesData as a data frame wtih row labels in the first column
+saveSeed=FALSE       # if TRUE, saves random number seed
+algoOpts=list()      # list of other specific options for the algorithm
+metricOpts=list()    # list of other specific options for the metric
+suppressProg= FALSE  # suppress printing of progress bar (for creating markdown files)
+Examples
+
+str(dataMacWarb)  # structure of MacArthur's warbler data set
+summary(myModel)  # output summary of null model analysis
+
+#create a random data set with uniform (0,1) values
+myRandomData <- matrix(runif(300), nrow=30)
+
+# run null model with czekanowski index and ra1, 5000 replications
+myRandomModel <- niche_null_model(speciesData=myRandomData, rowNames=FALSE, 
+                            algo="ra1", metric="czekanowski", 
+                            suppressProg=TRUE,nReps=5000)
+
+# print summary of model and plot histogram
+summary(myRandomModel)
+plot(myRandomModel,type="hist")
+Caveats
+
+This null model is appropriate only for unordered niche categories, such as host plant species or dietary type. Different kinds 
+of null models are appropriate for continuous data (such as prey body size) or circular data (such as temporal niches measured 
+over diurnal or annual time scales). The niche overlap model used here also assumes all resource categories are equally 
+available to all species. However, ra2 and ra4 fix the zero states, which means that resource categories that were never used 
+by a species are assumed to be unavailable to that species even in the absence of competition. None of the algorithm explicitly 
+account for sampling variation in the number of observations per category. However, ra3 and ra4 do account somewhat for 
+sampling variation because the percent utilization values are themselves randomized among resource categories.
+
+Literature
+
+Castro-Arellano, I., T.E. Lacher, Jr., M.R. Willig, and T.F. Rangel. 2010. Assessment of assemblage-wide temporal niche 
+segregation using null models. Methods in Ecology & Evolution 1: 311-318.
+
+Chase, J.M. and M.A. Leibold. 2003. Ecological Niches: Linking Classical And Contemporary Approaches. University of Chicago 
+Press, Chicago.
+
+Connell, J.H. 1980. Diversity and the coevolution of competitors, or the ghost of competition past. Oikos 35: 131-138.
+
+Gause, G.F. 1934. The Struggle For Existence. Williams & Wilkins, Baltimore.
+
+Hardin, G. 1960. The competitive exclusion principle. Science 131: 1292-1297.
+
+Gotelli, N.J. and W. Ulrich. 2012. Statistical challenges in null model analysis. Oikos 121: 171-180.
+
+Lawlor, L.R. 1980a. Structure and stability in natural and randomly constructed model ecosystems. American Naturalist 116: 
+394-408.
+
+Lawlor, L.R. 1980b. Overlap, similarity, and competition coefficients. Ecology 61: 245-251.
+
+MacArthur, R.H. 1958. Population ecology of some warblers of northeastern coniferous forests. Ecology 39: 599-699.
+
+MacArthur, R.H. And R. Levins. 1967. The limiting similarity, convergence, and divergence of coexisting species. American 
+Naturalist 101: 377-385.
+
+Schoener, T.S. 1974. Resource partitioning in ecological communities. Science 185: 27-39.
+
+Winemiller, K.O. and E.R. Pianka. 1990. Organization in natural assemblages of desert lizards and tropical fishes. Ecological 
+Monographs 60: 27-55.
