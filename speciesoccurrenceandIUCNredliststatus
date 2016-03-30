@@ -1,0 +1,52 @@
+Using R to mine species data
+Posted: 30 Mar 2016 03:02 AM PDT
+Many of us generate more data than we know what to do with (speaking of which: keep an eye out for the 2016 NGS Field Guide, coming soon!), so it’s easy to forget about the piles of data already at our fingertips. Research potential is hidden in online resources like GBIF, iDigBio, VertNet, and the IUCN database, and some great R packages make it possible to batch download enormous amounts of data at once.
+
+Here’s an introduction to a few R packages that make it easy to mine data on species occurrences, conservation statuses, and more.
+
+Species conservation data
+
+Species conservation information is easy to retrieve using two R packages, available through ropenscilabs: rredlist and taxize. As an example:
+
+library(devtools) #used to download packages from github
+devtools::install_github('ropenscilabs/rredlist')
+devtools::install_github('ropensci/taxize')
+library(taxize)
+library(rredlist)
+iucn_summary('Gulo gulo')
+The output from “iucn_summary(‘Gulo gulo’)” tells us that:
+
+1) The status of Gulo gulo is “Least Concern”
+
+2) Gulo gulo was reassessed as “Near Threatened” in 2008
+
+3) Gulo gulo is found in 9 countries: Canada, China, Estonia, Finland, Mongolia, Norway, Russia, Sweden, and the United States
+
+4) Gulo gulo‘s population trend is decreasing
+
+Also note that the package taxize has several additional tools for taxonomists, such as species name verification and taxonomic hierarchy information.
+
+Species occurrence data
+
+Retrieving and visualizing species occurrence data is easy with the R packages dismo and maptools:
+
+install.packages(c('dismo','maptools'))
+library(dismo)
+library(maptools)
+Soug&lt;-gbif("Sorex", "ugyunak", geo=T, removeZeros=T, args=c('originisocountrycode=US', 'originisocountrycode=CA')) #retrieve all occurrences of Sorex ugyunak from the U.S. and Canada
+Soug_xy&lt;-subset(Soug, lat !=0 &amp; lon !=0) #retain only the georeferenced records. This can also be done by including geo=T in the previous command
+coordinates(Soug_xy) = c("lon", "lat") #Set coordinates to a Spatial data frame
+data(wrld_simpl)
+plot(wrld_simpl, axes=TRUE, col='light green', las=1) #plot points on a world map
+zoom(wrld_simpl, axes=TRUE, las=1, col='light green') #zoom to a specific region
+points(Soug_xy, col='orange', pch=20, cex=0.75)
+Which gives the following result:
+
+Simple occurrence map for Sorex ugyunak
+Simple occurrence map for Sorex ugyunak
+
+Collection data
+
+Other helpful R packages include ridigbio, rvertnet, and rgbif, which allow you to download data from (you guessed it!) iDigBio, VertNet, and GBIF. These are particularly useful for obtaining museum collection information, including record counts by year or by institution.
+
+What’s your favorite tool for data mining in R? Let us know in the comments below.
