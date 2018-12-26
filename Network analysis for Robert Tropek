@@ -303,25 +303,24 @@ fix(x)
 x
 
 y<-gsub("Shrub","darkgreen",attributes2[,2])
-y<-gsub("Tree","green",y)
 y<-gsub("Epiphyte","lightgreen",y)
 y<-gsub("Herb","palegreen",y)
 y<-gsub("Climber","mediumaquamarine",y)
 fix(y)
 
-plotweb(i, col.high =x, bor.col.high=x, labsize = 0.6,
-        col.low="darkgreen", bor.col.low="darkgreen", text.rot=90, low.y=1.1,
+plotweb(i, col.high =x, bor.col.high=x, labsize = 0.6, col.low=y, bor.col.low=y,
+          text.rot=90, low.y=1.1,
         high.y=1.5, col.interaction="black")
 legend(0.7, 0.85, legend=c("Coleoptera", "Blattodea", "Diptera__h_fly_",
                            "Diptera__unsp_","Hymenoptera__bee_",
                            "Hymenoptera__eusocial_bee_",
                            "Lepidoptera__butterfly_",
                            "Lepidoptera__moth_", "Lepidoptera__sphingid_",
-                           "Passeriformes", "Small_mammals", "Shrub", "Tree", "Epiphyte", "Herb", "Climber"
+                           "Passeriformes", "Small_mammals", "Shrub", "Epiphyte", "Herb", "Climber"
 ),
 col=c("tan1", "white", "blue", "cornsilk", "brown1", "yellow",
       "darkorange", "darkorchid", "burlywood",
-      "lightblue", "plum2","darkgreen", "green", "lightgreen", "palegreen", "mediumaquamarine"), pch=c(15, 15, 15, 15,
+      "lightblue", "plum2","darkgreen", "lightgreen", "palegreen", "mediumaquamarine"), pch=c(15, 15, 15, 15,
                                                     15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15),
 pt.cex=1.0,cex=0.6, bty="n", title="Pollination network - Crater Lake
 (Wet season)")
@@ -357,7 +356,7 @@ y<-gsub("Climber","mediumaquamarine",y)
 fix(y)
 
 plotweb(y, col.high =x, bor.col.high=x, labsize = 0.6,
-        col.low="darkgreen", bor.col.low="darkgreen", text.rot=90, low.y=1.1,
+        col.low=y, bor.col.low=y, text.rot=90, low.y=1.1,
         high.y=1.5, col.interaction="black")
 legend(0.7, 0.85, legend=c("Coleoptera", "Diptera__h_fly_",
                            "Diptera__unsp_","Hymenoptera__bee_",
@@ -401,7 +400,7 @@ y<-gsub("Climber","mediumaquamarine",y)
 fix(y)
 
 plotweb(z, col.high =x, bor.col.high=x, labsize = 0.6,
-        col.low="darkgreen", bor.col.low="darkgreen", text.rot=90, low.y=1.1,
+        col.low=y, bor.col.low=y, text.rot=90, low.y=1.1,
         high.y=1.5, col.interaction="black")
 legend(0.7, 0.85, legend=c("Coleoptera", "Diptera__h_fly_",
                            "Diptera__unsp_","Hymenoptera__bee_",
