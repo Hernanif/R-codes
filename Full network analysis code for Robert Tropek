@@ -1,0 +1,5529 @@
+##### Network analysis for Robert Tropek
+#Written by: Hernani Oliveira
+#Date: 18/12/2018
+
+install.packages("data.table")
+
+library(tidyr)
+library(bipartite)
+library(igraph)
+library(ade4)
+library(vegan)
+library(ggplot2)
+library(qgraph)
+library(car)
+library(intergraph)
+library(BiRewire)
+library(data.table)
+library(glmm)
+library(MASS)
+library(lme4)
+library(mlmRev)
+library(agridat)
+library(MCMCglmm)
+library(CINNA)
+library(nlme)
+library(taRifx)
+library(gtools)
+library(dplyr)
+library(ResourceSelection)
+library(iNEXT)
+
+
+calculate_centralities(y)
+
+summary_tsne_centralities(y, dims = 2, perplexity = 5, scale = TRUE)
+
+
+#Opening the final data 
+CLDRYFINAL20.12.2018<-read.table("CLDRYFINAL20.12.2018.txt", h=T)
+attr.CLDRYFINAL20.12.2018<-read.table("attr.CLDRYFINAL20.12.2018.txt", h=T)
+CLWETFINAL20.12.2018<-read.table("CLWETFINAL20.12.2018.txt", h=T)
+attr.CLWETFINAL20.12.2018<-read.table("attr.CLWETFINAL20.12.2018.txt", h=T)
+MSDRYFINAL20.12.2018<-read.table("MSDRYFINAL20.12.2018.txt", h=T)
+attr.MSDRYFINAL20.12.2018<-read.table("attr.MSDRYFINAL20.12.2018.txt", h=T)
+MSWETFINAL20.12.2018<-read.table("MSWETFINAL20.12.2018.txt", h=T)
+attr.MSWETFINAL20.12.2018<-read.table("attr.MSWETFINAL20.12.2018.txt", h=T)
+
+
+
+#Multplying the data by 10000 and rounding the data
+dd<-CLDRYFINAL20.12.2018*10000000
+q<-apply(dd, 2, round)
+head(q)
+
+t<-CLWETFINAL20.12.2018*10000000
+i<-apply(t, 2, round)
+head(i)
+
+x<-MSDRYFINAL20.12.2018*10000000
+y<-apply(x, 2, round)
+head(y)
+
+w<-MSWETFINAL20.12.2018*10000000
+z<-apply(w, 2, round)
+head(z)
+
+
+#Checking if the conversion of the matrix and rounding was made right by counting the number of numbers higher than zero 
+length(which(dd>0))
+length(which(q>0))
+
+length(which(t>0))
+length(which(i>0))
+
+length(which(x>0))
+length(which(y>0))
+
+length(which(w>0))
+length(which(z>0))
+
+
+
+#Calculates the specialisation values for the species at each level of the network
+e<-dfun(q) #values for the lower trophic level of the network
+u<-dfun(t(q)) #values for the higher trophic level of the network
+
+m<-dfun(i) #values for the lower trophic level of the network
+n<-dfun(t(i)) #values for the higher trophic level of the network
+
+v<-dfun(y) #values for the lower trophic level of the network
+b<-dfun(t(y)) #values for the higher trophic level of the network
+
+j<-dfun(z) #values for the lower trophic level of the network
+a<-dfun(t(z)) #values for the higher trophic level of the network
+
+e1<-as.data.frame(e)
+u1<-as.data.frame(u)
+
+m1<-as.data.frame(m)
+n1<-as.data.frame(n)
+
+v1<-as.data.frame(v)
+b1<-as.data.frame(b)
+
+j1<-as.data.frame(j)
+a1<-as.data.frame(a)
+
+#Delete the columns with the names below from the data frame
+e1$dprime <- NULL
+e1$dmin <- NULL
+e1$dmax <- NULL
+e1
+
+u1$dprime <- NULL
+u1$dmin <- NULL
+u1$dmax <- NULL
+u1
+
+m1$dprime <- NULL
+m1$dmin <- NULL
+m1$dmax <- NULL
+m1
+
+n1$dprime <- NULL
+n1$dmin <- NULL
+n1$dmax <- NULL
+n1
+
+v1$dprime <- NULL
+v1$dmin <- NULL
+v1$dmax <- NULL
+v1
+
+b1$dprime <- NULL
+b1$dmin <- NULL
+b1$dmax <- NULL
+b1
+
+j1$dprime <- NULL
+j1$dmin <- NULL
+j1$dmax <- NULL
+j1
+
+a1$dprime <- NULL
+a1$dmin <- NULL
+a1$dmax <- NULL
+a1
+
+#Joins the data from both data frames into just one
+qq<-rbind(e1, u1)
+qq$season<-"dry"
+qq$elevation<-"cl"
+qq
+
+ss<-rbind(m1, n1)
+ss$season<-"wet"
+ss$elevation<-"cl"
+ss
+
+yy<-rbind(v1, b1)
+yy$season<-"dry"
+yy$elevation<-"ms"
+yy
+
+hh<-rbind(j1, a1)
+hh$season<-"wet"
+hh$elevation<-"ms"
+hh
+
+###### Obs.: Something is missing in this coding
+qq <- cbind(species = rownames(qq), qq)
+colnames(attr.CLDRYFINAL20.12.2018) <- c("species", "ID")
+qq$ID <- attr.CLDRYFINAL20.12.2018$ID[match(qq$species, attr.CLDRYFINAL20.12.2018$species)]
+head(qq)
+qq
+
+ss <- cbind(species = rownames(ss), ss)
+colnames(attr.CLWETFINAL20.12.2018) <- c("species", "ID")
+ss$ID <- attr.CLWETFINAL20.12.2018$ID[match(ss$species, attr.CLWETFINAL20.12.2018$species)]
+head(ss)
+ss
+
+yy <- cbind(species = rownames(yy), yy)
+colnames(attr.MSDRYFINAL20.12.2018) <- c("species", "ID")
+yy$ID <- attr.MSDRYFINAL20.12.2018$ID[match(yy$species, attr.MSDRYFINAL20.12.2018$species)]
+head(yy)
+yy
+
+hh <- cbind(species = rownames(hh), hh)
+colnames(attr.MSWETFINAL20.12.2018) <- c("species", "ID")
+hh$ID <- attr.MSWETFINAL20.12.2018$ID[match(hh$species, attr.MSWETFINAL20.12.2018$species)]
+head(hh)
+hh
+
+rrr<-rbind(yy, hh, qq, ss)
+head(rrr)
+
+str(rrr)
+head(rrr)
+
+#Adds the row names as a column
+rrr <- cbind(species = rownames(rrr), rrr)
+head(rrr)
+
+
+Running a glmm on the networks using elevation and season as fixed effects and functional groups as random effects
+rrr$d.t <- rrr$d + 1
+head(rrr)
+
+qqp(rrr$d.t, "norm") #normal 
+qqp(rrr$d.t, "lnorm") #lognormal
+
+nbinom <- fitdistr(rrr$d.t, "Negative Binomial")
+qqp(rrr$d.t, "nbinom", size = nbinom$estimate[[1]], mu = nbinom$estimate[[2]])
+
+poisson <- fitdistr(rrr$d.t, "Poisson")
+qqp(rrr$d.t, "pois", poisson$estimate)
+
+gamma <- fitdistr(rrr$d.t, "gamma")
+qqp(rrr$d.t, "gamma", shape = gamma$estimate[[1]], rate = gamma$estimate[[2]])
+
+
+lm<-lmer(d ~ season + elevation + (1 | ID), data = rrr,
+         REML = FALSE)
+
+summary(lm)
+Anova(lm)
+coef(lm) #coefficients of the fixed effects
+ranef(lm) #coefficients of the random effects
+
+#Explores the variation in the values of the coefficients of the random effects
+lm1<-ranef(lm)
+dotplot (lm1, rrr)
+
+dotplot(ranef(lm,condVar=TRUE),
+        lattice.options=list(layout=c(1,2)))
+
+
+head(rrr)
+ggplot(lm1, aes(x=d, y=ID)) + 
+  geom_boxplot()+
+  geom_dotplot(binaxis='y', stackdir='center')
+
+
+qqmath (lm1, rrr)
+as.data.frame(lm1)
+
+str(lm)
+
+#Explores the variability in the distribution of the coefficients of the glmm
+plot(ranef(lm))
+plot(lm) # it is expected to be scattered with no obvious pattern at all
+
+
+#Testing for the significance of random effects by subsequent removal of effects
+bothlmm<-lmer(d~ elevation + season + (1 | ID), data=rrr, REML=FALSE) 
+noseasonlmm <- lmer(d ~ elevation + (1 | ID), data = rrr, REML = FALSE)
+noelevationlmm <- lmer(d ~ season + (1 | ID), data = rrr, REML = FALSE)
+nofixedlmm <- lmer(d ~ 1 + (1 | ID), data = rrr, REML = FALSE)
+anova(noseasonlmm, noelevationlmm, nofixedlmm, bothlmm)
+
+
+#####
+#Running a glmm on the networks using elevation and season as fixed effects and species as random effects
+lmm<-lmer(d ~ season + elevation + (1 | ID), data = rrr,
+          REML = FALSE)
+summary(lmm)
+Anova(lmm)
+coef(lmm)
+ranef(lmm)
+as.data.frame(coef(lmm))
+as.data.frame(ranef(lmm))
+
+
+#Running a glmm on one of the functional groups of the networks using elevation and season 
+#while selecting only for one functional group (Hymenoptera_bee_)
+table(rrr$ID)
+mmmm<-filter(rrr, ID == "Small_mammals")
+mmmm
+lmm<-lmer(d ~ season + elevation + (1 | species), data = mmmm,
+          REML = FALSE)
+summary(lmm)
+Anova(lmm)
+coef(lmm)
+ranef(lmm)
+
+data(mtcars)
+head(mtcars)
+hoslem.test(mtcars$vs, fitted(model))
+
+#Runs a GLM for the samples
+fit <- glm(d ~ season + elevation, data=rrr, family=gaussian)
+anova(fit)
+summary(fit) #display results
+hoslem.test(rrr$d, fitted(fit)) #tests if the model is a good fit for the occurring distribution. If p-value is higher than 0.05, there is no significant difference between the model and the results
+
+head(rrr)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Calculates centrality
+w<-read.table("MSDRYFINAL24.10.2018.txt", h=T)
+d<-graph_from_incidence_matrix(d, weighted=TRUE)
+c<-closeness(d)
+f<-betweenness(d)
+hist(c)
+hist(f)
+
+hist(links$weight)
+mean(links$weight)
+sd(links$weight)
+
+# Plot the degree distribution for our network:
+deg.dist <- degree_distribution(d, cumulative=T, mode="all")
+plot( x=0:max(degree(d1)), y=1-deg.dist, pch=19, cex=1.2, col="orange", 
+      xlab="Degree", ylab="Cumulative Frequency")
+
+#####################################
+
+dim(MSDRYFINAL24.10.2018)
+
+# Data input. First a dataset with group codes and labels.
+accum <- read.table("data/cecropia.txt", header = TRUE, 
+                    sep = "\t", dec = ",", 
+                    na.strings = "NA")
+# I transpose the dataset (needed for accumulation curves).
+mat <- data.frame(t(MSDRYFINAL24.10.2018[, 2:73]))  # Just the adjacency matrix, and we add rownames
+colnames(mat) <- MSDRYFINAL24.10.2018$code
+head(mat[, 1:6])
+
+specpool(mat)  # This is the species richness estimates
+##     Species chao chao.se jack1 jack1.se jack2  boot boot.se  n
+## All      38 50.5   8.457 52.46    5.052 58.35 44.71   2.873 28
+# Now, plot the species accumulation curves.
+all <- specaccum(mat, method = "random")
+plot(all, ci.type = "poly", col = "blue", lwd = 2, ci.lty = 0, ylim = c(0, 45), 
+     ci.col = "lightblue", main = "Cecropia glaziouvi", xlab = "Number of trees", 
+     ylab = "Number of frugivore species")
+boxplot(all, col = "yellow", add = TRUE, pch = "+")
+
+
+##############
+
+dados<-MSDRYFINAL24.10.2018
+
+
+#Rede binaria
+
+#Transforme sua rede em binaria
+dados<- ifelse(dados==0,0,1)
+dados
+
+#Crie o objeto a ser analisado
+data=dados
+data
+
+
+#Calcule a metrica desejada para a rede real (observada)
+obs <- unlist(networklevel(data, index="connectance"))
+obs
+
+#Crie as redes aleatorizadas de acordo com o modelo nulo (method) de sua escolha,
+#escolhendo o numero de permutacoes (N). Pode demorar.
+nulls <- nullmodel(data, N=1000, method=1)
+
+#Mande calcular essa mesma metrica para todas as redes aleatorizadas
+null <- unlist(sapply(nulls, networklevel, index="connectance")) 
+null
+
+#Plote o histograma com os valores da metrica escolhida para as
+#redes aleatorizadas e a sua rede
+plot(density(null), xlim=c(min(obs, min(null)), max(obs, max(null))), 
+     main="Comparacao da rede observada com o modelo nulo", xlab = "Sua metrica escolhida")
+abline(v=obs, col="red", lwd=2)    
+
+#Calcule o valor de P, ou seja, a significancia da metrica escolhida
+mean(null)
+sd(null)
+obs
+praw <- sum(null>obs) / length(null)
+ifelse(praw > 0.5, 1-praw, praw)    # P-value
+
+
+#######
+
+##Calculates rarefaction curves
+
+install.packages("RandomLib")
+
+# Create dummy datasets with pairwise interactions recorded in each
+# sampling.  List of the sampled matrices.  Day 1- getting the pairwise
+# interaction labels.
+source("vectorize.R")
+source("matfills.R")  # This creates a randomly-filled matrix
+M1 <- randommat(5, 8)
+colnames(M1) <- c("P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8")
+rownames(M1) <- c("A1", "A2", "A3", "A4", "A5")
+MM <- vectorize(M1)
+colnames(MM) <- c("A", "P", "I")
+head(MM)
+
+
+
+########################
+
+#Rede ponderada (Crater Lake - Dry season)
+
+#Calcule a m??trica desejada para a rede real (observada)
+obscldry <- unlist(H2fun(q)[1])
+obscldry[[1]]
+
+#Crie as redes aleatorizadas de acordo com o modelo nulo (method) de sua escolha,
+#escolhendo o numero de permutacoes (N)
+nullscldry <- nullmodel(q, N=1000, method=1) #demora
+nullscldry
+
+#Mande calcular esse mesmo i?ndice para todas as redes aleatorizadas
+nullcldry <- unlist(sapply(nullscldry, H2fun)) #demora
+nullcldry[1,]
+
+#Plote o histograma com os valores da m??trica escolhida para as
+#redes aleatorizadas e a sua rede
+plot(density(null[1,]), xlim=c(min(obs, min(null)), max(obs, max(null))), 
+     main="Comparacao da rede observada com o modelo nulo", xlab = "Sua metrica escolhida")
+abline(v=obs, col="red", lwd=2)    
+
+#Calcule o valor de P, ou seja, a significancia da metrica escolhida
+mean(nullcldry[1,])
+sd(nullcldry[1,])
+obscldry[[1]]
+prawcldry <- sum(nullcldry[1,]>obscldry[[1]]) / length(nullcldry[1,])
+ifelse(prawcldry > 0.5, 1-prawcldry, prawcldry)    # P-value
+
+##############################
+
+#Rede ponderada (Crater Lake - Wet season)
+
+#Calcule a m??trica desejada para a rede real (observada)
+obsclwet <- unlist(H2fun(i)[1])
+obsclwet[[1]]
+
+#Crie as redes aleatorizadas de acordo com o modelo nulo (method) de sua escolha,
+#escolhendo o numero de permutacoes (N)
+nullsclwet <- nullmodel(i, N=1000, method=1) #demora
+nullsclwet
+
+#Mande calcular esse mesmo i?ndice para todas as redes aleatorizadas
+nullclwet <- unlist(sapply(nullsclwet, H2fun)) #demora
+nullclwet
+
+#Plote o histograma com os valores da m??trica escolhida para as
+#redes aleatorizadas e a sua rede
+plot(density(nullclwet[1,]), xlim=c(min(obs, min(nullclwet)), max(obs, max(nullclwet))), 
+     main="Comparacao da rede observada com o modelo nulo", xlab = "Sua metrica escolhida")
+abline(v=obs, col="red", lwd=2)    
+
+#Calcule o valor de P, ou seja, a significancia da metrica escolhida
+mean(nullclwet[1,])
+sd(nullclwet[1,])
+obsclwet[[1]]
+prawclwet <- sum(nullclwet[1,]>obsclwet[[1]]) / length(nullclwet[1,])
+ifelse(prawclwet > 0.5, 1-prawclwet, prawclwet)    # P-value
+
+############################
+
+#Rede ponderada (Mann's Spring - Dry season)
+
+#Calcule a m??trica desejada para a rede real (observada)
+obsmsdry <- unlist(H2fun(y)[1])
+obsmsdry[[1]]
+
+#Crie as redes aleatorizadas de acordo com o modelo nulo (method) de sua escolha,
+#escolhendo o numero de permutacoes (N)
+nullsmsdry <- nullmodel(y, N=1000, method=1) #demora
+nullsmsdry
+
+#Mande calcular esse mesmo i?ndice para todas as redes aleatorizadas
+nullmsdry <- unlist(sapply(nullsmsdry, H2fun)) #demora
+nullmsdry[1,]
+
+#Plote o histograma com os valores da m??trica escolhida para as
+#redes aleatorizadas e a sua rede
+plot(density(nullmsdry[1,]), xlim=c(min(obs, min(nullmsdry)), max(obs, max(nullmsdry))), 
+     main="Comparacao da rede observada com o modelo nulo", xlab = "Sua metrica escolhida")
+abline(v=obs, col="red", lwd=2)    
+
+#Calcule o valor de P, ou seja, a significancia da metrica escolhida
+mean(nullmsdry[1,])
+sd(nullmsdry[1,])
+obsmsdry[[1]]
+prawmsdry <- sum(nullmsdry[1,]>obsmsdry[[1]]) / length(nullmsdry[1,])
+ifelse(prawmsdry > 0.5, 1-prawmsdry, prawmsdry)    # P-value
+
+
+
+##############################
+
+#Rede ponderada (Mann's Spring - Wet season)
+
+#Calcule a m??trica desejada para a rede real (observada)
+obsmswet <- unlist(H2fun(z)[1])
+obsmswet[[1]]
+
+#Crie as redes aleatorizadas de acordo com o modelo nulo (method) de sua escolha,
+#escolhendo o numero de permutacoes (N)
+nullsmswet <- nullmodel(z, N=1000, method=3) #demora
+nullsmswet
+
+#Mande calcular esse mesmo i?ndice para todas as redes aleatorizadas
+nullmswet <- unlist(sapply(nullsmswet, H2fun)) #demora
+nullmswet
+
+#Plote o histograma com os valores da m??trica escolhida para as
+#redes aleatorizadas e a sua rede
+plot(density(nullmswet[1,]), xlim=c(min(obs, min(nullmswet)), max(obs, max(nullmswet))), 
+     main="Comparacao da rede observada com o modelo nulo", xlab = "Sua metrica escolhida")
+abline(v=obs, col="red", lwd=2)    
+
+#Calcule o valor de P, ou seja, a significancia da metrica escolhida
+mean(nullmswet[1,])
+sd(nullmswet[1,])
+obsmswet[[1]]
+prawmswet <- sum(nullmswet[1,]>obsmswet[[1]]) / length(nullmswet[1,])
+ifelse(prawmswet > 0.5, 1-prawmswet, prawmswet)    # P-value
+
+###########################################################
+
+#Rede ponderada (Crater Lake - Dry season)
+
+#Calcule a m??trica desejada para a rede real (observada)
+obscldry <- unlist(H2fun(q)[1])
+obscldry[[1]]
+
+#Crie as redes aleatorizadas de acordo com o modelo nulo (method) de sua escolha,
+#escolhendo o numero de permutacoes (N)
+nullscldry <- nullmodel(q, N=1000, method=3) #demora
+nullscldry
+
+#Mande calcular esse mesmo i?ndice para todas as redes aleatorizadas
+nullcldry <- unlist(sapply(nullscldry, H2fun)) #demora
+nullcldry[1,]
+
+#Plote o histograma com os valores da m??trica escolhida para as
+#redes aleatorizadas e a sua rede
+plot(density(nullcldry[1,]), xlim=c(min(obs, min(nullcldry)), max(obs, max(nullcldry))), 
+     main="Comparacao da rede observada com o modelo nulo", xlab = "Sua metrica escolhida")
+abline(v=obs, col="red", lwd=2)    
+
+#Calcule o valor de P, ou seja, a significancia da metrica escolhida
+mean(nullcldry[1,])
+sd(nullcldry[1,])
+obscldry[[1]]
+prawcldry <- sum(nullcldry[1,]>obscldry[[1]]) / length(nullcldry[1,])
+ifelse(prawcldry > 0.5, 1-prawcldry, prawcldry)    # P-value
+
+
+##############################
+
+#Rede ponderada (Crater Lake - Wet season)
+
+#Calcule a m??trica desejada para a rede real (observada)
+obsclwet <- unlist(H2fun(i)[1])
+obsclwet[[1]]
+
+#Crie as redes aleatorizadas de acordo com o modelo nulo (method) de sua escolha,
+#escolhendo o numero de permutacoes (N)
+nullsclwet <- nullmodel(i, N=1000, method=3) #demora
+nullsclwet
+
+#Mande calcular esse mesmo i?ndice para todas as redes aleatorizadas
+nullclwet <- unlist(sapply(nullsclwet, H2fun)) #demora
+nullclwet
+
+#Plote o histograma com os valores da m??trica escolhida para as
+#redes aleatorizadas e a sua rede
+plot(density(nullclwet[1,]), xlim=c(min(obs, min(nullclwet)), max(obs, max(nullclwet))), 
+     main="Comparacao da rede observada com o modelo nulo", xlab = "Sua metrica escolhida")
+abline(v=obs, col="red", lwd=2)    
+
+#Calcule o valor de P, ou seja, a significancia da metrica escolhida
+mean(nullclwet[1,])
+sd(nullclwet[1,])
+obsclwet[[1]]
+prawclwet <- sum(nullclwet[1,]>obsclwet[[1]]) / length(nullclwet[1,])
+ifelse(prawclwet > 0.5, 1-prawclwet, prawclwet)    # P-value
+
+############################
+
+#Rede ponderada (Mann's Spring - Dry season)
+
+#Calcule a m??trica desejada para a rede real (observada)
+obsmsdry <- unlist(H2fun(y)[1])
+obsmsdry[[1]]
+
+#Crie as redes aleatorizadas de acordo com o modelo nulo (method) de sua escolha,
+#escolhendo o numero de permutacoes (N)
+nullsmsdry <- nullmodel(y, N=1000, method=3) #demora
+nulls
+
+#Mande calcular esse mesmo i?ndice para todas as redes aleatorizadas
+nullmsdry <- unlist(sapply(nullsmsdry, H2fun)) #demora
+nullmsdry[1,]
+
+#Plote o histograma com os valores da m??trica escolhida para as
+#redes aleatorizadas e a sua rede
+plot(density(nullmsdry[1,]), xlim=c(min(obs, min(nullmsdry)), max(obs, max(nullmsdry))), 
+     main="Comparacao da rede observada com o modelo nulo", xlab = "Sua metrica escolhida")
+abline(v=obs, col="red", lwd=2)    
+
+#Calcule o valor de P, ou seja, a significancia da metrica escolhida
+mean(nullmsdry[1,])
+sd(nullmsdry[1,])
+obsmsdry[[1]]
+prawmsdry <- sum(nullmsdry[1,]>obs[[1]]) / length(nullmsdry[1,])
+ifelse(prawmsdry > 0.5, 1-prawmsdry, prawmsdry)    # P-value
+
+##############################
+
+#Rede ponderada (Mann's Spring - Wet season)
+
+#Calcule a m??trica desejada para a rede real (observada)
+obsmswet <- unlist(H2fun(z)[1])
+obsmswet[[1]]
+
+#Crie as redes aleatorizadas de acordo com o modelo nulo (method) de sua escolha,
+#escolhendo o numero de permutacoes (N)
+nullsmswet <- nullmodel(z, N=1000, method=3) #demora
+nullsmswet
+
+#Mande calcular esse mesmo i?ndice para todas as redes aleatorizadas
+nullmswet <- unlist(sapply(nullsmswet, H2fun)) #demora
+nullmswet
+
+#Plote o histograma com os valores da m??trica escolhida para as
+#redes aleatorizadas e a sua rede
+plot(density(nullmswet[1,]), xlim=c(min(obs, min(nullmswet)), max(obs, max(nullmswet))), 
+     main="Comparacao da rede observada com o modelo nulo", xlab = "Sua metrica escolhida")
+abline(v=obs, col="red", lwd=2)    
+
+#Calcule o valor de P, ou seja, a significancia da metrica escolhida
+mean(nullmswet[1,])
+sd(nullmswet[1,])
+obsmswet[[1]]
+prawmswet <- sum(nullmswet[1,]>obsmswet[[1]]) / length(nullmswet[1,])
+ifelse(prawmswet > 0.5, 1-prawmswet, prawmswet)    # P-value
+
+
+#####Comparisons between different networks
+(obscldry[[1]]-mean(nullcldry[1,]))/sd(nullcldry[1,])
+
+(obsclwet[[1]]-mean(nullclwet[1,]))/sd(nullclwet[1,])
+
+(obsmsdry[[1]]-mean(nullmsdry[1,]))/sd(nullmsdry[1,])
+
+(obsmswet[[1]]-mean(nullmswet[1,]))/sd(nullmswet[1,])
+
+
+
+
+
+####4. ESTIMATIVA DE SIGNIFICANCIA DA MODULARIDADE QUANBIMO####
+
+#Dormann & Strauss (2014)
+
+#Carregue a rede original ponderada
+dados<-read.table("laselvadrynet2.11.2016genus.txt", head=TRUE)
+dados
+
+#Rode o algoritmo QuanBiMo
+mod <- computeModules(web=dados, steps=1E6)
+mod
+
+#Calcule e mostre o valor de M
+mod@likelihood
+
+#Plote a matriz com os modulos e exporte o arquivo como imagem
+file_name= paste("Modulos_Quanbimo.png", sep="")
+png(filename= file_name, res= 300, height= 25, width=30, unit="cm")
+plotModuleWeb(mod)
+dev.off()
+
+#Calcule os modulos hierarquicos
+modn <- computeModules(dados, steps=1E6, deep=T) 
+
+#Estime a significancia de M com o algoritmo Patefield
+#Modelo nulo de Patefiled (1981)
+nulls <- nullmodel(dados, N=100, method=2, c.crit=10) #Pode trocar por quantas permutacoes quiser
+modules.nulls <- sapply(nulls, computeModules)
+like.nulls <- sapply(modules.nulls, function(x) x@likelihood)
+(z <- (mod@likelihood - mean(like.nulls))/sd(like.nulls))
+czvalues(mod) # for all species
+czvalues(mod, level="lower") # for lower trophic level
+czvalues(mod, level="lower", weighted=TRUE) #based on strength
+
+#Calcule a proporcao de valores aleatorizados que cai?ram
+#acima ou abaixo do valor real
+
+#Plote e exporte a distribuicao da metrica aleatorizada
+plot(density(like.nulls), xlim=c(min((mod@likelihood), min(like.nulls)), max((mod@likelihood), max(like.nulls))), 
+     main="comparison of observed with null model Patefield")
+abline(v=(mod@likelihood), col="red", lwd=2)    
+
+#Calcule a proporcao de valores aleatorizados que cai?ram
+#acima ou abaixo do valor real => valor de P
+mean(like.nulls)
+sd(like.nulls)
+mod@likelihood
+praw <- sum(like.nulls>(mod@likelihood)) / length(like.nulls)
+ifelse(praw > 0.5, 1-praw, praw)
+
+
+
+
+#Modularity calculations
+d<-graph_from_incidence_matrix(d)
+fc <- fastgreedy.community(d)
+length(fc)
+sizes(fc)
+membership(fc)
+modularity(fc)
+plot(fc, d, vertex.size=2, vertex.label=NA)
+plot_dendrogram(fc, cex=0.2)
+
+
+
+#Plots the modules of interaction using the different algorithms for comparison
+op<-par(mfrow=c(1,2))
+plot(ceb, d, main="Edge betweenness")
+dendPlot(ceb, mode="phylo")
+length(ceb)
+sizes(ceb)
+modularity(ceb)
+
+articulation.points(d)
+is.igraph(d)
+kcores(d)
+
+plot(cfg, karate, main="Fast greedy")
+dendPlot(cfg, mode="phylo")
+length(cfg)
+sizes(cfg)
+modularity(cfg)
+
+
+plot(co, karate, main="Cluster Optimal")
+dendPlot(cfg, mode="phylo")
+length(co)
+sizes(co)
+modularity(co)
+
+
+plot(cw, karate, main="Walktrap")
+dendPlot(cfg, mode="phylo")
+length(cw)
+sizes(cw)
+modularity(cw)
+
+
+#Compares the found by each modularity algorithm against one another
+compare(cw, ceb, method="adjusted.rand")
+compare(cw, cfg, method="adjusted.rand")
+compare(co, cl, method="adjusted.rand")
+compare(ceb, cfg, method="adjusted.rand")
+
+
+par(mfrow=c(1,2))
+plotweb(MSDRYFINAL24.10.2018)
+plotweb(y)
+
+head(MSDRYFINAL24.10.2018)
+head(y)
+
+
+par(mfrow=c(2,2))
+plotweb(CLDRYFINAL24.10.2018)
+plotweb(CLWETFINAL24.10.2018)
+plotweb(MSDRYFINAL24.10.2018)
+plotweb(MSWETFINAL24.10.2018)
+
+apply(MSDRYFINAL24.10.2018[-1,-1], round(, digits=0))
+str(MSDRYFINAL24.10.2018)
+
+sapply(round(MSDRYFINAL24.10.2018, digits=0))
+apply(round(MSDRYFINAL24.10.2018, digits=0))
+
+
+MSDRYFINAL24.10.2018
+MSDRYFINAL24.10.2018*10000
+MSWETFINAL24.10.2018
+CLDRYFINAL24.10.2018
+CLWETFINAL24.10.2018
+
+
+
+library(bipartite)
+plotweb(data)
+
+#Sort the data frame 
+sort(df$age)
+ranks<-order(df$age)
+ranks
+df$age
+df[ranks,]
+df[order(df$age, decreasing=TRUE),]
+
+##Suggestions of packages to manipulate dataframes (dplyr) (datatable)
+
+#Converts a given bipartite web into a graph object
+library(bipartite)
+library(igraph)
+library(statnet)
+library(betalink)
+
+
+data1<-read.table("CLDRY.txt", h=T)
+d1<-graph_from_incidence_matrix(data1, weight=TRUE)
+data2<-read.table("CLWET.txt", h=T)
+d2<-graph_from_incidence_matrix(data2, weight=TRUE)
+data3<-read.table("MSDRY.txt", h=T)
+d3<-graph_from_incidence_matrix(data3, weight=TRUE)
+data4<-read.table("MSWET.txt", h=T)
+d4<-graph_from_incidence_matrix(data4, weight=TRUE)
+
+betalink(d2, d4, bf = B01)
+
+op<-par(mfrow=c(1,1))
+network_betaplot(d1, d2, na = "#2ca02c", nb = "#1f77b4", ns = "grey", vertex.size=4, vertex.label=NA)
+network_betaplot(d3, d4, na = "#2ca02c", nb = "#1f77b4", ns = "grey", vertex.size=4, vertex.label=NA)
+network_betaplot(d1, d3, na = "#2ca02c", nb = "#1f77b4", ns = "grey", vertex.size=4, vertex.label=NA)
+network_betaplot(d2, d4, na = "#2ca02c", nb = "#1f77b4", ns = "grey", vertex.size=4, vertex.label=NA)
+
+
+x <- vector()
+for(i in 1:1000){
+  pmedium<-bipartite.random.game(7, 16, p=edge_density(d1), directed = FALSE) 
+  x[i] <- mean_distance(pmedium)
+  #print(plow)
+}
+
+print(i)
+
+
+x <- vector()
+for(i in 1:1000){
+  pmedium<-nullmodel(dados, N=1, method=4)
+  pmedium1<-nullmodel(dados1, N=1, method=4)) 
+difference[i] <- unlist(sapply(pmedium, networklevel, index="nestedness")) - unlist(sapply(pmedium1, networklevel, index="nestedness"))
+}
+print(i)
+
+
+#Creates a loop for the generation of 100 random bipartite networks according to the formula
+x <- vector()
+for(i in 1:1000){
+  pmedium1<-sample_bipartite(7, 333, p=edge_density(d1), type="Gnp" )
+  pmedium2<-sample_bipartite(7, 382, p=edge_density(d2), type="Gnp")
+  cfg1<-cluster_fast_greedy(pmedium1)
+  cfg2<-cluster_fast_greedy(pmedium2)
+  x[i] <-  abs(modularity(cfg1) - modularity(cfg2))
+  #print(plow)
+}
+
+centr_clo(d1)
+
+
+#Creates an object that stores the names of all columns of the dataframe
+cols<- c("low", "race", "smoke", "ptl", "ht", "ui", "ftv")
+
+#Creates a loop that transforms all cells in the columns of the dataframe into factors
+for(i in cols){
+  dataframe[,i]=as.factor(dataframe[,i])
+} 
+
+
+
+##### How to count combination of elements in a table 
+## Script written by Hernani Oliveira -  Date: 06/04/2018
+
+#Loads the package plyr 
+library(plyr)
+
+#Create three objects (x, y, z) with six elements each
+x <- c(1, 1, 1, 2, 2, 2)
+y <- c("Mammalia", "Mammalia", "Mammalia", "Bird", "Bird", "Reptil")
+z <- c("Savanna", "Forest", "Forest", "Forest", "Savanna", "Forest")
+
+#Combine the columns of the the data generated above into one object
+w <- cbind(x, y, z)
+w
+
+#Count the frequency of the combination of elements in the table (w)
+count(w, c("x", "y", "z"))
+count(w, c("x", "y"))
+count(w, c("x", "z"))
+count(w, c("xy", "z"))
+
+
+
+
+
+
+#Cool function that can be used to compare centrality values between different networks
+library(qgraph)
+
+#Transforms the data into a graph object
+d1<-graph_from_incidence_matrix(dieta)
+d2<-graph_from_incidence_matrix(dieta2)
+
+#Makes the centrality plot comparing different centrality values based on their z-scores between different networks. The centrality values of the same nodes are plotted at the same height
+centralityPlot(CLDRY=q,  CLWET=i, MSDRY=y, MSWET=z)
+
+#Calculates the mean of the random genreated networks
+mean(x)
+
+#Calculates the standard deviation of the randomgenerated networks
+sd(x)
+
+pnormGC(0.178, region="below", mean=0.0415, sd=0.0352)
+
+plot(degree.distribution(d4))
+
+
+coreness <- graph.coreness(d1)
+table(coreness)
+maxCoreness <- max(coreness)
+maxCoreness
+
+
+
+#Plot the network using the k-core set information and label the nodes with k-core membership value
+Vname <- get.vertex.attribute(d, name='vertex.names', index=V(d))
+V(d)$name <- Vname
+V(d)$color <- coreness + 1
+op <- par(mar = rep(0, 4))
+plot(d, vertex.label.cex=0.8, vertex.size=3, vertex.label=NA)
+par(op)
+
+colors <- rainbow(maxCoreness)
+op <- par(mar = rep(0, 4))
+plot(iDHHS, vertex.label=coreness, vertex.color=colors[coreness])
+par(op)
+
+
+
+
+#Display where are the bridges from a network
+brnet <- bridges(Net)
+gplot(Net, gmode="graph", vertex.col="red", edge.col=brnet+2, coord=coords, jitter=FALSE, displaylabels=TRUE)
+
+
+
+#Calcule a metrica desejada para a rede real (observada)
+obs <- unlist(networklevel(dados, index="nestedness"))
+obs
+
+#Crie as redes aleatorizadas de acordo com o modelo nulo (method) de sua escolha,
+#escolhendo o numero de permutacoes (N). Pode demorar.
+nulls <- nullmodel(dados, N=1, method=4)
+
+#Mande calcular essa mesma metrica para todas as redes aleatorizadas
+null <- unlist(sapply(nulls, networklevel, index="nestedness")) 
+null
+
+
+
+
+#na=color of items unique to network 1
+#nb=color of items unique to network 2
+#ns=color of shared items
+
+
+boxplot(degree(d1), degree(d2), degree(d3), degree(d4), names = c("CLDRY", "CLWET", "MSDRY", "MSWET"), col="lightblue", xlim=c(0,5), ylab="Node Degrees", main="")
+
+hist(degree(d1), degree(d1), degree(d2), degree(d3), degree(d4), col="lightblue", xlim=c(0,50), xlab="Vertex Degree", ylab="Frequency", main="")
+
+articulation.points(d1)
+articulation.points(d2)
+articulation.points(d3)
+articulation.points(d4)
+
+
+
+####################
+
+op<-par(mfrow=c(1,1))
+fc <- fastgreedy.community(d1)
+length(fc)
+sizes(fc)
+modularity(fc)
+
+###################
+
+op<-par(mfrow=c(1,1))
+fc <- fastgreedy.community(d4)
+length(fc)
+sizes(fc)
+modularity(fc)
+
+#Comparing communities against null models
+nv <- vcount(d1)
+ne <- ecount(d1)
+degs <- degree(d1)
+
+ntrials <- 1000
+
+num.comm.rg <- numeric(ntrials)
+for(i in (1:ntrials)){
+  g.rg<-erdos.renyi.game(nv, ne, type="gnm")
+  c.rg<-fastgreedy.community(g.rg)
+  num.comm.rg[i]<-length(c.rg)}
+
+num.comm.grg<-numeric(ntrials)
+for(i in (1:ntrials)){
+  g.rg<-degree.sequence.game(degs, method="vl")
+  c.grg<-fastgreedy.community(g.rg)
+  num.comm.grg[i]<-length(c.grg)
+}
+
+rslts<-c(num.comm.rg, num.comm.grg)
+indx<-c(rep(0, ntrials), rep(1, ntrials))
+counts<-table(indx, rslts)/ntrials
+barplot(counts, beside=TRUE, col=c("blue", "red"), xlab="Number of Communities", ylab="Relative Frequency",
+        legend=c("Fixed Size", "Fixed Degree Sequence"))
+
+counts
+
+
+#####################################
+
+data<-read.table("CLDRYFINAL24.10.2018.txt", h=T)
+d1<-graph_from_incidence_matrix(data, weight=TRUE)
+attributes<-read.table("attr.CLDRYFINAL24.10.2018.txt", h=T)
+
+
+attributes
+table(attributes[,2])
+
+attributes[1]
+
+V(d1)$ID=as.character(attributes$ID[match(V(d1)$name,attributes$Node.ID)]) # This code says to create a vertex attribute called "Sex" by extracting the value of the column "Sex" in the attributes file when the Bird ID number matches the vertex name.
+V(d1)$ID
+
+V(d1)$color=V(d1)$ID #assign the "Sex" attribute as the vertex color
+V(d1)$color=gsub("Plant","green",V(d1)$color) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
+V(d1)$color=gsub("Chiroptera","black",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Coleoptera","aliceblue",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Diptera_h_fly_","blue",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Diptera_unsp_","cornsilk",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Hymenoptera_bee_","brown1",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Hymenoptera_eusocial_bee_","yellow",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Hymenoptera_Carpenters_","darkgreen",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Lepidoptera_butterfly_","darkorange",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Lepidoptera_moth_","darkorchid",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Lepidoptera_sphingid_","deeppink",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Passeriformes","grey61",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Small_mammals","olivedrab1",V(d1)$color) #Bats will be black
+
+V(d1)$shape=V(d1)$ID
+V(d1)$shape=gsub("Plant","circle",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Chiroptera","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Coleoptera","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Diptera_h_fly_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Diptera_unsp_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Hymenoptera_eusocial_bee_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Hymenoptera_bee_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Hymenoptera_Carpenters_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Lepidoptera_butterfly_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Lepidoptera_moth_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Lepidoptera_sphingid_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Passeriformes","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Small_mammals","square",V(d1)$shape) #Bats will be black
+
+
+plot.igraph(d1, vertex.size=3, vertex.label=NA)
+plot(d1, vertex.size=3, vertex.label=NA)
+plot.igraph(d1, vertex.size=3, vertex.label=NA, layout=layout.kamada.kawai)
+
+networklevel(data)
+
+#PLot the network
+plot.igraph(d1, axes=FALSE, layout=layout.kamada.kawai, edge.width=E(d1)$weight/2, edge.color="grey", vertex.size=5)
+title("Full mutualistic network - Bat-Plants - Kamada.Kawai")
+
+
+legend(-2.4, 0.8, legend=c("Plant", "Coleoptera", "Diptera Hoverfly", "Diptera Unspecified", "Hymenoptera (bee)",
+                           "Hymenoptera (carpenters)", "Lepidoptera (butterfly)", "Lepidoptera (moth)",
+                           "Lepidoptera (sphingid)", "Passeriformes", "Small mammals"), 
+       col=c("green", "aliceblue", "blue", "cornsilk", "brown1", "darkgreen", "darkorange", "darkorchid",
+             "deeppink", "grey61", "olivedrab1"), pch=c(16, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15),
+       pt.cex=1.0,cex=1.0, bty="n", title="Pollination network - Crater Lake (Dry season)")
+
+######################################
+
+#
+data<-read.table("CLWETFINAL24.10.2018.txt", h=T)
+d1<-graph_from_incidence_matrix(data, weight=TRUE)
+attributes<-read.table("attr.CLWETFINAL24.10.2018.txt", h=T)
+
+table(attributes[,2])
+
+
+V(d1)$ID=as.character(attributes$ID[match(V(d1)$name,attributes$Node.ID)]) # This code says to create a vertex attribute called "Sex" by extracting the value of the column "Sex" in the attributes file when the Bird ID number matches the vertex name.
+V(d1)$ID
+
+V(d1)$color=V(d1)$ID #assign the "Sex" attribute as the vertex color
+V(d1)$color=gsub("Plant","green",V(d1)$color) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
+V(d1)$color=gsub("Coleoptera","aliceblue",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Diptera_h_fly_","blue",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Diptera_unsp_","cornsilk",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Hymenoptera_bee_","brown1",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Hymenoptera_eusocial_bee_","yellow",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Lepidoptera_butterfly_","darkorange",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Lepidoptera_moth_","darkorchid",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Lepidoptera_sphingid_","deeppink",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Passeriformes","grey61",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Small_mammals","olivedrab1",V(d1)$color) #Bats will be black
+
+V(d1)$shape=V(d1)$ID
+V(d1)$shape=gsub("Plant","circle",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Coleoptera","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Diptera_h_fly_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Diptera_unsp_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Hymenoptera_bee_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Hymenoptera_eusocial_bee_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Lepidoptera_butterfly_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Lepidoptera_moth_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Lepidoptera_sphingid_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Passeriformes","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Small_mammals","square",V(d1)$shape) #Bats will be black
+
+
+plot.igraph(d1, vertex.size=3, vertex.label=NA)
+plot(d1, vertex.size=3, vertex.label=NA)
+plot.igraph(d1, vertex.size=3, vertex.label=NA, layout=layout.kamada.kawai)
+
+networklevel(data)
+
+
+
+plot.igraph(d1, vertex.size=3, vertex.label=NA, layout=layout.kamada.kawai)
+
+#PLot the network
+plot.igraph(d1, axes=FALSE, layout=layout.kamada.kawai, edge.width=E(d1)$weight/2, edge.color="grey", vertex.size=5)
+title("Full mutualistic network - Bat-Plants - Kamada.Kawai")
+
+
+legend(-2.4, 0.8, legend=c("Plant", "Coleoptera", "Diptera Hoverfly", "Diptera Unspecified", "Hymenoptera (bee)",
+                           "Hymenoptera (eusocial bee)", "Lepidoptera (butterfly)", "Lepidoptera (moth)",
+                           "Lepidoptera (sphingid)", "Passeriformes", "Small mammals"), 
+       col=c("green", "aliceblue", "blue", "cornsilk", "brown1", "yellow", "darkorange", "darkorchid",
+             "deeppink", "grey61", "olivedrab1"), pch=c(16, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15),
+       pt.cex=1.0,cex=1.0, bty="n", title="Pollination network - Crater Lake (Wet season)")
+
+
+################################
+
+data<-read.table("MSDRYFINAL24.10.2018.txt", h=T)
+d1<-graph_from_incidence_matrix(data, weight=TRUE)
+attributes<-read.table("attr.MSDRYFINAL24.10.2018.txt", h=T)
+
+table(attributes[,2])
+
+
+V(d1)$ID=as.character(attributes$ID[match(V(d1)$name,attributes$Node.ID)]) # This code says to create a vertex attribute called "Sex" by extracting the value of the column "Sex" in the attributes file when the Bird ID number matches the vertex name.
+V(d1)$ID
+
+V(d1)$color=V(d1)$ID #assign the "Sex" attribute as the vertex color
+V(d1)$color=gsub("Plant","green",V(d1)$color) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
+V(d1)$color=gsub("Coleoptera","aliceblue",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Diptera_h_fly_","blue",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Diptera_unsp_","cornsilk",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Hymenoptera_bee_","brown1",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Hymenoptera_eusocialbee_","yellow",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Lepidoptera_butterfly_","darkorange",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Lepidoptera_moth_","darkorchid",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Lepidoptera_sphingid_","deeppink",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Passeriformes","grey61",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Small_mammals","olivedrab1",V(d1)$color) #Bats will be black
+
+V(d1)$shape=V(d1)$ID
+V(d1)$shape=gsub("Plant","circle",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Coleoptera","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Diptera_h_fly_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Diptera_unsp_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Hymenoptera_bee_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Hymenoptera_eusocialbee_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Lepidoptera_butterfly_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Lepidoptera_moth_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Lepidoptera_sphingid_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Passeriformes","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Small_mammals","square",V(d1)$shape) #Bats will be black
+
+
+plot.igraph(d1, vertex.size=3, vertex.label=NA)
+plot(d1, vertex.size=3, vertex.label=NA)
+plot.igraph(d1, vertex.size=3, vertex.label=NA, layout=layout.kamada.kawai)
+
+networklevel(data)
+
+
+
+#PLot the network
+plot.igraph(d1, axes=FALSE, layout=layout.kamada.kawai, edge.width=E(d1)$weight/2, edge.color="grey", vertex.size=5)
+title("Full mutualistic network - Bat-Plants - Kamada.Kawai")
+
+
+legend(-2.4, 0.8, legend=c("Plant", "Coleoptera", "Diptera Hoverfly", "Diptera Unspecified", "Hymenoptera (bee)",
+                           "Hymenoptera (eusocial bee)", "Lepidoptera (butterfly)", "Lepidoptera (moth)",
+                           "Lepidoptera (sphingid)", "Passeriformes", "Small mammals"), 
+       col=c("green", "aliceblue", "blue", "cornsilk", "brown1", "yellow", "darkorange", "darkorchid",
+             "deeppink", "grey61", "olivedrab1"), pch=c(16, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15),
+       pt.cex=1.0,cex=1.0, bty="n", title="Pollination network - Mann's Spring (Dry season)")
+
+#########################################################
+
+data<-read.table("MSWETFINAL24.10.2018.txt", h=T)
+d1<-graph_from_incidence_matrix(data, weight=TRUE)
+attributes<-read.table("attr.MSWETFINAL24.10.2018.txt", h=T)
+
+table(attributes[,2])
+
+
+V(d1)$ID=as.character(attributes$ID[match(V(d1)$name,attributes$Node.ID)]) # This code says to create a vertex attribute called "Sex" by extracting the value of the column "Sex" in the attributes file when the Bird ID number matches the vertex name.
+V(d1)$ID
+
+V(d1)$color=V(d1)$ID #assign the "Sex" attribute as the vertex color
+V(d1)$color=gsub("Plant","green",V(d1)$color) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
+V(d1)$color=gsub("Coleoptera","aliceblue",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Diptera_h_fly_","blue",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Diptera_unsp_","cornsilk",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Hymenoptera_bee_","brown1",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Hymenoptera_eusocial_bee_","yellow",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Lepidoptera_moth_","darkorchid",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Lepidoptera_sphingid_","deeppink",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Passeriformes","grey61",V(d1)$color) #Bats will be black
+
+V(d1)$shape=V(d1)$ID
+V(d1)$shape=gsub("Plant","circle",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Coleoptera","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Diptera_h_fly_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Diptera_unsp_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Hymenoptera_bee_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Hymenoptera_eusocial_bee_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Lepidoptera_moth_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Lepidoptera_sphingid_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Passeriformes","square",V(d1)$shape) #Bats will be black
+
+
+plot.igraph(d1, vertex.size=3, vertex.label=NA)
+plot(d1, vertex.size=3, vertex.label=NA)
+plot.igraph(d1, vertex.size=3, vertex.label=NA, layout=layout.kamada.kawai)
+
+networklevel(data)
+
+
+
+#PLot the network
+plot.igraph(d1, axes=FALSE, layout=layout.kamada.kawai, edge.width=E(d1)$weight/2, edge.color="grey", vertex.size=5)
+title("Full mutualistic network - Bat-Plants - Kamada.Kawai")
+
+
+legend(-2.4, 0.8, legend=c("Plant", "Coleoptera", "Diptera Hoverfly", "Diptera Unspecified", "Hymenoptera (bee)",
+                           "Hymenoptera (eusocial bee)", "Lepidoptera (moth)",
+                           "Lepidoptera (sphingid)", "Passeriformes"), 
+       col=c("green", "aliceblue", "blue", "cornsilk", "brown1", "yellow", "darkorchid",
+             "deeppink", "grey61"), pch=c(16, 15, 15, 15, 15, 15, 15, 15, 15),
+       pt.cex=1.0,cex=1.0, bty="n", title="Pollination network - Mann's Spring (Wet season)")
+
+
+########################################
+library(bipartite)
+data<-read.table("CLDRYFINAL24.10.2018.txt", h=T)
+attributes<-read.table("attr.CLDRYFINAL24.10.2018.txt", h=T)
+
+table(attributes[,2])
+
+x<-gsub("Coleoptera","aliceblue", attributes[,2])
+x<-gsub("Diptera_h_fly","blue", x)
+x<-gsub("Diptera_unsp","cornsilk", x)
+x<-gsub("Hymenoptera_bee","brown1",x)
+x<-gsub("Hymenoptera_eusocial_bee","yellow",x)
+x<-gsub("Hymenoptera_carpenters", "darkgreen", x)
+x<-gsub("Hymenoptera_bee","brown1", x)
+x<-gsub("Lepidoptera_butterfly","darkorange", x)
+x<-gsub("Lepidoptera_moth","darkorchid",x)
+x<-gsub("Lepidoptera_sphingid","deeppink", x)
+x<-gsub("Passeriformes","grey61", x)
+x<-gsub("Small_mammals","olivedrab1",x)
+fix(x)
+
+plotweb(data, col.high =x, col.low="green", text.rot=90, low.y=1.0, high.y=1.4)
+
+
+legend(0.5, 0.7, legend=c("Plant", "Coleoptera", "Diptera Hoverfly", "Diptera Unspecified", "Hymenoptera (bee)",
+                          "Hymenoptera (eusocial bee)", "Hymenoptera (carpenters)", "Lepidoptera (butterfly)", "Lepidoptera (moth)",
+                          "Lepidoptera (sphingid)", "Passeriformes", "Small mammals"), 
+       col=c("green", "aliceblue", "blue", "cornsilk", "brown1", "yellow", "darkgreen", "darkorange", "darkorchid",
+             "deeppink", "grey61", "olivedrab1"), pch=c(15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15),
+       pt.cex=1.0,cex=0.7, bty="n", title="Pollination network - Crater Lake (Dry season)")
+
+
+####################################################
+
+library(bipartite)
+data<-read.table("CLWETFINAL24.10.2018.txt", h=T)
+attributes<-read.table("attr.CLWET.txt", h=T)
+
+table(attributes[,2])
+
+x<-gsub("Coleoptera","aliceblue", attributes[,2])
+x<-gsub("Diptera_h_fly","blue", x)
+x<-gsub("Diptera_unsp","cornsilk", x)
+x<-gsub("Hymenoptera_bee","brown1", x)
+x<-gsub("Hymenoptera_eusocial_bees","yellow",x)
+x<-gsub("Lepidoptera_butterfly","darkorange", x)
+x<-gsub("Lepidoptera_moth","darkorchid",x)
+x<-gsub("Lepidoptera_sphingid","deeppink", x)
+x<-gsub("Passeriformes","grey61", x)
+x<-gsub("Small_mammals","olivedrab1",x)
+fix(x)
+
+plotweb(data, col.high =x, col.low="green", text.rot=90, low.y=1.0, high.y=1.4)
+
+legend(0.5, 0.7, legend=c("Plant", "Coleoptera", "Diptera Hoverfly", "Diptera Unspecified", "Hymenoptera (bee)",
+                          "Hymenoptera (eusocial bee)", "Lepidoptera (butterfly)", "Lepidoptera (moth)",
+                          "Lepidoptera (sphingid)", "Passeriformes", "Small mammals"), 
+       col=c("green", "aliceblue", "blue", "cornsilk", "brown1", "yellow", "darkorange", "darkorchid",
+             "deeppink", "grey61", "olivedrab1"), pch=c(15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15),
+       pt.cex=1.0,cex=0.7, bty="n", title="Pollination network - Crater Lake (Wet season)")
+
+
+#####################################
+
+library(bipartite)
+data<-read.table("MSDRYFINAL24.10.2018.txt", h=T)
+attributes<-read.table("attr.MSDRYFINAL24.10.2018.txt", h=T)
+
+table(attributes[,2])
+
+x<-gsub("Coleoptera","aliceblue", attributes[,2])
+x<-gsub("Diptera_h_fly","blue", x)
+x<-gsub("Diptera_unsp","cornsilk", x)
+x<-gsub("Hymenoptera_bee","brown1", x)
+x<-gsub("Hymenoptera_eusocial_bee","yellow",x)
+x<-gsub("Lepidoptera_butterfly","darkorange", x)
+x<-gsub("Lepidoptera_moth","darkorchid",x)
+x<-gsub("Lepidoptera_sphingidae","deeppink", x)
+x<-gsub("Passeriformes","grey61", x)
+x<-gsub("Small_mammals","olivedrab1",x)
+fix(x)
+
+plotweb(data, col.high =x, col.low="green", text.rot=90, low.y=1.0, high.y=1.4)
+
+legend(0.5, 0.7, legend=c("Plant", "Coleoptera", "Diptera Hoverfly", "Diptera Unspecified", "Hymenoptera (bee)",
+                          "Hymenoptera (eusocial bee)", "Lepidoptera (butterfly)", "Lepidoptera (moth)",
+                          "Lepidoptera (sphingid)", "Passeriformes", "Small mammals"), 
+       col=c("green", "aliceblue", "blue", "cornsilk", "brown1", "yellow", "darkorange", "darkorchid",
+             "deeppink", "grey61", "olivedrab1"), pch=c(15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15),
+       pt.cex=1.0,cex=0.7, bty="n", title="Pollination network - Mann's Spring (Dry season)")
+
+#################################
+library(bipartite)
+data<-read.table("MSWETFINAL24.10.2018.txt", h=T)
+attributes<-read.table("attr.MSWETFINAL24.10.2018.txt", h=T)
+
+table(attributes[,2])
+
+
+x<-gsub("Coleoptera","aliceblue", attributes[,2])
+x<-gsub("Diptera_h_fly","blue", x)
+x<-gsub("Diptera_unsp","cornsilk", x)
+x<-gsub("Hymenoptera_bee","brown1", x)
+x<-gsub("Hymenoptera_eusocial_bee","yellow",x)
+x<-gsub("Lepidoptera_moth","darkorchid",x)
+x<-gsub("Lepidoptera_sphingidae","deeppink", x)
+x<-gsub("Passeriformes","grey61", x)
+fix(x)
+
+plotweb(data, col.high =x, col.low="green", text.rot=90, low.y=1.0, high.y=1.4)
+
+legend(0.5, 0.7, legend=c("Plant", "Coleoptera", "Diptera Hoverfly", "Diptera Unspecified", "Hymenoptera (bee)",
+                          "Hymenoptera (eusocial bee)", "Lepidoptera (moth)",
+                          "Lepidoptera (sphingid)", "Passeriformes"), 
+       col=c("green", "aliceblue", "blue", "cornsilk", "brown1", "yellow", "darkorchid",
+             "deeppink", "grey61"), pch=c(16, 15, 15, 15, 15, 15, 15, 15, 15),
+       pt.cex=1.0,cex=0.7, bty="n", title="Pollination network - Mann's Spring (Wet season)")
+
+#########################
+
+library(bipartite)
+data<-read.table("MSWET.txt", h=T)
+attributes<-read.table("attr.MSWET.txt", h=T)
+attributes[,2]
+
+x<-gsub("Coleoptera","aliceblue", arrtibutes[,2])
+x<-gsub("Plant","", x)
+x<-gsub("Diptera_h_fly","blue", x)
+x<-gsub("Diptera_unsp","cornsilk", x)
+x<-gsub("Hymenoptera_bee","brown1", x)
+x<-gsub("Lepidoptera_butterfly","darkorange", x)
+x<-gsub("Hymenoptera_eusocial_bee","yellow", x)
+x<-gsub("Lepidoptera_moth","darkorchid",x)
+x<-gsub("Lepidoptera_sphingidae","deeppink", x)
+x<-gsub("Passeriformes","grey61", x)
+x<-gsub("Small_mammals","olivedrab1",x)
+fix(x)
+
+
+plotweb(data, col.high =x, col.low="green", text.rot=90, low.y=1.0, high.y=1.4)
+
+legend(0.5, 0.7, legend=c("Plant", "Coleoptera", "Diptera Hoverfly", "Diptera Unspecified", "Hymenoptera (bee)",
+                          "Hymenoptera (eusocial bee)", "Lepidoptera (moth)",
+                          "Lepidoptera (sphingid)", "Passeriformes"), 
+       col=c("green", "aliceblue", "blue", "cornsilk", "brown1", "yellow", "darkorchid",
+             "deeppink", "grey61"), pch=c(15, 15, 15, 15, 15, 15, 15, 15, 15),
+       pt.cex=1.0,cex=0.8, bty="n", title="Pollination network - Mann's Spring (Wet season)")
+
+
+#########################
+library(bipartite)
+data<-read.table("MSDRY.txt", h=T)
+attributes<-read.table("attr.MSDRY.txt", h=T)
+attributes[,2]
+
+
+x<-gsub("Coleoptera","aliceblue", arrtibutes[,2])
+x<-gsub("Plant","", x)
+x<-gsub("Diptera_h_fly","blue", x)
+x<-gsub("Diptera_unsp","cornsilk", x)
+x<-gsub("Hymenoptera_bee","brown1", x)
+x<-gsub("Hymenoptera_eusocial_bee","yellow", x)
+x<-gsub("Lepidoptera_moth","darkorchid",x)
+x<-gsub("Lepidoptera_sphingidae","deeppink", x)
+x<-gsub("Passeriformes","grey61", x)
+fix(x)
+
+plotweb(data, col.high =x, col.low="green", text.rot=90, low.y=1.0, high.y=1.4)
+
+
+legend(0.5, 0.7, legend=c("Plant", "Coleoptera", "Diptera Hoverfly", "Diptera Unspecified", "Hymenoptera (bee)",
+                          "Hymenoptera (carpenters)", "Lepidoptera (butterfly)", "Lepidoptera (moth)",
+                          "Lepidoptera (sphingid)", "Passeriformes", "Small mammals"), 
+       col=c("green", "aliceblue", "blue", "cornsilk", "brown1", "darkgreen", "darkorange", "darkorchid",
+             "deeppink", "grey61", "olivedrab1"), pch=c(15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15),
+       pt.cex=1.0,cex=0.7, bty="n", title="Pollination network - Crater Lake (Dry season)")
+
+
+
+##########  
+library(qgraph)
+data<-read.table("MSWETFINAL24.10.2018.2.txt", h=T)
+d1<-graph_from_incidence_matrix(data, weight=TRUE)
+dd<-CLDRYFINAL24.10.2018*10000000
+q<-apply(dd, 2, round)
+betweenness(d1)
+rr<-betweenness(d1)
+x<-gsub("Plant","", rr)
+rr
+table(rr)
+
+#Converts the matrix from fractins to integers and then saves centrality values from a network in  a table
+CLDRYFINAL24.10.2018<-read.table("CLDRYFINAL24.10.2018.2.txt", h=T)
+dd<-CLDRYFINAL24.10.2018*10000000
+q<-apply(dd, 2, round)
+d1<-graph_from_incidence_matrix(q, weight=TRUE)
+x<-betweenness(d1)
+forumG1 <- data.frame(V(d1)$name, x)
+forumG1
+write.table(forumG1,file="cenralityvaluesbetweenness_CLDRY.csv",sep=";")
+
+#Converts the matrix from fractins to integers and then saves centrality values from a network in  a table
+CLWETFINAL24.10.2018<-read.table("CLWETFINAL24.10.2018.2.txt", h=T)
+u<-CLWETFINAL24.10.2018*10000000
+i<-apply(dd, 2, round)
+d2<-graph_from_incidence_matrix(i, weight=TRUE)
+y<-betweenness(d2)
+forumG2 <- data.frame(V(d1)$name, y)
+forumG2
+write.table(forumG2,file="cenralityvaluesbetweenness_CLWET.csv",sep=";")
+
+#Converts the matrix from fractins to integers and then saves centrality values from a network in  a table
+MSDRYFINAL24.10.2018<-read.table("MSDRYFINAL24.10.2018.2.txt", h=T)
+b<-MSDRYFINAL24.10.2018*10000000
+n<-apply(b, 2, round)
+d3<-graph_from_incidence_matrix(n, weight=TRUE)
+m<-betweenness(d3)
+forumG3 <- data.frame(V(d3)$name, m)
+forumG3
+write.table(forumG3,file="cenralityvaluesbetweenness_MSDRY.csv",sep=";")
+
+#Converts the matrix from fractins to integers and then saves centrality values from a network in  a table
+MSWETFINAL24.10.2018<-read.table("MSWETFINAL24.10.2018.2.txt", h=T)
+l<-MSWETFINAL24.10.2018*10000000
+a<-apply(l, 2, round)
+d4<-graph_from_incidence_matrix(a, weight=TRUE)
+v<-betweenness(d4)
+forumG4 <- data.frame(V(d4)$name, v)
+forumG4
+write.table(forumG,file="cenralityvaluesbetweenness_MSWET.csv",sep=";")
+
+
+################################
+#Make a boxplot showing the differences of centrality values between the different groups
+
+par(mfrow=c(2,2))
+
+gg<-read.csv("cenralityvaluesbetweenness_CLDRY.csv", h=T)
+hh<-read.csv("cenralityvaluesbetweenness_CLWET.csv", h=T)
+jj<-read.csv("cenralityvaluesbetweenness_MSDRY.csv", h=T)
+qq<-read.csv("cenralityvaluesbetweenness_MSWET.csv", h=T)
+
+gg<-read.table("cenralityvaluesbetweenness_CLDRY.txt", h=T)
+hh<-read.table("cenralityvaluesbetweenness_CLWET.txt", h=T)
+jj<-read.table("cenralityvaluesbetweenness_MSDRY.txt", h=T)
+qq<-read.table("cenralityvaluesbetweenness_MSWET.txt", h=T)
+
+boxplot(gg, las=2, main="CL DRY")
+boxplot(hh, las=2, main="CL WET")
+boxplot(jj, las=2, main="MS DRY")
+boxplot(qq, las=2, main="MS WET")
+
+
+#########################
+
+#Converts the matrix from fractins to integers and then saves centrality values from a network in  a table
+CLDRYFINAL24.10.2018<-read.table("CLDRYFINAL24.10.2018.2.txt", h=T)
+dd<-CLDRYFINAL24.10.2018*10000000
+q<-apply(dd, 2, round)
+d1<-graph_from_incidence_matrix(q, weight=TRUE)
+x<-betweenness(d1)
+forumG1 <- data.frame(V(d1)$name, x)
+forumG1
+write.table(forumG1,file="cenralityvaluesbetweenness_CLDRYFINAL.csv",sep=";")
+
+#Converts the matrix from fractins to integers and then saves centrality values from a network in  a table
+CLWETFINAL24.10.2018<-read.table("CLWETFINAL24.10.2018.2.txt", h=T)
+u<-CLWETFINAL24.10.2018*10000000
+i<-apply(u, 2, round)
+d2<-graph_from_incidence_matrix(i, weight=TRUE)
+y<-betweenness(d2)
+forumG2 <- data.frame(V(d2)$name, y)
+forumG2
+write.table(forumG2,file="cenralityvaluesbetweenness_CLWETFINAL.csv",sep=";")
+
+#Converts the matrix from fractins to integers and then saves centrality values from a network in  a table
+MSDRYFINAL24.10.2018<-read.table("MSDRYFINAL24.10.2018.2.txt", h=T)
+b<-MSDRYFINAL24.10.2018*10000000
+n<-apply(b, 2, round)
+d3<-graph_from_incidence_matrix(n, weight=TRUE)
+m<-betweenness(d3)
+forumG3 <- data.frame(V(d3)$name, m)
+forumG3
+write.table(forumG3,file="cenralityvaluesbetweenness_MSDRYFINAL.csv",sep=";")
+
+#Converts the matrix from fractins to integers and then saves centrality values from a network in  a table
+MSWETFINAL24.10.2018<-read.table("MSWETFINAL24.10.2018.2.txt", h=T)
+l<-MSWETFINAL24.10.2018*10000000
+a<-apply(l, 2, round)
+d4<-graph_from_incidence_matrix(a, weight=TRUE)
+v<-betweenness(d4)
+forumG4 <- data.frame(V(d4)$name, v)
+forumG4
+write.table(forumG4,file="cenralityvaluesbetweenness_MSWETFINAL.csv",sep=";")
+
+
+################################
+#Make a boxplot showing the differences of centrality values between the different groups
+
+par(mfrow=c(2,2))
+
+gg<-read.csv("cenralityvaluesbetweenness_CLDRYFINAL.csv", h=T)
+hh<-read.csv("cenralityvaluesbetweenness_CLWETFINAL.csv", h=T)
+jj<-read.csv("cenralityvaluesbetweenness_MSDRYFINAL.csv", h=T)
+qq<-read.csv("cenralityvaluesbetweenness_MSWETFINAL.csv", h=T)
+
+gg<-read.table("cenralityvaluesbetweenness_CLDRYFINAL.txt", h=T)
+hh<-read.table("cenralityvaluesbetweenness_CLWETFINAL.txt", h=T)
+jj<-read.table("cenralityvaluesbetweenness_MSDRYFINAL.txt", h=T)
+qq<-read.table("cenralityvaluesbetweenness_MSWETFINAL.txt", h=T)
+
+
+boxplot(gg, las=2, main="CL DRY")
+boxplot(hh, las=2, main="CL WET")
+boxplot(jj, las=2, main="MS DRY")
+boxplot(qq, las=2, main="MS WET")
+
+library(ggplot2)
+
+aa<-read.table("cenralityvaluesbetweenness_CLDRYFINAL.txt", h=T)
+ww<-read.table("cenralityvaluesbetweenness_CLDRYFINAL....txt", h=T)
+
+
+ww<-read.table("cenralityvaluesbetweenness_CLWETFINAL....txt", h=T)
+
+tt<-read.table("cenralityvaluesbetweenness_CLWETFINAL.txt", h=T)
+
+boxplot(tt, las=2, main="CL DRY")
+
+ggplot(gg)
+
+ggplot(ww, aes(x=Order, y=Centrality)) + 
+  geom_boxplot()+
+  geom_jitter(position=position_jitter(0.2))
+
+closeness(gg)
+
+xxx<-as.data.frame(gg)
+
+x
+str(x)
+mode(x)
+forumG <- data.frame(V(d1)$name, x)
+forumG
+write.table(forumG,file="cenralityvaluesbetweenness_MSWET.csv",sep=";")
+
+
+###Creates a table with values for different measures of centrality
+d2<-centralityTable(d1)
+d2
+d3<-d2[1:76,]
+
+centralityPlot(d1, labels, scale = c("z-scores"),
+               include = c("Betweenness"), theme_bw = TRUE, print = TRUE,
+               verbose = TRUE, standardized, relative, weighted = TRUE, signed = TRUE,
+               orderBy = "default", decreasing = FALSE)
+
+
+clusteringPlot(d1)
+
+write.csv(d2, "table centrality.csv", row.names=TRUE)
+
+#########################################
+# Library
+install.packages("fmsb")
+library(fmsb)
+
+# Create data: note in High school for several students
+set.seed(99)
+data=as.data.frame(matrix( sample( 0:20 , 15 , replace=F) , ncol=5))
+colnames(data)=c("math" , "english" , "biology" , "music" , "R-coding" )
+rownames(data)=paste("mister" , letters[1:3] , sep="-")
+
+data
+
+# To use the fmsb package, I have to add 2 lines to the dataframe: the max and min of each topic to show on the plot!
+data=rbind(rep(20,5) , rep(0,5) , data)
+
+data
+
+#==================
+# Plot 2: Same plot with custom features
+colors_border=c( rgb(0.2,0.5,0.5,0.9), rgb(0.8,0.2,0.5,0.9) , rgb(0.7,0.5,0.1,0.9) )
+colors_in=c( rgb(0.2,0.5,0.5,0.4), rgb(0.8,0.2,0.5,0.4) , rgb(0.7,0.5,0.1,0.4) )
+radarchart( data  , axistype=1 , 
+            #custom polygon
+            pcol=colors_border , pfcol=colors_in , plwd=4 , plty=1,
+            #custom the grid
+            cglcol="grey", cglty=1, axislabcol="grey", caxislabels=seq(0,20,5), cglwd=0.8,
+            #custom labels
+            vlcex=0.8 
+)
+legend(x=0.7, y=1, legend = rownames(data[-c(1,2),]), bty = "n", pch=20 , col=colors_in , text.col = "grey", cex=1.2, pt.cex=3)
+
+library(bipartite)
+data<-read.table("CLDRY.txt", h=T)
+attributes<-read.table("attr.CLDRY.txt", h=T)
+attributes[,2]
+
+V(d1)$color=V(d1)$ID #assign the "Sex" attribute as the vertex color
+V(d1)$color=gsub("Plant","green",V(d1)$color) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
+V(d1)$color=gsub("Coleoptera","aliceblue",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Diptera_h_fly","blue",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Diptera_unsp","cornsilk",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Hymenoptera_bee","brown1",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Hymenoptera_carpenters","darkgreen",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Lepidoptera_butterfly","darkorange",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Lepidoptera_moth","darkorchid",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Lepidoptera_sphingid","deeppink",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Passeriformes","grey61",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Small_mammals","olivedrab1",V(d1)$color) #Bats will be black
+
+
+x<-gsub("Coleoptera","aliceblue", arrtibutes[,2])
+x<-gsub("Plant","", x)
+x<-gsub("Diptera_h_fly","blue", x)
+x<-gsub("Diptera_unsp","cornsilk", x)
+x<-gsub("Hymenoptera_bee","brown1", x)
+x<-gsub("Hymenoptera_eusocial_bee","yellow", x)
+x<-gsub("Lepidoptera_moth","darkorchid",x)
+x<-gsub("Lepidoptera_sphingidae","deeppink", x)
+x<-gsub("Passeriformes","grey61", x)
+fix(x)
+
+plotweb(data, col.high =x, col.low="green", text.rot=90, low.y=1.0, high.y=1.4)
+
+legend(0.5, 0.7, legend=c("Plant", "Coleoptera", "Diptera Hoverfly", "Diptera Unspecified", "Hymenoptera (bee)",
+                          "Hymenoptera (eusocial bee)", "Lepidoptera (butterfly)", "Lepidoptera (moth)",
+                          "Lepidoptera (sphingid)", "Passeriformes", "Small mammals"), 
+       col=c("green", "aliceblue", "blue", "cornsilk", "brown1", "yellow", "darkorange", "darkorchid",
+             "deeppink", "grey61", "olivedrab1"), pch=c(15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15),
+       pt.cex=1.0,cex=0.7, bty="n", title="Pollination network - Mann's Spring (Dry season)")
+
+
+
+##################################
+data<-read.table("CLDRY.txt", h=T)
+d1<-graph_from_incidence_matrix(data, weight=TRUE)
+attributes<-read.table("attr.CLDRY.txt", h=T)
+
+V(d1)$ID=as.character(attributes$ID[match(V(d1)$name,attributes$Node.ID)]) # This code says to create a vertex attribute called "Sex" by extracting the value of the column "Sex" in the attributes file when the Bird ID number matches the vertex name.
+V(d1)$ID
+
+V(d1)$color=V(d1)$ID #assign the "Sex" attribute as the vertex color
+V(d1)$color=gsub("Plant","green",V(d1)$color) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
+V(d1)$color=gsub("Arthropod","black",V(d1)$color) #Bats will be black
+
+V(d1)$shape=V(d1)$ID
+V(d1)$shape=gsub("Plant","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Arthropod","circle",V(d1)$shape) #Bats will be black
+
+
+betw<- betweeness(d1)
+V(d1)$size <- betw*3
+
+plot.igraph(d1, vertex.size=3, vertex.label=NA)
+plot.igraph(d1, vertex.size=3, vertex.label=NA, layout=layout.kamada.kawai)
+
+networklevel(data)
+
+
+
+#PLot the network
+plot.igraph(d1, axes=FALSE, layout=layout.kamada.kawai, edge.width=E(d1)$weight/2, edge.color="grey", vertex.size=5)
+title("Full mutualistic network - Bat-Plants - Kamada.Kawai")
+
+
+legend(-2.2, -1.0, legend=c("Pollinator", "Plant"), 
+       col=c("black", "green"), pch=c(16,15),
+       pt.cex=1.0,cex=1.2, bty="n", title="Pollination network - Crater Lake (Dry season)")
+
+plotweb(data, text.rot=90, low.y=0.6, high.y=1.3)
+
+mean_distance(d1)
+distance_table(d1)
+
+
+######################################################
+
+data<-read.table("CLWET.txt", h=T)
+d1<-graph_from_incidence_matrix(data, weight=TRUE)
+attributes<-read.table("attr.CLWET.txt", h=T)
+
+V(d1)$ID=as.character(attributes$ID[match(V(d1)$name,attributes$Node.ID)]) # This code says to create a vertex attribute called "Sex" by extracting the value of the column "Sex" in the attributes file when the Bird ID number matches the vertex name.
+V(d1)$ID
+
+V(d1)$color=V(d1)$ID #assign the "Sex" attribute as the vertex color
+V(d1)$color=gsub("Plant","green",V(d1)$color) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
+V(d1)$color=gsub("Arthropod","black",V(d1)$color) #Bats will be black
+
+V(d1)$shape=V(d1)$ID
+V(d1)$shape=gsub("Plant","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Arthropod","circle",V(d1)$shape) #Bats will be black
+
+betw<- betweeness(d1)
+V(d1)$size <- betw*3
+
+
+plot.igraph(d1, vertex.size=3, vertex.label=NA)
+plot.igraph(d1, vertex.size=3, vertex.label=NA, layout=layout.kamada.kawai)
+
+
+legend(-2.2, -1.0, legend=c("Pollinator", "Plant"), 
+       col=c("black", "green"), pch=c(16,15),
+       pt.cex=1.0,cex=1.2, bty="n", title="Pollination network - Crater Lake (Wet season)")
+
+plotweb(data, text.rot=90, low.y=0.6, high.y=1.3)
+
+networklevel(data)
+
+#PLot the network
+plot.igraph(d1, axes=FALSE, layout=layout.kamada.kawai, edge.width=E(d1)$weight/2, edge.color="grey", vertex.size=5)
+title("Full mutualistic network - Bat-Plants - Kamada.Kawai")
+
+mean_distance(d1)
+distance_table(d1)
+
+
+
+####################################################################
+data<-read.table("MSDRY.txt", h=T)
+d1<-graph_from_incidence_matrix(data, weight=TRUE)
+attributes<-read.table("attr.MSDRY.txt", h=T)
+
+V(d1)$ID=as.character(attributes$ID[match(V(d1)$name,attributes$Node.ID)]) # This code says to create a vertex attribute called "Sex" by extracting the value of the column "Sex" in the attributes file when the Bird ID number matches the vertex name.
+V(d1)$ID
+
+V(d1)$color=V(d1)$ID #assign the "Sex" attribute as the vertex color
+V(d1)$color=gsub("Plant","green",V(d1)$color) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
+V(d1)$color=gsub("Arthropod","black",V(d1)$color) #Bats will be black
+
+V(d1)$shape=V(d1)$ID
+V(d1)$shape=gsub("Plant","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Arthropod","circle",V(d1)$shape) #Bats will be black
+
+betw<- betweeness(d1)
+V(d1)$size <- betw*3
+
+plot.igraph(d1, vertex.size=3, vertex.label=NA)
+plot.igraph(d1, vertex.size=3, vertex.label=NA, layout=layout.kamada.kawai)
+
+
+legend(-2.2, -1.0, legend=c("Pollinator", "Plant"), 
+       col=c("black", "green"), pch=c(16,15),
+       pt.cex=1.0,cex=1.2, bty="n", title="Pollination network - Mann's Spring (Dry season)")
+
+plotweb(data, text.rot=90, low.y=0.6, high.y=1.3)
+
+networklevel(data)
+
+#PLot the network
+plot.igraph(d1, axes=FALSE, layout=layout.kamada.kawai, edge.width=E(d1)$weight/2, edge.color="grey", vertex.size=5)
+title("Full mutualistic network - Bat-Plants - Kamada.Kawai")
+
+mean_distance(d1)
+distance_table(d1)
+
+
+################################################################
+data<-read.table("MSWET.txt", h=T)
+d1<-graph_from_incidence_matrix(data, weight=TRUE)
+attributes<-read.table("attr.MSWET.txt", h=T)
+
+V(d1)$ID=as.character(attributes$ID[match(V(d1)$name,attributes$Node.ID)]) # This code says to create a vertex attribute called "Sex" by extracting the value of the column "Sex" in the attributes file when the Bird ID number matches the vertex name.
+V(d1)$ID
+
+V(d1)$color=V(d1)$ID #assign the "Sex" attribute as the vertex color
+V(d1)$color=gsub("Plant","green",V(d1)$color) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
+V(d1)$color=gsub("Arthropod","black",V(d1)$color) #Bats will be black
+
+V(d1)$shape=V(d1)$ID
+V(d1)$shape=gsub("Plant","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Arthropod","circle",V(d1)$shape) #Bats will be black
+
+betw<- betweeness(d1)
+V(d1)$size <- betw*3
+
+plot.igraph(d1, vertex.size=3, vertex.label=NA)
+plot.igraph(d1, vertex.size=3, vertex.label=NA, layout=layout.kamada.kawai)
+
+
+legend(-2.2, -1.0, legend=c("Pollinator", "Plant"), 
+       col=c("black", "green"), pch=c(16,15),
+       pt.cex=1.0,cex=1.2, bty="n", title="Pollination network - Mann's Spring (Wet season)")
+
+plotweb(data, text.rot=90, low.y=0.6, high.y=1.3)
+networklevel(data)
+
+#PLot the network
+plot.igraph(d1, axes=FALSE, layout=layout.kamada.kawai, edge.width=E(d1)$weight/2, edge.color="grey", vertex.size=5)
+title("Full mutualistic network - Bat-Plants - Kamada.Kawai")
+
+mean_distance(d1)
+distance_table(d1)
+
+###########################################
+
+dados<-read.table("MSWET.txt", head=TRUE)
+dados
+#Transforme sua rede em binaria
+dados<- ifelse(dados==0,0,1)
+dados
+
+#Crie o objeto a ser analisado
+data=dados
+data
+
+#Calcule a metrica desejada para a rede real (observada)
+obs <- unlist(networklevel(dados, index="nestedness"))
+obs
+
+#Crie as redes aleatorizadas de acordo com o modelo nulo (method) de sua escolha,
+#escolhendo o numero de permutacoes (N). Pode demorar.
+nulls <- nullmodel(dados, N=1000, method=4)
+
+#Mande calcular essa mesma metrica para todas as redes aleatorizadas
+null <- unlist(sapply(nulls, networklevel, index="nestedness")) 
+null
+
+#Plote o histograma com os valores da metrica escolhida para as
+#redes aleatorizadas e a sua rede
+plot(density(null), xlim=c(min(obs, min(null)), max(obs, max(null))), 
+     main="Comparacao da rede observada com o modelo nulo", xlab = "Sua metrica escolhida")
+abline(v=obs, col="red", lwd=2)    
+
+#Calcule o valor de P, ou seja, a significancia da metrica escolhida
+mean(null)
+sd(null)
+obs
+praw <- sum(null>obs) / length(null)
+ifelse(praw > 0.5, 1-praw, praw)    # P-value
+
+
+
+#Rede ponderada
+
+#Limpe os objetos criados anteriormente
+rm(list= ls())
+
+#Crie o objeto a ser analisado
+dados<-read.table("CLDRY.txt", head=TRUE)
+data=dados
+data
+
+#Calcule a m??trica desejada para a rede real (observada)
+obs <- unlist(networklevel(data, index="connectance"))
+obs
+
+#Crie as redes aleatorizadas de acordo com o modelo nulo (method) de sua escolha,
+#escolhendo o numero de permutacoes (N)
+nulls <- nullmodel(data, N=1000, method=1) #demora
+nulls
+
+#Mande calcular esse mesmo i?ndice para todas as redes aleatorizadas
+null <- unlist(sapply(nulls, networklevel, index="robustness", level="higher", extinctmethod="abundance")) #demora
+null
+
+#Plote o histograma com os valores da m??trica escolhida para as
+#redes aleatorizadas e a sua rede
+plot(density(null), xlim=c(min(obs, min(null)), max(obs, max(null))), 
+     main="Comparacao da rede observada com o modelo nulo", xlab = "Sua metrica escolhida")
+abline(v=obs, col="red", lwd=2)    
+
+#Calcule o valor de P, ou seja, a significancia da metrica escolhida
+mean(null)
+sd(null)
+obs
+praw <- sum(null>obs) / length(null)
+ifelse(praw > 0.5, 1-praw, praw)    # P-value
+
+
+################################################################
+
+
+#Diferenca entre redes ponderadas, com base no modelo nulo de Patefield (1981)
+#ALERTA: demora bastante a rodar
+
+#Limpe os objetos criados anteriormente
+rm(list= ls())
+
+dados<-read.table("rede1.txt", head=TRUE)
+dados
+dados2<-read.table("rede2.txt", head=TRUE)
+dados2
+dados_neo=as.matrix(dados)
+dados_neo
+dados2_neo=as.matrix(dados2)
+dados2_neo
+
+#Escolha a metrica a ser usada para a comparacao entre as redes
+
+metrics=c("H2")
+metrics
+
+#Calcule a diferencas na metrica entre as redes originais
+orig=abs(networklevel(dados_neo,index=metrics)-networklevel(dados2_neo,index=metrics))
+orig
+
+#Calcule as diferencas na metrica escolhida entre as redes aleatorizadas.
+#Geralmente fica confiavel a partir de 999 permutacoes.
+Nperm = 9
+i=1
+randomized.patef=matrix(nrow=length(orig),ncol=Nperm+1)
+row.names(randomized.patef)=names(orig)
+randomized.patef[,1]=orig
+
+while(i <=Nperm){ 
+  
+  dados_aleat=permatfull(dados_neo,fixedmar="both",mtype="count",times=1)
+  dados_aleat=dados_aleat$perm[[1]]
+  dados2_aleat=permatfull(dados2_neo,fixedmar="both",mtype="count",times=1)
+  dados2_aleat=dados2_aleat$perm[[1]]
+  linha<-abs(networklevel(dados_aleat, index=metrics)-networklevel(dados2_aleat, index=metrics))
+  randomized.patef[,i+1]=linha
+  print(i)
+  i=i+1
+  
+} 
+
+randomized.patef
+
+#Plote e exporte a comparacao entre o valor observado e a distribuicao da metrica aleatorizada
+niveis<-row.names(randomized.patef)
+for(k in niveis)
+{
+  if(any(is.na(randomized.patef[k,]) == TRUE))
+  {
+    print("k tem NA")
+  } else {
+    nome.arq<- paste("Hist_DIFERENCES_patef_null_",k,".png", sep="")
+    png(filename= nome.arq, res= 300, height= 15, width=21, unit="cm")
+    plot(density(randomized.patef[k,]), main="Comparison between observed and
+         randomized values",)
+    abline(v=orig[k], col="red", lwd=2, xlab="")
+    dev.off()
+    print(k)
+    nome.arq<- paste("DIFERENCES_patef_Null_mean_sd_",k,".txt", sep="")
+    write.table(cbind(mean(randomized.patef[k,]),sd(randomized.patef[k,])), file=paste(nome.arq,sep=""), 
+                sep=" ",row.names=TRUE,col.names=FALSE)
+  }
+}
+
+
+#Calcule a proporcao das diferencas aleatorizadas que ficou maior do que
+#a diferen??a entre as redes originais
+significance.patef=matrix(nrow=nrow(randomized.patef),ncol=3)
+row.names(significance.patef)=row.names(randomized.patef)
+colnames(significance.patef)=c("p (rand <= orig)", "p (rand >= orig)", "p (rand=orig)")
+
+signif.sup=function(x) sum(x>=x[1])/length(x)
+signif.inf=function(x) sum(x<=x[1])/length(x)
+signif.two=function(x) ifelse(min(x)*2>1,1,min(x)*2)
+
+significance.patef[,1]=apply(randomized.patef,1,signif.inf)
+significance.patef[,2]=apply(randomized.patef,1,signif.sup)
+significance.patef[,3]=apply(significance.patef[,-3],1,signif.two)
+
+significance.patef
+
+#Exporte os resultados
+file_name= paste("Diferencas_Patefiled",i,"_Nperm.txt", sep="")
+write.table(significance.patef, file=file_name, 
+            sep=" ",row.names=TRUE,col.names=TRUE)
+
+
+par(mfrow=c(1,1))
+data<-read.table("guanawetnet2.11.2016.txt", h=T)
+d1<-graph_from_incidence_matrix(data, weight=TRUE)
+attributes<-read.table("attr.guanawetnet2.11.2016.txt", h=T)
+
+V(d1)$ID=as.character(attributes$ID[match(V(d1)$name,attributes$Node.ID)]) # This code says to create a vertex attribute called "Sex" by extracting the value of the column "Sex" in the attributes file when the Bird ID number matches the vertex name.
+V(d1)$ID
+
+V(d1)$color=V(d1)$ID #assign the "Sex" attribute as the vertex color
+V(d1)$color=gsub("Plant","green",V(d1)$color) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
+V(d1)$color=gsub("Bat","black",V(d1)$color) #Bats will be black
+
+V(d1)$color=gsub("Unknown","aliceblue",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Araneae","cadeblue",V(d1)$color) #Bats will be black
+
+
+V(d1)$color=gsub("Unknown","aliceblue",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Araneae","cadeblue",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Blattodea","burlywood4",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Coleoptera","antiquewhite4",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Collembola","blue",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Dermaptera","blueviolet",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Diplopoda","cornsilk",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Ditera(h-fly)","",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Ditera(unsp)","",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Gastropoda","",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Haplotoxida","",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Hemiptera","",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Hymenoptera(ant)","",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Hymenoptera(bee)","",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Hymenoptera(eusocialbee)","",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Hymenoptera(unsp)","",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Hymenoptera(wasp)","",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Lepidoptera(butterfly)","",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Lepidoptera(larva)","",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Lepidoptera(moth)","",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Lepidoptera(sphingid)","",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Myriapoda","",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Neuroptera","",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Opiliones","",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Orthoptera","",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Passeriformes","",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Rodentia","",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Thysanoptera","",V(d1)$color) #Bats will be black
+
+
+V(d1)$shape=gsub("Unknown","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Araneae","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Blattodea","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Coleoptera","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Collembola","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Dermaptera","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Diplopoda","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Ditera(h-fly)","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Ditera(unsp)","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Gastropoda","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Haplotoxida","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Hemiptera","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Hymenoptera(ant)","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Hymenoptera(bee)","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Hymenoptera(eusocialbee)","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Hymenoptera(unsp)","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Hymenoptera(wasp)","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Lepidoptera(butterfly)","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Lepidoptera(larva)","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Lepidoptera(moth)","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Lepidoptera(sphingid)","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Myriapoda","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Neuroptera","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Opiliones","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Orthoptera","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Passeriformes","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Rodentia","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Thysanoptera","square",V(d1)$shape) #Bats will be black
+
+
+V(d1)$shape=V(d1)$ID #assign the "Sex" attribute as the vertex color
+V(d1)$shape=gsub("Plant","square",V(d1)$shape) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
+V(d1)$shape=gsub("Bat","circle",V(d1)$shape) #Bats will be black
+
+#PLot the network
+plot.igraph(d1, axes=FALSE, layout=layout.kamada.kawai, edge.width=E(d1)$weight/2, edge.color="grey", vertex.size=5)
+title("Full mutualistic network - Bat-Plants - Kamada.Kawai")
+
+legend(-1.5, -0.5, legend=c("Bat", "Plant"), 
+       col=c("black", "green"), pch=c(16,15),
+       pt.cex=1.0,cex=1.2, bty="n", title="Full network of Interactions")
+
+
+##########
+
+#Permutation of nodes - Code from the social network article
+library(igraph)
+library(sna)
+library(asnipe)
+
+# Function to allocate number of observations to groups
+rand_vect <- function(N, M, sd = 1, pos.only = TRUE) {
+  vec <- rnorm(N, M/N, sd)
+  if (abs(sum(vec)) < 0.01) vec <- vec + 1
+  vec <- round(vec / sum(vec) * M)
+  deviation <- M - sum(vec)
+  for (. in seq_len(abs(deviation))) {
+    vec[i] <- vec[i <- sample(N, 1)] + sign(deviation)
+  }
+  if (pos.only) while (any(vec < 0)) {
+    negs <- vec < 0
+    pos  <- vec > 0
+    vec[negs][i] <- vec[negs][i <- sample(sum(negs), 1)] + 1
+    vec[pos][i]  <- vec[pos ][i <- sample(sum(pos ), 1)] - 1
+  }
+  vec
+}
+
+
+
+
+# START HERE:
+
+# Set parameters
+N <- 40
+n_groups <- 200
+
+# Generate nodes
+ids <- data.frame(ID=1:(N),SEX=sample(c("M","F"),N,replace=TRUE))
+ids
+
+# Generate a distribution of group sizes
+group_size <- sample(c(1:(N/2)),n_groups,replace=TRUE)
+
+# Create blank GBI matrix
+gbi <- matrix(0,nrow=n_groups,ncol=N)
+
+# Allocate individuals to groups, starting with males so that they end up in smaller groups
+ids$OBS <- rand_vect(N,sum(group_size),pos.only=TRUE)
+group_size.tmp <- group_size
+which.males <- which(ids$SEX=="M")
+for (i in which.males) {
+  
+  g <- sample(1:n_groups,ids$OBS[i],prob=(group_size.tmp>0))
+  group_size.tmp[g] <- group_size.tmp[g]-1
+  gbi[g,i] <- 1
+  
+}
+which.females <- which(ids$SEX=="F")
+for (i in which.females) {
+  if (sum((group_size.tmp>0) < ids$OBS[i])) {
+    g <- sample(1:n_groups,ids$OBS[i],prob=(group_size.tmp>0),replace=TRUE)
+  } else {
+    g <- sample(1:n_groups,ids$OBS[i],prob=(group_size.tmp>0),replace=FALSE)
+  }
+  group_size.tmp[g] <- group_size.tmp[g]-1
+  gbi[g,i] <- 1
+  
+}
+
+# Remove some observations
+# Generate probability of being observed (males=1,females=0.7)
+ids$OBS_PROB <- 0.8
+ids$OBS_PROB[which(ids$SEX=="M")] <- 1
+
+# Remove observations from GBI
+gbi.r <- gbi
+for (i in 1:N) {
+  gbi.r[which(gbi.r[,i] > 0),i] <- sample(c(0,1),sum(gbi.r[,i]),replace=TRUE,prob=c(1-ids$OBS_PROB[i],ids$OBS_PROB[i]))
+}
+
+# Calculate network
+network.r <- get_network(gbi.r)
+
+# Calculate Degree
+ids$DEGREE.r <- rowSums(network.r)
+
+# Calculate effects
+coef.r <- coefficients(lm(DEGREE.r~SEX,data=ids))[2]
+
+
+# Plot
+layout(matrix(c(1,1,1,1,2,3,4,5,6,7,8,9),nrow=2,ncol=6))
+par(cex.lab=1.5,mar=c(4,4,1,1), tck=0.01, mgp=c(2.5,0.5,0),las=1)
+
+# Plot original network
+coords <- layout.fruchterman.reingold(graph.adjacency(network.r,mode="undirected",diag=FALSE))
+plot(NULL, xlim=range(coords[,1]), ylim=range(coords[,2]), pch=20,  axes=FALSE, xlab=NA, ylab=NA)
+edges <- which(network.r > 0, arr.ind=TRUE)
+segments(coords[edges[,1],1],coords[edges[,1],2],coords[edges[,2],1],coords[edges[,2],2],lwd=1400*network.r[edges]^5, col="#00000055")
+points(coords, pch=20, col=c("blue","red")[as.numeric(ids$SEX)], cex=ids$DEGREE.r/1.5)
+
+## Node permutations - with plotting
+coefs.n <- rep(NA,1000)
+for (i in 1:1000) {
+  
+  # Randomise sex
+  s <- sample(1:N)
+  ids$SEX.temp <- ids$SEX[s]
+  
+  # re-run model
+  coefs.n[i] <- coefficients(lm(DEGREE.r~SEX.temp,data=ids))[2]
+  
+  if (i %in% c(1,10,100,1000)) {
+    
+    # Plot network
+    plot(NULL, xlim=range(coords[,1]), ylim=range(coords[,2]), pch=20,  axes=FALSE, xlab=NA, ylab=NA)
+    edges <- which(network.r > 0, arr.ind=TRUE)
+    segments(coords[edges[,1],1],coords[edges[,1],2],coords[edges[,2],1],coords[edges[,2],2],lwd=1400*network.r[edges]^5, col="#00000055")
+    points(coords, pch=20, col=c("blue","red")[as.numeric(ids$SEX.temp)], cex=ids$DEGREE.r/1.5)
+    
+    # Plot result
+    if (i > 1) {
+      a <- hist(coefs.n,xlim=c(-0.4,0.4), ylim=c(0,50), col="black",xlab="Coefficient value",ylab="Frequency",breaks=100,cex.axis=1.3,main=paste(i,"permutations"), tck=0.01)
+    } else {
+      plot(NULL, xlim=c(-0.4,0.4), ylim=c(0,50), col="black",xlab="Coefficient value",ylab="Frequency",cex.axis=1.3,main="1 permutation", tck=0.01)
+      segments(coefs.n[i],0,coefs.n[i],1,lwd=2)
+    }
+    segments(coef.r,0,coef.r,50,col="red")
+    box()
+    #text(par('usr')[1] + (par('usr')[2]-par('usr')[1])/15,par('usr')[4] - (par('usr')[4]-par('usr')[3])/15, "d)", cex=2) 
+  }
+}
+
+#########
+#Randomisation of the nodes in the network
+
+#Opening the final data 
+CLDRYFINAL24.10.2018<-read.table("CLDRYFINAL24.10.2018.txt", h=T)
+CLWETFINAL24.10.2018<-read.table("CLWETFINAL24.10.2018.txt", h=T)
+MSDRYFINAL24.10.2018<-read.table("MSDRYFINAL24.10.2018.txt", h=T)
+MSWETFINAL24.10.2018<-read.table("MSWETFINAL24.10.2018.txt", h=T)
+
+#Multplying the data by 10000 and rounding the data
+dd<-CLDRYFINAL24.10.2018*10000000
+q<-apply(dd, 2, round)
+head(q)
+
+t<-CLWETFINAL24.10.2018*10000000
+i<-apply(t, 2, round)
+head(i)
+
+x<-MSDRYFINAL24.10.2018*10000000
+y<-apply(x, 2, round)
+head(y)
+
+w<-MSWETFINAL24.10.2018*10000000
+z<-apply(w, 2, round)
+head(z)
+
+######################################
+#Calculating correlations between centrality values
+
+#Opening the final data 
+CLDRYFINAL24.10.2018<-read.table("CLDRYFINAL24.10.2018.txt", h=T)
+CLWETFINAL24.10.2018<-read.table("CLWETFINAL24.10.2018.txt", h=T)
+MSDRYFINAL24.10.2018<-read.table("MSDRYFINAL24.10.2018.txt", h=T)
+MSWETFINAL24.10.2018<-read.table("MSWETFINAL24.10.2018.txt", h=T)
+
+#Multplying the data by 10000 and rounding the data
+dd<-CLDRYFINAL24.10.2018*10000000
+q<-apply(dd, 2, round)
+head(q)
+
+t<-CLWETFINAL24.10.2018*10000000
+i<-apply(t, 2, round)
+head(i)
+
+x<-MSDRYFINAL24.10.2018*10000000
+y<-apply(x, 2, round)
+head(y)
+
+w<-MSWETFINAL24.10.2018*10000000
+z<-apply(w, 2, round)
+head(z)
+
+#Converts the matrix to an igraph object
+q<-graph_from_incidence_matrix(q, weighted=TRUE)
+i<-graph_from_incidence_matrix(i, weighted=TRUE)
+y<-graph_from_incidence_matrix(y, weighted=TRUE)
+z<-graph_from_incidence_matrix(z, weighted=TRUE)
+
+#Calculates degree cantrality
+deg_Bq <- degree(q, loops = FALSE)
+deg_Bi <- degree(i, loops = FALSE)
+deg_By <- degree(y, loops = FALSE)
+deg_Bz <- degree(z, loops = FALSE)
+
+sort(deg_B, decreasing = TRUE)
+
+# calculate the standardized degree centrality
+deg_B_Sq <- degree(q, loops = FALSE)/(vcount(q) - 1)
+deg_B_Si <- degree(i, loops = FALSE)/(vcount(i) - 1)
+deg_B_Sy <- degree(y, loops = FALSE)/(vcount(y) - 1)
+deg_B_Sz <- degree(z, loops = FALSE)/(vcount(z) - 1)
+
+sort(deg_B_S, decreasing = TRUE)
+
+# calculate the closeness centrality
+close_Bq <- closeness(q)
+close_Bi <- closeness(i)
+close_By <- closeness(y)
+close_Bz <- closeness(z)
+
+sort(closeness(q), decreasing = TRUE)
+
+# calculate the standardized closeness centrality
+close_B_Sq <- closeness(q) * (vcount(q) - 1)
+close_B_Si <- closeness(i) * (vcount(i) - 1)
+close_B_Sy <- closeness(y) * (vcount(y) - 1)
+close_B_Sz <- closeness(z) * (vcount(z) - 1)
+
+sort(close_B_S, decreasing = TRUE)
+
+# calculate the betweenness centrality
+betw_Bq <-betweenness(q)
+betw_Bi <-betweenness(i)
+betw_By <-betweenness(y)
+betw_Bz <-betweenness(z)
+
+sort(betweenness(q), decreasing = TRUE)
+
+# calculate the standardized Betweenness centrality
+betw_B_Sq <- 2*betweenness(q)/((vcount(q) - 1)*(vcount(q)-2))
+betw_B_Si <- 2*betweenness(i)/((vcount(i) - 1)*(vcount(i)-2))
+betw_B_Sy <- 2*betweenness(y)/((vcount(y) - 1)*(vcount(y)-2))
+betw_B_Sz <- 2*betweenness(z)/((vcount(z) - 1)*(vcount(z)-2))
+
+sort(betw_B_S, decreasing = TRUE)
+
+#Transforming the values into data frames
+dfq <- data.frame(deg_Bq, close_Bq, betw_Bq)
+dfi <- data.frame(deg_Bi, close_Bi, betw_Bi)
+dfy <- data.frame(deg_By, close_By, betw_By)
+dfz <- data.frame(deg_Bz, close_Bz, betw_Bz)
+
+dfq
+dfi
+dfy
+dfz
+
+#Makes correlations between the values of centrality (Pearson correlation)
+Pearson_correlation_matrixq <- cor(dfq) # Pearson correlation matrix
+Pearson_correlation_matrixi <- cor(dfi) # Pearson correlation matrix
+Pearson_correlation_matrixy <- cor(dfy) # Pearson correlation matrix
+Pearson_correlation_matrixz <- cor(dfz) # Pearson correlation matrix
+
+#Makes correlations between the values of centrality (Spearman correlation)
+Spearman_correlation_matrixq <- cor(dfq, method = "spearman") # Spearman correlation matrix
+Spearman_correlation_matrixi <- cor(dfi, method = "spearman") # Spearman correlation matrix
+Spearman_correlation_matrixy <- cor(dfy, method = "spearman") # Spearman correlation matrix
+Spearman_correlation_matrixz <- cor(dfz, method = "spearman") # Spearman correlation matrix
+
+#Makes a correlation matrix according to the Kendall method
+cor(dfq, method = "kendall") # Kendall correlation matrix
+cor(dfi, method = "kendall") # Kendall correlation matrix
+cor(dfy, method = "kendall") # Kendall correlation matrix
+cor(dfz, method = "kendall") # Kendall correlation matrix
+
+#Plots the correlation matrix between different pairs of variables
+pairs(~deg_Bq+close_Bq+betw_Bq,data=dfq, main="Simple Scatterplot Matrix")
+pairs(~deg_Bi+close_Bi+betw_Bi,data=dfi, main="Simple Scatterplot Matrix")
+pairs(~deg_By+close_By+betw_By,data=dfy, main="Simple Scatterplot Matrix")
+pairs(~deg_Bz+close_Bz+betw_Bz,data=dfz, main="Simple Scatterplot Matrix")
+
+#Makes a scatterplot to show the relationship between different pairs of variables
+scatterplotMatrix(~deg_Bq + close_Bq + betw_Bq)
+scatterplotMatrix(~deg_Bi + close_Bi + betw_Bi)
+scatterplotMatrix(~deg_By + close_By + betw_By)
+scatterplotMatrix(~deg_Bz + close_Bz + betw_Bz)
+
+par(mfrow=c(2,1))
+
+#Makes a cluster dendrogram showing the relationship between the centrality scores
+fit_pearsonq <- hclust(as.dist(Pearson_correlation_matrixq - diag(3)), method = "ward.D")
+fit_pearsoni <- hclust(as.dist(Pearson_correlation_matrixi - diag(3)), method = "ward.D")
+fit_pearsony <- hclust(as.dist(Pearson_correlation_matrixy - diag(3)), method = "ward.D")
+fit_pearsonz <- hclust(as.dist(Pearson_correlation_matrixz - diag(3)), method = "ward.D")
+
+#Plots the cluster dendrogram
+plot(fit_pearsonq)
+plot(fit_pearsoni)
+plot(fit_pearsony)
+plot(fit_pearsonz)
+
+#Comparing the most popular centrality metrics
+#                         Low degree                                         Low closeness                                                           Low betweenness
+#High degree               -----                                             Embbeded in a cluster that is far from the rest of the network          Ego's connection are redundant and bypasses him or her'    
+#High closeness           Key player tied to important/active alters         -----------                                                             Probably multiple paths in the network, ego is near many people, but so are many others
+#High betweenness         Ego's few ties are crucial for the network flow    Ego monopolizees the ties from a small number of people to many others
+
+
+############
+#Randomization of the significance of the number of communities in a network using the Erdos-Renyi
+#Define the parameters for the randomization
+dieta1<-read.table("CLDRYFINAL24.10.2018.txt", h=T)
+dieta2<-read.table("CLWETFINAL24.10.2018.txt", h=T)
+d1<-graph_from_incidence_matrix(dieta1, weight=TRUE)
+d2<-graph_from_incidence_matrix(dieta2, weight=TRUE)
+n1<-nrow(dieta1)  #plants (Bottom vertices in the randomisation)
+n2<-ncol(dieta1) #pollinators (Upper vertices in the randomisation)
+n3<-nrow(dieta2)  #plants (Bottom vertices in the randomisation)
+n4<-ncol(dieta2) #pollinators (Upper vertices in the randomisation)
+p<-0.5 #random association of nodes in the network
+m<-degree(d1)
+
+ntrials <- 1000
+
+num.comm.rg <- numeric(ntrials)
+for(i in (1:ntrials)){
+  g.rg<-sample_bipartite(n1, n2, type = c("gnp"), p, directed = FALSE,
+                         mode = c("in"))
+  c.rg<-fastgreedy.community(g.rg)
+  num.comm.rg[i]<-length(c.rg)}
+
+#Observed number of communities in the network
+nrlts<-fastgreedy.community(d1)
+length(nrlts)
+
+#Mean and standard deviation of the observed number of communities
+mean(num.comm.rg)
+sd(num.comm.rg)
+
+######Randomization of the significance of the difference between networks
+num.comm.rg <- numeric(ntrials)
+for(i in (1:ntrials)){
+  g.rg1<-sample_bipartite(n1, n2, type = c("gnp"), p, directed = FALSE,
+                          mode = c("in"))
+  g.rg2<-sample_bipartite(n3, n4, type = c("gnp"), p, directed = FALSE,
+                          mode = c("in"))
+  c.rg1<-fastgreedy.community(g.rg) 
+  c.rg2<-fastgreedy.community(g.rg)
+  num.comm.rg[i]<-length(c.rg1) - length(c.rg2) }
+
+#Observed differences
+nrlts1<-fastgreedy.community(d1) 
+nrlts2<-fastgreedy.community(d2)
+abs(length(nrlts1) - length(nrlts2))
+
+#Mean and standard deviation of the observed number of communities
+mean(num.comm.rg)
+sd(num.comm.rg)
+
+##################
+#Randomization of the centrality values for different insect species in the network 
+#Opening the final data 
+CLDRYFINAL24.10.2018<-read.table("CLDRYFINAL24.10.2018.txt", h=T)
+attr.CLDRYFINAL24.10.2018<-read.table("attr.CLDRYFINAL24.10.2018.txt", h=T)
+
+#Multplying the data by 10000 and rounding the data
+dd<-CLDRYFINAL24.10.2018*10000000
+q<-apply(dd, 2, round)
+q
+t<-graph_from_incidence_matrix(q, weighted=TRUE)
+t
+
+#Extracts the edgelist from the graph
+x<-as_edgelist(t)
+x
+
+#Creates a data frame with the plants and pollinators in the columns
+y<-as.data.frame(x)
+colnames(y) <- c("Plants", "Pollinators")
+y
+
+#Extracts all values higher than zero of the matrix
+y$weights<-which(as.vector(q)>0)
+y
+
+#Makes the randomization of the pollinators
+s <- sample(1:nrow(y))
+y$Pollinators <- y$Pollinators[s]
+y
+
+#Makes the randomization of the plants
+s <- sample(1:nrow(y))
+y$Plants <- y$Plants[s]
+y
+
+## Calculates the betweenness values for each node and then object to a data frame
+ww<-betweenness(t)
+ww2 <- data.frame(V(t)$name, ww)
+ww2
+colnames(ww2)<-c("species", "betweenness")
+ww2
+
+## Calculates the betweenness values for each node and then object to a data frame
+ll<-closeness(t)
+ll2 <- data.frame(V(t)$name, ll)
+ll2
+colnames(ll2)<-c("species", "closeness")
+
+#Merges data frames including the values of closeness, betweenness and the species ID
+ll2$betweenness <- ww2$betweenness[match(ll2$species, ww2$species)]
+ll2$ID <- attr.CLDRYFINAL24.10.2018$ID[match(ll2$species, attr.CLDRYFINAL24.10.2018$species)]
+head(ll2)
+ll2
+
+######Merging all data into just one file
+CLDRYFINAL24.10.2018<-read.table("CLDRYFINAL24.10.2018.txt", h=T)
+attr.CLDRYFINAL24.10.2018<-read.table("attr.CLDRYFINAL24.10.2018.txt", h=T)
+CLWETFINAL24.10.2018<-read.table("CLWETFINAL24.10.2018.txt", h=T)
+attr.CLWETFINAL24.10.2018<-read.table("attr.CLWETFINAL24.10.2018.txt", h=T)
+MSDRYFINAL24.10.2018<-read.table("MSDRYFINAL24.10.2018.txt", h=T)
+attr.MSDRYFINAL24.10.2018<-read.table("attr.MSDRYFINAL24.10.2018.txt", h=T)
+MSWETFINAL24.10.2018<-read.table("MSWETFINAL24.10.2018.txt", h=T)
+attr.MSWETFINAL24.10.2018<-read.table("attr.MSWETFINAL24.10.2018.txt", h=T)
+
+
+#Multplying the data by 10000 and rounding the data
+dd<-CLDRYFINAL24.10.2018*10000000
+q<-apply(dd, 2, round)
+head(q)
+
+t<-CLWETFINAL24.10.2018*10000000
+i<-apply(t, 2, round)
+head(i)
+
+x<-MSDRYFINAL24.10.2018*10000000
+y<-apply(x, 2, round)
+head(y)
+
+w<-MSWETFINAL24.10.2018*10000000
+z<-apply(w, 2, round)
+head(z)
+
+#Extracts the edgelist from the graph
+tt<-graph_from_incidence_matrix(q, weighted=TRUE)
+ww<-graph_from_incidence_matrix(i, weighted=TRUE)
+mm<-graph_from_incidence_matrix(y, weighted=TRUE)
+nn<-graph_from_incidence_matrix(z, weighted=TRUE)
+
+ttt<-as_edgelist(tt)
+www<-as_edgelist(ww)
+mmm<-as_edgelist(mm)
+nnn<-as_edgelist(nn)
+
+#Creates a data frame with the plants and pollinators in the columns
+tttt<-as.data.frame(ttt)
+wwww<-as.data.frame(www)
+mmmm<-as.data.frame(mmm)
+nnnn<-as.data.frame(nnn)
+
+#Changes colnames to Plants and Pollinators
+colnames(tttt) <- c("Plants", "Pollinators")
+colnames(wwww) <- c("Plants", "Pollinators")
+colnames(mmmm) <- c("Plants", "Pollinators")
+colnames(nnnn) <- c("Plants", "Pollinators")
+head(tttt)
+head(wwww)
+head(mmmm)
+head(nnnn)
+
+#Extracts all values higher than zero of the matrix
+tttt$weights<-which(as.vector(q)>0) #the weights are out of order for the interactions between pollinators and plants
+wwww$weights<-which(as.vector(y)>0) #the weights are out of order for the interactions between pollinators and plants
+mmmm$weights<-which(as.vector(i)>0) #the weights are out of order for the interactions between pollinators and plants
+nnnn$weights<-which(as.vector(z)>0) #the weights are out of order for the interactions between pollinators and plants
+
+#Makes the randomization of the pollinators
+s <- sample(1:nrow(tttt))
+tttt$Pollinators <- tttt$Pollinators[s]
+
+s <- sample(1:nrow(wwww))
+wwww$Pollinators <- wwww$Pollinators[s]
+
+s <- sample(1:nrow(mmmm))
+mmmm$Pollinators <- mmmm$Pollinators[s]
+
+s <- sample(1:nrow(nnnn))
+nnnn$Pollinators <- nnnn$Pollinators[s]
+
+#Makes the randomization of the plants
+s <- sample(1:nrow(tttt))
+tttt$Plants <- tttt$Plants[s]
+
+s <- sample(1:nrow(wwww))
+wwww$Plants <- wwww$Plants[s]
+
+s <- sample(1:nrow(mmmm))
+mmmm$Plants <- mmmm$Plants[s]
+
+s <- sample(1:nrow(nnnn))
+nnnn$Plants <- nnnn$Plants[s]
+
+### Calculates the betweenness values for each node and then object to a data frame
+#CL DRY
+w1<-closeness(tt)
+ww1 <- data.frame(V(tt)$name, w1)
+ww1
+colnames(ww1)<-c("species", "closeness")
+ww1
+
+w2<-betweenness(tt)
+ww2 <- data.frame(V(tt)$name, w2)
+ww2
+colnames(ww2)<-c("species", "betweenness")
+ww2
+
+#CL WET
+p1<-closeness(ww)
+pp1 <- data.frame(V(ww)$name, p1)
+pp1
+colnames(pp1)<-c("species", "closeness")
+pp1
+
+p2<-betweenness(ww)
+pp2 <- data.frame(V(ww)$name, p2)
+pp2
+colnames(pp2)<-c("species", "betweenness")
+pp2
+
+#MS DRY
+h1<-closeness(mm)
+hh1 <- data.frame(V(mm)$name, h1)
+hh1
+colnames(hh1)<-c("species", "closeness")
+hh1
+
+h2<-betweenness(mm)
+hh2 <- data.frame(V(mm)$name, h2)
+hh2
+colnames(hh2)<-c("species", "betweenness")
+hh2
+
+#MS WET
+k1<-closeness(nn)
+kk1 <- data.frame(V(nn)$name, k1)
+kk1
+colnames(kk1)<-c("species", "closeness")
+kk1
+
+k2<-betweenness(nn)
+kk2 <- data.frame(V(nn)$name, k2)
+kk2
+colnames(kk2)<-c("species", "betweenness")
+kk2
+
+#############
+#Calculates the specialisation values for the species at each level of the network
+e<-dfun(q) #values for the lower trophic level of the network
+u<-dfun(t(q)) #values for the higher trophic level of the network
+
+m<-dfun(i) #values for the lower trophic level of the network
+n<-dfun(t(i)) #values for the higher trophic level of the network
+
+v<-dfun(y) #values for the lower trophic level of the network
+b<-dfun(t(y)) #values for the higher trophic level of the network
+
+j<-dfun(z) #values for the lower trophic level of the network
+a<-dfun(t(z)) #values for the higher trophic level of the network
+
+e1<-as.data.frame(e)
+u1<-as.data.frame(u)
+
+m1<-as.data.frame(m)
+n1<-as.data.frame(n)
+
+v1<-as.data.frame(v)
+b1<-as.data.frame(b)
+
+j1<-as.data.frame(j)
+a1<-as.data.frame(a)
+
+#Delete the columns with the names below from the data frame
+e1$dprime <- NULL
+e1$dmin <- NULL
+e1$dmax <- NULL
+e1
+
+u1$dprime <- NULL
+u1$dmin <- NULL
+u1$dmax <- NULL
+u1
+
+m1$dprime <- NULL
+m1$dmin <- NULL
+m1$dmax <- NULL
+m1
+
+n1$dprime <- NULL
+n1$dmin <- NULL
+n1$dmax <- NULL
+n1
+
+v1$dprime <- NULL
+v1$dmin <- NULL
+v1$dmax <- NULL
+v1
+
+b1$dprime <- NULL
+b1$dmin <- NULL
+b1$dmax <- NULL
+b1
+
+j1$dprime <- NULL
+j1$dmin <- NULL
+j1$dmax <- NULL
+j1
+
+a1$dprime <- NULL
+a1$dmin <- NULL
+a1$dmax <- NULL
+a1
+
+#Joins the data from both data frames into just one
+qq<-rbind(e1, u1)
+qq$season<-"dry"
+qq$elevation<-"cl"
+qq
+
+ss<-rbind(m1, n1)
+ss$season<-"wet"
+ss$elevation<-"cl"
+ss
+
+yy<-rbind(v1, b1)
+yy$season<-"dry"
+yy$elevation<-"ms"
+yy
+
+hh<-rbind(j1, a1)
+hh$season<-"wet"
+hh$elevation<-"ms"
+hh
+
+###### Obs.: Something is missing in this coding
+qq <- cbind(species = rownames(qq), qq)
+colnames(attr.CLDRYFINAL24.10.2018) <- c("species", "ID")
+qq$ID <- attr.CLDRYFINAL24.10.2018$ID[match(qq$species, attr.CLDRYFINAL24.10.2018$species)]
+head(qq)
+qq
+
+ss <- cbind(species = rownames(ss), ss)
+colnames(attr.CLWETFINAL24.10.2018) <- c("species", "ID")
+ss$ID <- attr.CLWETFINAL24.10.2018$ID[match(ss$species, attr.CLWETFINAL24.10.2018$species)]
+head(ss)
+ss
+
+yy <- cbind(species = rownames(yy), yy)
+colnames(attr.MSDRYFINAL24.10.2018) <- c("species", "ID")
+yy$ID <- attr.MSDRYFINAL24.10.2018$ID[match(yy$species, attr.MSDRYFINAL24.10.2018$species)]
+head(yy)
+yy
+
+hh <- cbind(species = rownames(hh), hh)
+colnames(attr.MSWETFINAL24.10.2018) <- c("species", "ID")
+hh$ID <- attr.MSWETFINAL24.10.2018$ID[match(hh$species, attr.MSWETFINAL24.10.2018$species)]
+head(hh)
+hh
+
+rrr<-rbind(yy, hh, qq, ss)
+head(rrr)
+
+str(rrr)
+head(rrr)
+
+#Adds the row names as a column
+rrr <- cbind(species = rownames(rrr), rrr)
+head(rrr)
+
+#####
+#Running a glmm on the networks using elevation and season as fixed effects and functional groups as random effects
+rrr$d.t <- rrr$d + 1
+head(rrr)
+
+qqp(rrr$d.t, "norm") #normal 
+qqp(rrr$d.t, "lnorm") #lognormal
+
+nbinom <- fitdistr(rrr$d.t, "Negative Binomial")
+qqp(rrr$d.t, "nbinom", size = nbinom$estimate[[1]], mu = nbinom$estimate[[2]])
+
+poisson <- fitdistr(rrr$d.t, "Poisson")
+qqp(rrr$d.t, "pois", poisson$estimate)
+
+gamma <- fitdistr(rrr$d.t, "gamma")
+qqp(rrr$d.t, "gamma", shape = gamma$estimate[[1]], rate = gamma$estimate[[2]])
+
+
+lm<-lmer(d ~ season + elevation + (1 | ID), data = rrr,
+         REML = FALSE)
+
+summary(lm)
+Anova(lm)
+coef(lm) #coefficients of the fixed effects
+ranef(lm) #coefficients of the random effects
+
+#Explores the variation in the values of the coefficients of the random effects
+lm1<-ranef(lm)
+dotplot (lm1, rrr)
+qqmath (lm1, rrr)
+as.data.frame(lm1)
+
+str(lm)
+
+#Explores the variability in the distribution of the coefficients of the glmm
+plot(ranef(lmm))
+plot(lm) # it is expected to be scattered with no obvious pattern at all
+
+
+#Testing for the significance of random effects by subsequent removal of effects
+bothlmm<-lmer(d~ elevation + season + (1 | ID), data=rrr, REML=FALSE) 
+noseasonlmm <- lmer(d ~ elevation + (1 | ID), data = rrr, REML = FALSE)
+noelevationlmm <- lmer(d ~ season + (1 | ID), data = rrr, REML = FALSE)
+nofixedlmm <- lmer(d ~ 1 + (1 | ID), data = rrr, REML = FALSE)
+anova(noseasonlmm, noelevationlmm, nofixedlmm, bothlmm)
+
+
+#####
+#Running a glmm on the networks using elevation and season as fixed effects and species as random effects
+lmm<-lmer(d ~ season + elevation + (1 | ID), data = rrr,
+          REML = FALSE)
+summary(lmm)
+Anova(lmm)
+coef(lmm)
+ranef(lmm)
+as.data.frame(coef(lmm))
+as.data.frame(ranef(lmm))
+
+
+#Running a glmm on one of the functional groups of the networks using elevation and season 
+#while selecting only for one functional group (Hymenoptera_bee_)
+table(rrr$ID)
+mmmm<-filter(rrr, ID == "Small_mammals")
+mmmm
+lmm<-lmer(d ~ season + elevation + (1 | species), data = mmmm,
+          REML = FALSE)
+summary(lmm)
+Anova(lmm)
+coef(lmm)
+ranef(lmm)
+
+data(mtcars)
+head(mtcars)
+hoslem.test(mtcars$vs, fitted(model))
+
+#Runs a GLM for the samples
+fit <- glm(d ~ season + elevation, data=rrr, family=gaussian)
+anova(fit)
+summary(fit) #display results
+hoslem.test(rrr$d, fitted(fit)) #tests if the model is a good fit for the occurring distribution. If p-value is higher than 0.05, there is no significant difference between the model and the results
+
+head(rrr)
+
+#Combines the row and column names from all observed matrices of interaction from Mount Cameroon
+#Multplying the data by 10000 and rounding the data
+CLDRYFINAL24.10.2018<-read.table("CLDRYFINAL24.10.2018.txt", h=T)
+attr.CLDRYFINAL24.10.2018<-read.table("attr.CLDRYFINAL24.10.2018.txt", h=T)
+CLWETFINAL24.10.2018<-read.table("CLWETFINAL24.10.2018.txt", h=T)
+attr.CLWETFINAL24.10.2018<-read.table("attr.CLWETFINAL24.10.2018.txt", h=T)
+MSDRYFINAL24.10.2018<-read.table("MSDRYFINAL24.10.2018.txt", h=T)
+attr.MSDRYFINAL24.10.2018<-read.table("attr.MSDRYFINAL24.10.2018.txt", h=T)
+MSWETFINAL24.10.2018<-read.table("MSWETFINAL24.10.2018.txt", h=T)
+attr.MSWETFINAL24.10.2018<-read.table("attr.MSWETFINAL24.10.2018.txt", h=T)
+
+
+dd<-CLDRYFINAL24.10.2018*10000000
+q<-apply(dd, 2, round)
+head(q)
+
+t<-CLWETFINAL24.10.2018*10000000
+i<-apply(t, 2, round)
+head(i)
+
+x<-MSDRYFINAL24.10.2018*10000000
+y<-apply(x, 2, round)
+head(y)
+
+w<-MSWETFINAL24.10.2018*10000000
+z<-apply(w, 2, round)
+head(z)
+
+
+tttttt<-merge(rownames(q), colnames(q), all=TRUE)
+pppppp<-merge(rownames(i), colnames(i), all=TRUE)
+nnnnnn<-merge(rownames(y), colnames(y), all=TRUE)
+aaaaaa<-merge(rownames(z), colnames(z), all=TRUE)
+ssssss<-rbind(tttttt, pppppp, nnnnnn, aaaaaa)
+yyy<-unite(ssssss, "rr", c("x","y"), sep=":")
+yyy
+yyy$CLDRY<-0
+yyy$CLWET<-0
+yyy$MSDRY<-0
+yyy$MSWET<-0
+head(yyy)
+
+
+# Loop to fill the column of CLDRY with values from the matrix q
+for(o in 1:nrow(q)) {
+  for(j in 1:ncol(q)) {
+    if (print(q[o, j])>0) {
+      yyy[(o +(j-1)*nrow(q)),2]=1
+      
+    }
+  }
+}
+
+nrow(q)
+sum(yyy[,2])
+dadosq<- ifelse(q==0,0,1)
+sum(dadosq)
+
+# Loop to fill the column of CLWET with values from the matrix i
+for(o in 1:nrow(i)) {
+  for(j in 1:ncol(i)) {
+    if (print(i[o, j])>0) {
+      yyy[(o +(j-1)*nrow(i)),3]=1
+      
+    }
+  }
+}
+
+nrow(i)
+sum(yyy[,3])
+dadosi<- ifelse(i==0,0,1)
+sum(dadosi)
+
+# Loop to fill the column of MSDRY with values from the matrix y
+for(o in 1:nrow(y)) {
+  for(j in 1:ncol(y)) {
+    if (print(y[o, j])>0) {
+      yyy[(o +(j-1)*nrow(y)),4]=1
+      
+    }
+  }
+}
+
+nrow(y)
+sum(yyy[,4])
+dadosy<- ifelse(y==0,0,1)
+sum(dadosy)
+
+# Loop to fill the column of MSWET with values from the matrix z
+for(o in 1:nrow(z)) {
+  for(j in 1:ncol(z)) {
+    if (print(z[o, j])>0) {
+      yyy[(o +(j-1)*nrow(z)),5]=1
+      
+    }
+  }
+}
+
+nrow(z)
+
+nrow(z)
+sum(yyy[,5])
+dadosz<- ifelse(z==0,0,1)
+sum(dadosz)
+
+
+#Removes duplicated rows from the merged data frame
+yyy1<-aggregate(.~rr, data=yyy, FUN=max)
+
+#Removes interactions that do not occur in the networks
+yyy2<-yyy1[rowSums(yyy1[, -1])>0, ]
+
+head(yyy2)
+
+
+##### Make a metanetwork where the links are represented by pairwise species interactions
+head(yyy2)
+head(yyy2, n=100)
+colnames(yyy2)<-c("", "CLDRY", "CLWET", "MSDRY", "MSWET")
+rownames(yyy2)<-yyy2[,1]
+d1<-graph_from_incidence_matrix(yyy2[2:5], weight=TRUE)
+plot(d1, vertex.size=2, , vertex.label=NA)
+
+
+
+####Replaces the names of the species in the interactions by the order
+yyy2
+yyy2$ID<-gsub(".*:","",yyy2[,1])
+yyy2$ID=as.character(attr.total.final$ID[match(yyy2$ID,attr.total.final$Node.ID)]) # This code says to create a vertex attribute called "Sex" by extracting the value of the column "Sex" in the attributes file when the Bird ID number matches the vertex name.
+head(yyy2)
+
+
+head(yyy2)
+
+V(d1)$ID=as.character(yyy2$ID[match(V(d1)$name, rownames(yyy2))]) # This code says to create a vertex attribute called "Sex" by extracting the value of the column "Sex" in the attributes file when the Bird ID number matches the vertex name.
+V(d1)$ID
+fix(d1)
+
+V(d1)$color=V(d1)$ID
+V(d1)$color=gsub("Plant","green",V(d1)$color) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
+V(d1)$color=gsub("Chiroptera","black",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Coleoptera","aliceblue",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Diptera_h_fly_","blue",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Diptera_unsp_","cornsilk",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Hymenoptera_bee_","brown1",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Hymenoptera_eusocial_bee_","yellow",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Hymenoptera_Carpenters_","darkgreen",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Lepidoptera_butterfly_","darkorange",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Lepidoptera_moth_","darkorchid",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Lepidoptera_sphingid_","deeppink",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Passeriformes","grey61",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Small_mammals","olivedrab1",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("CLDRY","red",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("CLWET","red",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("MSDRY","red",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("MSWET","red",V(d1)$color) #Bats will be black
+
+
+V(d1)$shape=V(d1)$ID
+V(d1)$shape=gsub("Plant","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Chiroptera","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Coleoptera","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Diptera_h_fly_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Diptera_unsp_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Hymenoptera_eusocial_bee_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Hymenoptera_bee_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Hymenoptera_Carpenters_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Lepidoptera_butterfly_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Lepidoptera_moth_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Lepidoptera_sphingid_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Passeriformes","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Small_mammals","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("CLDRY","circle",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("CLWET","circle",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("MSDRY","circle",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("MSWET","circle",V(d1)$shape) #Bats will be black
+
+table(V(d1)$ID)
+
+#Plots the metanetwork using the functional groups as the nodes
+plot.igraph(d1, vertex.size=3, vertex.label=NA)
+plot(d1, vertex.size=3, vertex.label=NA)
+plot.igraph(d1, vertex.size=3, vertex.label=NA, layout=layout.kamada.kawai)
+
+
+
+
+
+head(yyy2)
+V(d1)$name
+
+#Merges all attribute files
+attr.CLDRY<-read.table("attr.CLDRYFINAL24.10.2018.txt", h=T)
+attr.CLWET<-read.table("attr.CLWETFINAL24.10.2018.txt", h=T)
+attr.MSDRY<-read.table("attr.MSDRYFINAL24.10.2018.txt", h=T)
+attr.MSWET<-read.table("attr.MSWETFINAL24.10.2018.txt", h=T)
+attr.total<-rbind(attr.CLDRY[,c(1:2)], attr.CLWET, attr.MSDRY, attr.MSWET)
+nrow(attr.total)
+attr.total
+
+
+#Remove duplicated rows from the attr.total file
+attr.total.final<-attr.total %>% distinct(Node.ID, ID, .keep_all = TRUE)
+head(attr.total)
+head(attr.total.final)
+
+
+#Merges all attribute files
+attr.CLDRY<-read.table("attr.CLDRYFINAL24.10.2018.txt", h=T)
+attr.CLWET<-read.table("attr.CLWETFINAL24.10.2018.txt", h=T)
+attr.MSDRY<-read.table("attr.MSDRYFINAL24.10.2018.txt", h=T)
+attr.MSWET<-read.table("attr.MSWETFINAL24.10.2018.txt", h=T)
+attr.total<-rbind(attr.CLDRY[,c(1:2)], attr.CLWET, attr.MSDRY, attr.MSWET)
+nrow(attr.total)
+head(attr.total)
+
+
+#Remove duplicated rows from the attr.total file
+attr.total.final<-attr.total %>% distinct(Node.ID, ID, .keep_all = TRUE)
+attr.total.final
+
+head(yyy2)
+head(attr.total.final)
+
+
+V(d1)$ID=as.character(attributes$ID[match(V(d1)$name,attributes$Node.ID)]) # This code says to create a vertex attribute called "Sex" by extracting the value of the column "Sex" in the attributes file when the Bird ID number matches the vertex name.
+V(d1)$ID
+
+
+yyy2$ID1 <- attr.total.final$ID1[match(yyy2$ID, attr.total.final$ID)]
+head(yyy2)
+
+df1$B <- df2$B[match(df1$A, df2$A)]
+
+V(d1)$ID=as.character(attributes$ID[match(V(d1)$name,attributes$Node.ID)]) # This code says to create a vertex attribute called "Sex" by extracting the value of the column "Sex" in the attributes file when the Bird ID number matches the vertex name.
+V(d1)$ID
+
+
+attr.total.final
+attr.total.final
+mmmm<-filter(attr.total.final, ID == "Plant")
+str(mmmm)
+dim(mmmm)
+vvvv<-mmmm[,1]
+vvvv
+vvvv
+
+eee<-lapply(yyy2, function(x) as.numeric(gsub(attr.total.final[,1]), attr.total.final[,2], x))
+eee
+
+data <- lapply(attr.total.final, FUN = function(x) as.numeric(gsub(attr.total.final[,1]), "", x)))
+
+
+
+dados<- ifelse(attr.total.final[,2]=="Plant",0,1)
+
+dados
+
+dados<- ifelse(dados==0,0,1)
+dados
+
+
+gsub(vvvv, )
+
+gsub(pattern, replacement, x, ignore.case = FALSE, perl = FALSE,
+     fixed = FALSE, useBytes = FALSE)
+
+
+Case insensitive replace:
+  > gsub("tut","ot",x,ignore.case=T))
+
+
+
+#
+
+rownamesyyy2<-rownames(yyy2)
+rownames(yyy2)
+
+which(attr.total.final[,2]=="Plant")
+
+rownames(yyyy)<-!which(attr.total.final[,2]=="Plant")
+
+
+attr.total.final
+
+dim(attr.total.final)
+
+yyy10<-gsub(".*_","",rownamesyyy2)
+yyy10
+rownamesyyy2
+
+d <- 5
+for(i in 1:nrow(yyy2)) {
+  
+  
+  nam <- paste("A", i, sep = "")
+  assign(nam, rnorm(3)+d)
+}
+
+
+
+
+if(length(i <- grep("foo", txt)))
+  cat("'foo' appears at least once in\n\t", txt, "\n")
+i # 2 and 4
+txt[i]
+
+
+
+
+
+
+V(d1)$color=gsub("Plant","green",V(d1)$color) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
+V(d1)$color=gsub("Chiroptera","black",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Coleoptera","aliceblue",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Diptera_h_fly_","blue",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Diptera_unsp_","cornsilk",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Hymenoptera_bee_","brown1",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Hymenoptera_eusocial_bee_","yellow",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Hymenoptera_Carpenters_","darkgreen",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Lepidoptera_butterfly_","darkorange",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Lepidoptera_moth_","darkorchid",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Lepidoptera_sphingid_","deeppink",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Passeriformes","grey61",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Small_mammals","olivedrab1",V(d1)$color) #Bats will be black
+
+V(d1)$shape=V(d1)$ID
+V(d1)$shape=gsub("Plant","circle",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Chiroptera","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Coleoptera","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Diptera_h_fly_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Diptera_unsp_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Hymenoptera_eusocial_bee_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Hymenoptera_bee_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Hymenoptera_Carpenters_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Lepidoptera_butterfly_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Lepidoptera_moth_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Lepidoptera_sphingid_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Passeriformes","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Small_mammals","square",V(d1)$shape) #Bats will be black
+
+
+plot.igraph(d1, vertex.size=3, vertex.label=NA)
+plot(d1, vertex.size=3, vertex.label=NA)
+plot.igraph(d1, vertex.size=3, vertex.label=NA, layout=layout.kamada.kawai)
+
+networklevel(data)
+
+
+##### Makes a bipartite plot
+plotweb(yyy2[,2:5], text.rot=90)
+
+
+##### Make a rarefaction curve for each elevation during each season
+bbbb<-rbind (c(NA, sum(yyy2[,2]), sum(yyy2[,3]), sum(yyy2[,4]), sum(yyy2[,5])), yyy2)
+a<-iNEXT(bbbb[2:5], datatype="incidence_freq", conf=0.95, nboot=50)
+ggiNEXT(a,type=1,se=TRUE,facet.var="site",grey=TRUE)
+
+
+
+#######Code to run a NMDS
+library(vegan)
+set.seed(2)
+rownames(yyy2)<-yyy2[,1]
+yyy3<-yyy2[,-1]
+example_NMDS=metaMDS(yyy3, k=2)
+
+example_NMDS=metaMDS(yyy3,k=2,trymax=100)
+
+stressplot(example_NMDS)
+
+plot(example_NMDS)
+ordiplot(example_NMDS,type="n")
+orditorp(example_NMDS,display="species",col="red",air=0.01)
+orditorp(example_NMDS,display="sites",cex=1.25,air=0.01)
+treat=c(rep("Treatment1",5),rep("Treatment2",5))
+ordiplot(example_NMDS,type="n")
+ordihull(example_NMDS,groups=treat,draw="polygon",col="grey90",label=F)
+orditorp(example_NMDS,display="species",col="red",air=0.01)
+orditorp(example_NMDS,display="sites",col=c(rep("green",5),rep("blue",5)),
+         air=0.01,cex=1.25)
+
+
+# First, create a vector of color values corresponding of the 
+# same length as the vector of treatment values
+colors=c(rep("red",5),rep("blue",5))
+ordiplot(example_NMDS,type="n")
+#Plot convex hulls with colors baesd on treatment
+for(i in unique(treat)) {
+  ordihull(example_NMDS$point[grep(i,treat),],draw="polygon",
+           groups=treat[treat==i],col=colors[grep(i,treat)],label=F) } 
+orditorp(example_NMDS,display="species",col="red",air=0.01)
+orditorp(example_NMDS,display="sites",col=c(rep("green",5),
+                                            rep("blue",5)),air=0.01,cex=1.25)
+
+
+
+
+#######
+
+
+####################################################################
+#####                                                           ####
+##### SCRIPT FOR DRAWING AND ANALYZING MULTILAYER NETWORKS IN R ####
+#####                                                           ####       
+####################################################################
+
+
+##### Ecological Synthesis Lab (SintECO)
+##### https://marcomellolab.wordpress.com
+##### Authors: Marco Mello & Renata Muylaert
+##### E-mail: marmello@gmail.com 
+##### Script: Drawing and analyzing multilayer networks in R
+##### How to cite: Mello MAR & Muylaert RL. 2017. Script for drawing and analyzing
+##### multilayer networks in R. Available at https://marcomellolab.wordpress.com.
+##### Published on November 23rd, 2017 (English version).
+##### Run in R 3.4.2 (2017-09-28) -- "Short Summer"
+
+##### Disclaimer: You may use this script freely for non-comercial
+##### purposes at your own risk. We assume no responsibility or
+##### liability for the use of this software, convey no license
+##### or title under any patent, copyright, or mask work right
+##### to the product. We reserve the right to make changes in
+##### the software without notification. 
+##### We also make no representation or warranty that such
+##### application will be suitable for the specified use without
+##### further testing or modification.
+
+##### Obs: If this script helps you produce any academic work
+##### (paper, book, chapter, dissertation etc.), please
+##### acknowledge the authors and cite the source.
+
+
+#############################################
+
+
+#### Step 1 ####
+# Set the working directory automatically to the source file location 
+current_path <- getActiveDocumentContext()$path 
+setwd(dirname(current_path ))
+print( getwd() )
+
+
+#### Step 2 ####
+# Clear all objects and load the required packages
+
+rm(list=ls())
+library("igraph")
+library("bipartite")
+library("ggplot2")
+library("network") 
+library("png")
+library("plyr")
+library("reshape2")
+library("rstudioapi")
+
+
+#### Step 3 ####
+# Example file: two adjacency matrices: antagonistic and mutualistic
+# interactions between small mammals and plants in an urban protected
+# area in Brazil (Genrich et al 2017, Oikos:
+# http://dx.doi.org/10.1111/oik.03825)
+# NOTE ABOUT THE INPUT FILES
+# How are your INPUT data formatted: edge list or adjacency matrix?
+# You need to know it, before choosing the data import 
+# method (1 or 2).
+# Method 1 will save multilayer network as the object multilayer1
+# Method 2 will save multilayer network as the object multilayer2
+# Method 2 is preferable, as you can import a file in which you 
+# can include all the addtional data you want (e.g., species
+# traits) in the node and edge lists.
+
+#### METHOD 1 ####
+# Import the data, method 1: from adjacency matrices
+
+# Using the example files provided with this script
+antagonistic <- read.table("antagonistic.txt", head=TRUE)
+class(antagonistic)
+mutualistic <- read.table("mutualistic.txt", head=TRUE)
+class(mutualistic)
+
+# Check the data O^O
+antagonistic 
+mutualistic
+
+# Transform the bipartite matrices into edge lists
+
+### Layer 1: antagonistic
+antagonistic2 = cbind.data.frame(reference=row.names(antagonistic),antagonistic)
+str(antagonistic2)
+antagonistic_list = melt(antagonistic2, na.rm = T)
+colnames(antagonistic_list) = c("animals", "plants", "weight")
+antagonistic_list[,1]=as.character(paste(antagonistic_list[,1]))
+antagonistic_list[,2]=as.character(paste(antagonistic_list[,2]))
+head(antagonistic_list)
+
+# Exclude all edges with value 0 (zero)
+antagonistic_list2 <- subset(antagonistic_list, weight > 0)
+head(antagonistic_list2)
+
+# Create the edge list
+links_ant = antagonistic_list2
+head(links_ant)
+
+# Creata the node list of the antagonistic layer
+nodes_ant <- unique(data.frame(nodes = c(antagonistic_list2[,1], antagonistic_list2[,2])))
+head(nodes_ant)
+
+# Check the dimensions of the node list
+dim(nodes_ant[1])
+
+# Create a new column in the node list to tell which
+# nodes are the animals and the plants
+# They are the rows and columns of the original matrix
+nodes_ant$taxon = c((rep("Animal",8)), rep("Plant", 33)) 
+head(nodes_ant)
+
+# Create an igraph object based on the node and edge lists
+antagonistic3 <- graph_from_data_frame(d=links_ant, vertices=nodes_ant, directed=F) 
+class(antagonistic3)
+str(antagonistic3)
+head(antagonistic3)
+antagonistic3
+
+#Add information on the two-mode strucutre
+V(antagonistic3)$type <- V(antagonistic3)$name %in% links_ant[,1]
+V(antagonistic3)$type = nodes_ant[,2]
+antagonistic3
+
+# Create a column in the edge for the layers
+# In the example file, the layers are interaction types
+antagonistic_list2$layer = "antagonistic"
+
+### Layer 2: mutualistic
+mutualistic2 = cbind.data.frame(reference=row.names(mutualistic),mutualistic)
+str(mutualistic2)
+mutualistic_list = melt(mutualistic2, na.rm = T)
+colnames(mutualistic_list) = c("animals", "plants", "weight")
+mutualistic_list[,1]=as.character(paste(mutualistic_list[,1]))
+mutualistic_list[,2]=as.character(paste(mutualistic_list[,2]))
+head(mutualistic_list)
+
+# Exclude all edges with value 0 (zero)
+mutualistic_list2 <- subset(mutualistic_list, weight > 0)
+head(mutualistic_list2)
+
+# Create the edge list
+links_mut = mutualistic_list2
+head(links_mut)
+
+# Creata the node list of the mutualistic layer
+nodes_mut <- unique(data.frame(nodes = c(mutualistic_list2[,1], mutualistic_list2[,2])))
+head(nodes_mut)
+
+# Check the dimensions of the node list
+dim(nodes_mut[1])
+
+# Create a new column in the node list to tell which
+# nodes are the animals and the plants
+# They are the rows and columns of the original matrix
+nodes_mut$taxon = c((rep("Animal",8)), rep("Plant", 20)) 
+head(nodes_mut)
+
+# Create an igraph object based on the node and edge lists
+mutualistic3 <- graph_from_data_frame(d=links_mut, vertices=nodes_mut, directed=F) 
+class(mutualistic3)
+str(mutualistic3)
+head(mutualistic3)
+mutualistic3
+
+#Add information on the two-mode strucutre
+V(mutualistic3)$type <- V(mutualistic3)$name %in% links_mut[,1]
+V(mutualistic3)$type = nodes_mut[,2]
+mutualistic3
+
+# Create a column in the edge for the layers
+# In the example file, the layers are interaction types
+mutualistic_list2$layer = "mutualistic"
+
+### Bind the layers and build the multilayer network
+links1 = rbind(antagonistic_list2, mutualistic_list2)
+nodes1 = rbind(nodes_ant, nodes_mut)
+nodes1 = unique(nodes1)
+dim(nodes1)
+multilayer1 <- graph_from_data_frame(d=links1, vertices=nodes1, directed=F) 
+class(multilayer1)
+head(multilayer1)
+multilayer1
+
+write.table(links1, "links1.txt", sep="\t", quote=F, row.names = FALSE)
+write.table(nodes1, "nodes1.txt", sep="\t", quote=F, row.names = FALSE)
+
+#### METHOD 2 ####
+# Import the data, method 2: from edge and node lists
+# Import vertices (nodes) and edges (links) that you already have in
+# your working directory 
+# You may create those lists with as many additional data as
+# you want. Or you may just use the files exported using
+# the method 1
+
+links2 = read.table("links1.txt", header= TRUE, sep="\t")
+nodes2 = read.table("nodes1.txt", header= TRUE, sep="\t")
+
+head(links2)
+head(nodes2)
+
+# Create the multilayer network based on the node and link lists
+multilayer2 <- graph_from_data_frame(d=links2, vertices=nodes2, directed=T) 
+
+# Notice that, using the example files, the two multilayer
+# networks are actually the same
+str(multilayer2)
+str(multilayer1)
+
+# So you may work with either of the two networks in
+# the following steps
+# multilayer1 <- multilayer2
+
+
+#### Step 4: Drawing ####
+
+
+# Draw the graph with node colors by taxon
+# Data from the example file (import using method 1)
+
+# Choose the drawing method (layout) and save it as an object 
+l <- layout_nicely(multilayer1)
+
+#If the nodes are overlapping, try expanding the graph
+my.layout <- layout_with_fr(multilayer1)
+my.layout <- norm_coords(my.layout, ymin=-1, ymax=1, xmin=-1, xmax=1)
+plot(multilayer1, rescale=F, layout=my.layout*3)
+
+# Set node colors by taxon
+V(multilayer1)$color = nodes1$taxon
+V(multilayer1)$color = gsub("Animal","#E6B246",V(multilayer1)$color)
+V(multilayer1)$color = gsub("Plant","#A3D642",V(multilayer1)$color)
+
+#Set link colors by layer
+E(multilayer1)$color = links1$layer
+E(multilayer1)$color = gsub("antagonistic","#D05B9B",E(multilayer1)$color)
+E(multilayer1)$color = gsub("mutualistic","#5770AE",E(multilayer1)$color)
+
+# Transform arcs into edges
+E(multilayer1)$arrow.mode = 0
+
+# Export the graph as a PNG image
+# CAUTION: study the plotting parameters, so you can
+# customize your own graph
+plot.new()
+
+png(filename= "multilayer_example.png", res= 300, height= 3000, width= 4700)
+par(mfrow=c(1,1),mar=c(1,1,3,17))
+#Use a function for avoiding overlap between edges of different layers in the graph
+curves = curve_multiple(multilayer1)
+plot(multilayer1, 
+     vertex.color = V(multilayer1)$color, 
+     vertex.frame.color= V(multilayer1)$color, 
+     vertex.shape = V(multilayer1)$shape, 
+     vertex.size=10,
+     vertex.label=V(multilayer1)$name,
+     vertex.label.color="white",
+     vertex.label.cex=.5,
+     edge.color = E(multilayer1)$color, 
+     edge.width = E(multilayer1)$weight/2,
+     edge.curved=curves, 
+     layout=l)
+
+# Create a legend for the plot 
+legend(x = 1.3,y = 0.9, legend = c("Animals", "Plants"), 
+       pch = c(15,16),  title="Taxa", 
+       text.col = "gray20", title.col = "black", box.lwd = 0,
+       cex = 2, col=c("#E6B246", "#A3D642"))
+legend(x = 1.3,y = 0.1, legend = c("Antagonistic", "Mutualistic"),
+       fill = c("#D05B9B", "#5770AE"), 
+       title="Interaction types (layers)",
+       text.col = "gray20", title.col = "black", box.lwd = 0, cex = 2)
+title(main = "Plant-frugivore multilayer network", cex.main=2)
+par(mfrow=c(1,1))
+
+dev.off()
+
+
+#### Suggested readings ####
+
+
+# Boccaletti S, Bianconi G, Criado R, et al (2014) The structure and dynamics of multilayer networks. Phys Rep 544:1–122. doi: 10.1016/j.physrep.2014.07.001
+
+# Costa F V., Mello MAR, Bronstein JL, et al (2016) Few Ant Species Play a Central Role Linking Different Plant Resources in a Network in Rupestrian Grasslands. PLoS One 11:e0167161. doi: 10.1371/journal.pone.0167161
+
+# Cozzo E, Arruda GF, Rodrigues FA, Moreno Y (2016) Multilayer networks: metrics and spectral properties. In: Garas A (ed) Interconnected networks. Springer International Publishing, Cham, pp 17–35
+
+# Genrich CM, Mello MAR, Silveira FAO, et al (2017) Duality of interaction outcomes in a plant-frugivore multilayer network. Oikos 126:361–368. doi: 10.1111/oik.03825
+
+# Kivela M, Arenas A, Barthelemy M, et al (2014) Multilayer networks. J Complex Networks 2:203–271. doi: 10.1093/comnet/cnu016
+
+# Kefi S, Miele V, Wieters EA, et al (2016) How Structured Is the Entangled Bank? The Surprisingly Simple Organization of Multiplex Ecological Networks Leads to Increased Persistence and Resilience. PLOS Biol 14:e1002527. doi: 10.1371/journal.pbio.1002527
+
+# Pilosof S, Porter MA, Pascual M, Kefi S (2017) The multilayer nature of ecological networks. Nat Ecol Evol 1:101. doi: 10.1038/s41559-017-0101
+
+# Pocock MJO, Evans DM, Fontaine C, et al (2016) The Visualisation of Ecological Networks, and Their Use as a Tool for Engagement, Advocacy and Management. In: Woodward G, Bohan DA (eds) Advances in Ecological Research, 1st edn. Academic Press, Cambridge, pp 41–85
+
+
+
+
+
+
+
+head(yyy, n=40)
+head(q, n=40)
+
+q[1:40,1]
+y[1:16,1]
+z[1:27,1]
+
+head(yyy, n=100)
+
+sum(yyy[,2])
+
+nrow(yyy)
+
+
+dados1<- ifelse(q==0,0,1)
+sum(dados1)
+
+
+sum(q)
+
+
+
+40*212 +40
+
+40*213
+
+ncol(q)
+nrow(q)
+
+print(q[1, 2])
+
+nrow(yyy) + (ncol()-1
+             
+             q[1, 2]
+             
+             head(yyy, n=1000)
+             
+             
+             
+             
+             head(yyy, n=1000)
+             
+             
+             
+             sum(yyy[,2])
+             
+             nrow(q)
+             ncol(q)
+             40*213
+             
+             yyy[8520,1]
+             
+             colnames(q)
+             
+             yyy
+             ncol(q)
+             
+             sum(yyy[,2])
+             
+             dados1<- ifelse(q==0,0,1)
+             sum(dados1)
+             
+             nrow(yyy)
+             sum(yyy[,2])
+             sum(dados1)
+             head(yyy, n=11376)
+             head(yyy, n=10)
+             
+             
+             
+             
+             
+             for (i in 1:nrow(q)) {
+               if (q[i,1]>0) {
+                 yyy[i,2]=1
+               }   
+             }
+             
+             for (i in 1:nrow(q)) {
+               if (q[i,1]>0) {
+                 yyy[i,2]=1
+               }   
+             }
+             
+             
+             
+             
+             for (i in 1:nrow(yyy)) {
+               for (j in 1:nrow(q)) {
+                 for (b in 1:ncol(q)){
+                   if (q[,]>0) {
+                     yyy[i,2]=1
+                   }   
+                 }
+               }
+             }
+             head(yyy)
+             yyy
+             
+             for (i in 1:nrow(yyy)) {
+               for (j in 1:nrow(q)) {
+                 for (b in 1:ncol(q)){
+                   if (q[j,1]>0) {
+                     yyy[i,2]=1
+                   }   
+                 }
+                 
+                 
+                 head(yyy, n=41)  
+                 
+                 
+                 
+                 
+                 q[c(1:40), 1]
+                 
+                 
+               }
+             }
+             
+             
+             for (i in 1:nrow(tttttt)) {
+               for (j in 1: ncol(tttttt)) {
+                 for (p in 1: nrow(yyy)) {
+                   if (q[i,1]>0) {
+                     yyy[p,2]==1
+                   }   
+                 }
+               }
+             }
+             
+             randommat[i,j]<-sample(0:1, 1, replace=T, prob=c(
+               1-(sum(dados_neo[i,])/ncol(dados_neo) + sum(dados_neo[,j])/nrow(dados_neo))/2,
+               (sum(dados_neo[i,])/ncol(dados_neo) + sum(dados_neo[,j])/nrow(dados_neo))/2))
+             
+             
+             
+             }
+if q
+
+for (i in 2:nrow(yyy)) {
+  for (j in 2:ncol(yyy)) {
+    randommat[i,j]<-sample(0:1, 1, replace=T, prob=c(
+      1-(sum(dados_neo[i,])/ncol(dados_neo) + sum(dados_neo[,j])/nrow(dados_neo))/2,
+      (sum(dados_neo[i,])/ncol(dados_neo) + sum(dados_neo[,j])/nrow(dados_neo))/2))
+  }
+}
+
+
+
+#Check for duplicated rownames
+x<-yyy[,1]
+table(duplicated(yyy))
+
+
+
+yyy1<-yyy[!duplicated(yyy), ]
+nrow(yyy1)
+head(yyy1)
+
+nrow(yyy[!duplicated(yyy), ])
+nrow(yyy)
+rownames()
+
+yyy[,1]
+
+head(yyy)
+
+yyy[!duplicated(yyy[,1])]
+
+x<-yyy[!duplicated(yyy[1,])]
+str(x)
+
+
+x <- c(9:20, 1:5, 3:7, 0:8)
+
+## extract unique elements
+(xu <- x[!duplicated(x)])
+
+## similar, same elements but different order:
+(xu2 <- x[!duplicated(x, fromLast = TRUE)])
+
+
+## xu == unique(x) but unique(x) is more efficient
+stopifnot(identical(xu,  unique(x)),
+          identical(xu2, unique(x, fromLast = TRUE)))
+
+duplicated(xxx[,1])
+
+duplicated(iris3, MARGIN = c(1, 3))
+anyDuplicated(iris) ## 143
+
+anyDuplicated(x)
+anyDuplicated(x, fromLast = TRUE)
+
+
+duplicated(yyy[,1])
+
+yyy[duplicated(yyy$rr),]
+
+yyy[yyy$rr %in% n_occur$Var1[n_occur$Freq > 1],]
+
+
+#Fills an empty matrix with values from another matrix 
+for (i in 2:nrow(yyy)) {
+  for (j in 2:ncol(yyy) {
+    yyy[i,j]<-
+      
+  }
+}
+
+
+2:ncol(yyy)
+
+
+as.data.frame(coef(lmm))
+as.data.frame(ranef(lmm))
+
+
+rrr %>% filter(ID == "Plant")
+
+rrr
+
+rrr
+
+
+rrr %>% filter(ID== "Plant")
+head(rrr)
+
+
+my_data2 <- rrr %>% select(ID)
+my_data2
+
+rrr
+
+
+head(rrr)
+
+head(rrr)
+my_data %>% filter(Sepal.Length > 6.7, Species == "versicolor")
+
+ed_exp3 <- rrr[which(rrr$d>0),names(rrr) %in% c("Plant")]
+
+
+ed_exp3 <- education[which(education$Region == 2),names(education) %in% c("State","Minor.Population","Education.Expenditures")]
+
+ans<-rrr[which(rrr[,2]>0 & rrr[,5]==Diptera_unsp)]
+
+head(rrr)
+
+
+df[!(df$gender == "woman" & df$age > 40 & df$bp = "high"), ]
+
+rrr[,5]
+
+
+my_data %>% filter(Sepal.Length > 6.7, Sepal.Width <= 3)
+
+rrr[,2]
+
+head(rrr)
+ncol(rrr)
+
+# NOT RUN {
+require(lattice)
+fm1 <- lmer(Reaction ~ Days + (Days|Subject), sleepstudy)
+fm2 <- lmer(Reaction ~ Days + (1|Subject) + (0+Days|Subject), sleepstudy)
+fm3 <- lmer(diameter ~ (1|plate) + (1|sample), Penicillin)
+ranef(fm1)
+str(rr1 <- ranef(fm1, condVar = TRUE))
+dotplot(rr1)  ## default
+## specify free scales in order to make Day effects more visible
+dotplot(rr1,scales = list(x = list(relation = 'free')))[["Subject"]]
+##-- condVar=TRUE is not yet implemented for multiple terms --> Warning:
+str(ranef(fm2, condVar = TRUE))
+op <- options(digits = 4)
+ranef(fm3, drop = TRUE)
+options(op)
+## as.data.frame() provides RE's and conditional standard deviations:
+str(dd <- as.data.frame(rr1))
+if (require(ggplot2)) {
+  ggplot(dd, aes(y=grp,x=condval)) +
+    geom_point() + facet_wrap(~term,scales="free_x") +
+    geom_errorbarh(aes(xmin=condval -2*condsd,
+                       xmax=condval +2*condsd), height=0)
+}
+# }
+
+
+
+####
+library(lme4)
+attach(sleepstudy)  
+fml <- lmer(Reaction ~ Days + (Days|Subject), sleepstudy)
+beta <- coef(fml)$Subject
+colnames(beta) <- c("Intercept", "Slope")
+beta
+
+head(sleepstudy)
+
+summary(beta)
+summary(fml)
+
+
+
+str(coef(lmm))
+
+
+plot(ranef(lmm))
+plot(lmm) # it is expected to be scattered with no obvious pattern at all
+
+bothlmm<-lmer(d~ elevation + season + (1 | species), data=rrr, REML=FALSE)  
+noseasonlmm <- lmer(d ~ elevation + (1 | species), data = rrr, REML = FALSE)
+noelevationlmm <- lmer(d ~ season + (1 | species), data = rrr, REML = FALSE)
+nofixedlmm <- lmer(d ~ 1 + (1 | species), data = rrr, REML = FALSE)
+anova(noseasonlmm, noelevationlmm, nofixedlmm, bothlmm)
+
+
+#Randomization using the coefficients of the GLMM
+CLDRYFINAL24.10.2018<-read.table("CLDRYFINAL24.10.2018.txt", h=T)
+CLWETFINAL24.10.2018<-read.table("CLWETFINAL24.10.2018.txt", h=T)
+MSDRYFINAL24.10.2018<-read.table("MSDRYFINAL24.10.2018.txt", h=T)
+MSWETFINAL24.10.2018<-read.table("MSWETFINAL24.10.2018.txt", h=T)
+
+
+dim(CLDRYFINAL24.10.2018)
+dim(CLWETFINAL24.10.2018)
+dim(MSDRYFINAL24.10.2018)
+dim(MSWETFINAL24.10.2018)
+
+
+apply(MSWETFINAL24.10.2018, 1, function(x) which(x == min(x, na.rm = TRUE)))
+
+str(MSDRYFINAL24.10.2018)
+
+#Checking if the conversion of the matrix and rounding was made right by counting the number of numbers higher than zero 
+length(which(d>0))
+length(which(q>0))
+
+length(which(t>0))
+length(which(i>0))
+
+length(which(x>0))
+length(which(y>0))
+
+length(which(w>0))
+length(which(z>0))
+
+
+
+r<-dfun(MSDRYFINAL24.10.2018)[1]
+as.data.frame(r)
+r
+
+d
+q
+
+######## Randomization of the networks to output the values of the coefficients of the glmm
+#Multplying the data by 10000 and rounding the data
+CLDRYFINAL24.10.2018<-read.table("CLDRYFINAL24.10.2018.txt", h=T)
+attr.CLDRYFINAL24.10.2018<-read.table("attr.CLDRYFINAL24.10.2018.txt", h=T)
+CLWETFINAL24.10.2018<-read.table("CLWETFINAL24.10.2018.txt", h=T)
+attr.CLWETFINAL24.10.2018<-read.table("attr.CLWETFINAL24.10.2018.txt", h=T)
+MSDRYFINAL24.10.2018<-read.table("MSDRYFINAL24.10.2018.txt", h=T)
+attr.MSDRYFINAL24.10.2018<-read.table("attr.MSDRYFINAL24.10.2018.txt", h=T)
+MSWETFINAL24.10.2018<-read.table("MSWETFINAL24.10.2018.txt", h=T)
+attr.MSWETFINAL24.10.2018<-read.table("attr.MSWETFINAL24.10.2018.txt", h=T)
+
+dd<-CLDRYFINAL24.10.2018*10000000
+q<-apply(dd, 2, round)
+
+t<-CLWETFINAL24.10.2018*10000000
+i<-apply(t, 2, round)
+sss<-i
+
+x<-MSDRYFINAL24.10.2018*10000000
+y<-apply(x, 2, round)
+head(y)
+
+w<-MSWETFINAL24.10.2018*10000000
+z<-apply(w, 2, round)
+head(z)
+
+*&@(*&(@))
+
+#Loop to calculate the coefficient values of the glmm
+x <- vector()
+for (i in 1:2){
+  a<-nullmodel(q, method=3, N=1)
+  b<-nullmodel(sss, method=3, N=1)
+  c<-nullmodel(y, method=3, N=1)
+  tt<-nullmodel(z, method=3, N=1)
+  aa<-as.data.frame(a)
+  bb<-as.data.frame(b)
+  cc<-as.data.frame(c)
+  ee<-as.data.frame(tt)
+  rownames(aa)<-rownames(q)
+  colnames(aa)<-colnames(q)
+  rownames(bb)<-rownames(sss)
+  colnames(bb)<-colnames(sss)
+  rownames(cc)<-rownames(y)
+  colnames(cc)<-colnames(y)
+  rownames(ee)<-rownames(z)
+  colnames(ee)<-colnames(z)
+  aaa<-as.matrix(aa)
+  bbb<-as.matrix(bb)
+  ccc<-as.matrix(cc)
+  eee<-as.matrix(ee)
+  e<-dfun(aaa) 
+  u<-dfun(t(aaa))
+  m<-dfun(bbb) 
+  n<-dfun(t(bbb)) 
+  v<-dfun(ccc) 
+  b<-dfun(t(ccc)) 
+  j<-dfun(eee) 
+  g<-dfun(t(eee))
+  e1<-as.data.frame(e)
+  u1<-as.data.frame(u)
+  m1<-as.data.frame(m)
+  n1<-as.data.frame(n)
+  v1<-as.data.frame(v)
+  b1<-as.data.frame(b)
+  j1<-as.data.frame(j)
+  g1<-as.data.frame(g)
+  e1$dprime <- NULL
+  e1$dmin <- NULL
+  e1$dmax <- NULL
+  u1$dprime <- NULL
+  u1$dmin <- NULL
+  u1$dmax <- NULL
+  m1$dprime <- NULL
+  m1$dmin <- NULL
+  m1$dmax <- NULL
+  n1$dprime <- NULL
+  n1$dmin <- NULL
+  n1$dmax <- NULL
+  v1$dprime <- NULL
+  v1$dmin <- NULL
+  v1$dmax <- NULL
+  b1$dprime <- NULL
+  b1$dmin <- NULL
+  b1$dmax <- NULL
+  j1$dprime <- NULL
+  j1$dmin <- NULL
+  j1$dmax <- NULL
+  g1$dprime <- NULL
+  g1$dmin <- NULL
+  g1$dmax <- NULL
+  qq<-rbind(e1, u1)
+  qq$season<-"dry"
+  qq$elevation<-"cl"
+  ss<-rbind(m1, n1)
+  ss$season<-"wet"
+  ss$elevation<-"cl"
+  yy<-rbind(v1, b1)
+  yy$season<-"dry"
+  yy$elevation<-"ms"
+  hh<-rbind(j1, g1)
+  hh$season<-"wet"
+  hh$elevation<-"ms"
+  qq <- cbind(species = rownames(qq), qq)
+  colnames(attr.CLDRYFINAL24.10.2018) <- c("species", "ID")
+  qq$ID <- attr.CLDRYFINAL24.10.2018$ID[match(qq$species, attr.CLDRYFINAL24.10.2018$species)]
+  ss <- cbind(species = rownames(ss), ss)
+  colnames(attr.CLWETFINAL24.10.2018) <- c("species", "ID")
+  ss$ID <- attr.CLWETFINAL24.10.2018$ID[match(ss$species, attr.CLWETFINAL24.10.2018$species)]
+  yy <- cbind(species = rownames(yy), yy)
+  colnames(attr.MSDRYFINAL24.10.2018) <- c("species", "ID")
+  yy$ID <- attr.MSDRYFINAL24.10.2018$ID[match(yy$species, attr.MSDRYFINAL24.10.2018$species)]
+  hh <- cbind(species = rownames(hh), hh)
+  colnames(attr.MSWETFINAL24.10.2018) <- c("species", "ID")
+  hh$ID <- attr.MSWETFINAL24.10.2018$ID[match(hh$species, attr.MSWETFINAL24.10.2018$species)]
+  www<-rbind(qq, ss, yy, hh)
+  lmmm<-lmer(d ~ season + elevation + (1 | species), data = www,
+             REML = FALSE)
+  x[i]<-coef(lmmm)
+}
+
+
+#How to generate czvalues for the network
+data(memmott1999)
+set.seed(2)
+mod <- computeModules(memmott1999, steps=1E4)
+cz <- czvalues(mod)
+plot(cz[[1]], cz[[2]], pch=16, xlab="c", ylab="z", cex=0.8, xlim=c(0,1), las=1)
+abline(v=0.62) # threshold of Olesen et al. 2007
+abline(h=2.5)   # dito
+text(cz[[1]], cz[[2]], names(cz[[1]]), pos=4, cex=0.7)
+
+
+#Compute values of modularity values of c and z for each node of the network
+CLDRYFINAL24.10.2018<-read.table("CLDRYFINAL24.10.2018.txt", h=T)
+attr.CLDRYFINAL24.10.2018<-read.table("attr.CLDRYFINAL24.10.2018.txt", h=T)
+dd<-CLDRYFINAL24.10.2018*10000000
+q<-apply(dd, 2, round)
+set.seed(2)
+mod <- computeModules(q, steps=1E4)
+czhigh <- czvalues(mod, level="higher") #higher trophic level (animals)
+czlow <- czvalues(mod, level="lower") # for lower trophic level (plants)
+czhigh1<-as.data.frame(czhigh)
+czlow1<-as.data.frame(czlow)
+cztotal<-rbind(czhigh1, czlow1)
+cztotal <- cbind(species = rownames(cztotal), cztotal)
+colnames(attr.CLDRYFINAL24.10.2018) <- c("species", "ID", "Legend")
+cztotalfinal<-na.replace(cztotal, 0)
+cztotalfinal
+cztotalfinal$ID <- attr.CLDRYFINAL24.10.2018$ID[match(cztotalfinal$species, attr.CLDRYFINAL24.10.2018$species)]
+p<-ggplot(cztotalfinal, aes(x=c, y=z, colour=cztotalfinal$ID, label=cztotalfinal$species, shape=attr.CLDRYFINAL24.10.2018$Legend)) + geom_point() 
+p + geom_text(hjust = 0, nudge_x = 0.01, size = 2)  + geom_hline(yintercept=2.5) + 
+  geom_vline(xintercept =0.62)  # threshold of Olesen et al. 2007 (v=0.62)
+
+
+nrow(cztotalfinal)
+ncol(cztotalfinal)
+
+
+guides(colour = guide_legend(override.aes = list(shape = 15)))
+
+
+ggplot(cztotalfinal, aes(x = length, y = height, color=group, shape=quality)) + 
+  geom_point(size=5) + 
+  guides(colour = guide_legend(override.aes = list(shape = 15)))
+
+attr.CLDRYFINAL24.10.2018
+
+p + geom_text(check_overlap = TRUE) 
+p + geom_text(hjust = 0, nudge_x = 0.01)
+p + geom_point() + geom_text(hjust = 0, nudge_x = 0.01)
+
+
+ggplot(td, aes(x=hjust, y=vjust)) + 
+  geom_point() +
+  geom_text(aes(label=text, angle=angle, hjust=hjust, vjust=vjust)) + 
+  facet_grid(~angle) +
+  scale_x_continuous(breaks=c(0, 0.5, 1), expand=c(0, 0.2)) +
+  scale_y_continuous(breaks=c(0, 0.5, 1), expand=c(0, 0.2))
+
+
+
+#Compute values of modularity values of c and z for each node of the network (lower and higher level)
+CLDRYFINAL24.10.2018<-read.table("CLDRYFINAL24.10.2018.txt", h=T)
+attr.CLDRYFINAL24.10.2018<-read.table("attr.CLDRYFINAL24.10.2018.txt", h=T)
+dd<-CLDRYFINAL24.10.2018*10000000
+q<-apply(dd, 2, round)
+set.seed(2)
+mod <- computeModules(q, steps=1E4)
+czhigh <- czvalues(mod, level="higher") #higher trophic level (animals)
+czlow <- czvalues(mod, level="lower") # for lower trophic level (plants)
+cztotal <- merge.list(czhigh, czlow, by=c("c","z"), all=TRUE)
+cztotal <- cbind(species = rownames(cztotal), cztotal)
+head(cztotal)
+colnames(attr.CLDRYFINAL24.10.2018) <- c("species", "ID")
+cztotal$ID <- attr.CLDRYFINAL24.10.2018$ID[match(cztotal$species, attr.CLDRYFINAL24.10.2018$species)]
+head(cztotal)
+p<-ggplot(cztotal, aes(x=c, y=z, color=ID, label=cztotal$species)) + geom_point() 
+p + geom_text(aes(colour = factor(cztotal$ID)))  + geom_hline(yintercept=2.5) + 
+  geom_vline(xintercept =0.62)  # threshold of Olesen et al. 2007 (v=0.62)
+
+
+#How to create the c and z plot with species from both levels of the czvalues of the network
+CLDRYFINAL24.10.2018<-read.table("CLDRYFINAL24.10.2018.txt", h=T)
+set.seed(2)
+mod <- computeModules(CLDRYFINAL24.10.2018, steps=1E4)
+czhigh <- czvalues(mod, level="higher") #higher trophic level (animals)
+czlow <- czvalues(mod, level="lower") # for lower trophic level (plants)
+cztotal <- merge.list(czhigh, czlow, by=c("c","z"), all=TRUE)
+cztotal
+plot(cztotal[[1]], cztotal[[2]], pch=16, xlab="c", ylab="z", cex=0.8, xlim=c(0,1), las=1)
+abline(v=0.62) # threshold of Olesen et al. 2007
+abline(h=2.5)   # dito
+text(cztotal[[1]], cztotal[[2]], names(cztotal[[1]]), pos=4, cex=0.7)
+
+
+
+#Compute values of modularity values of c and z for each node of the network
+CLDRYFINAL24.10.2018<-read.table("CLDRYFINAL24.10.2018.txt", h=T)
+attr.CLDRYFINAL24.10.2018<-read.table("attr.CLDRYFINAL24.10.2018.txt", h=T)
+dd<-CLDRYFINAL24.10.2018*10000000
+q<-apply(dd, 2, round)
+set.seed(2)
+mod <- computeModules(q, steps=1E4)
+czhigh <- czvalues(mod, level="higher") #higher trophic level (animals)
+czlow <- czvalues(mod, level="lower") # for lower trophic level (plants)
+cztotal <- merge.list(czhigh, czlow, by=c("c","z"), all=TRUE)
+colnames(attr.CLDRYFINAL24.10.2018) <- c("species", "ID")
+cztotal$ID <- attr.CLDRYFINAL24.10.2018$ID[match(cztotal$species, attr.CLDRYFINAL24.10.2018$species)]
+head(cztotal)
+p<-ggplot(cztotal, aes(x=c, y=z, color=ID, label=cztotal$species)) + geom_point() 
+p + geom_text(aes(colour = factor(cztotal$ID)))  + geom_hline(yintercept=2.5) + 
+  geom_vline(xintercept =0.62)  # threshold of Olesen et al. 2007 (v=0.62)
+
+str(cztotal)
+
+
+#Compute values of modularity values of c and z for each node of the network
+CLDRYFINAL24.10.2018<-read.table("CLDRYFINAL24.10.2018.txt", h=T)
+attr.CLDRYFINAL24.10.2018<-read.table("attr.CLDRYFINAL24.10.2018.txt", h=T)
+dd<-CLDRYFINAL24.10.2018*10000000
+q<-apply(dd, 2, round)
+set.seed(2)
+mod <- computeModules(q, steps=1E4)
+czhigh <- czvalues(mod, level="higher") #higher trophic level (animals)
+czlow <- czvalues(mod, level="lower") # for lower trophic level (plants)
+czhigh1<-as.data.frame(czhigh)
+czlow1<-as.data.frame(czlow)
+cztotal<-rbind(czhigh1, czlow1)
+cztotal
+head(cztotal)
+
+colnames(attr.CLDRYFINAL24.10.2018) <- c("species", "ID")
+cztotal$ID <- attr.CLDRYFINAL24.10.2018$ID[match(cztotal$species, attr.CLDRYFINAL24.10.2018$species)]
+head(cztotal)
+p<-ggplot(cztotal, aes(x=c, y=z, color=ID, label=cztotal$species)) + geom_point() 
+p + geom_text(aes(colour = factor(cztotal$ID)))  + geom_hline(yintercept=2.5) + 
+  geom_vline(xintercept =0.62)  # threshold of Olesen et al. 2007 (v=0.62)
+
+str(cztotal)
+
+
+
+#Compute values of modularity values of c and z for each node of the network
+CLDRYFINAL24.10.2018<-read.table("CLDRYFINAL24.10.2018.txt", h=T)
+attr.CLDRYFINAL24.10.2018<-read.table("attr.CLDRYFINAL24.10.2018.txt", h=T)
+dd<-CLDRYFINAL24.10.2018*10000000
+q<-apply(dd, 2, round)
+set.seed(2)
+mod <- computeModules(q, steps=1E4)
+cz <- czvalues(mod)
+cz1<-as.data.frame(cz)
+cz1 <- cbind(species = rownames(cz1), cz1)
+head(cz1)
+colnames(attr.CLDRYFINAL24.10.2018) <- c("species", "ID")
+cz1$ID <- attr.CLDRYFINAL24.10.2018$ID[match(cz1$species, attr.CLDRYFINAL24.10.2018$species)]
+head(cz1)
+as.list(cz1)
+
+as.data.frame()
+
+p<-ggplot(cz1, aes(x=c, y=z, color=ID, label=cz1$species)) + geom_point() 
+p + geom_text(aes(colour = factor(cz1$ID)))  + geom_hline(yintercept=2.5) + 
+  geom_vline(xintercept =0.62)  # threshold of Olesen et al. 2007 (v=0.62)
+
+
+
+(z)
+
+str(cztotal)
+
+
+colSums(z)
+
+####Training example about how to work with lists and data frames
+new.df <- data.frame(Gertrude = c(3, 5, 2, 1, NA, 3, 1, 1, 4), Guinevere = c(6, 9, 7, 3, 3, 6, 2, 10, 6))
+new.df
+
+baskets.of.Gabrielle <- c(11, 5, 6, 7, 3, 12, 4, 5, 9)
+
+head(cbind(baskets.df, new.df), 4)
+
+
+
+p<-ggplot(cz1, aes(x=c, y=z, color=ID, label=cz1$species)) + geom_point(aes(shape=cz1$ID))  + geom_text(aes(colour = factor(cz1$ID)))
+
+p
+p + geom_text(aes(colour = factor(cz1$ID)))  + geom_hline(yintercept=2.5) + 
+  geom_vline(xintercept =0.62)  # threshold of Olesen et al. 2007 (v=0.62)
+
+
+p + geom_text(aes(colour = factor(cz1$ID)))  + geom_hline(yintercept=2.5) + 
+  geom_vline(xintercept =0.62)  # threshold of Olesen et al. 2007 (v=0.62)
+
+
+ggplot(cz1, aes(x=c, y=z, label=cz1$species)) + geom_point(aes(shape=cz1$ID))
+
+#Shapes are used
+ggplot(df, aes(x=xval, y=yval, group = cond)) +
+  geom_line(aes(linetype=cond), # Line type depends on cond
+            size = 1.5) +       # Thicker line
+  geom_point(aes(shape=cond),   # Shape depends on cond
+             size = 4) +        # Large points
+  scale_shape_manual(values=c(6,5)) +                  # Change shapes
+  scale_linetype_manual(values=c("dotdash", "dotted"))
+
+
+
+
+p + geom_text(check_overlap = TRUE) 
+p + geom_text(hjust = 0, nudge_x = 0.01)
+p + geom_point() + geom_text(hjust = 0, nudge_x = 0.01)
+
+
+
+
+a<-nullmodel(q, method=3, N=1)
+b<-nullmodel(sss, method=3, N=1)
+c<-nullmodel(y, method=3, N=1)
+tt<-nullmodel(z, method=3, N=1)
+a<-as.data.frame(a)
+b<-as.data.frame(b)
+c<-as.data.frame(c)
+e<-as.data.frame(tt)
+rownames(a)<-rownames(q)
+colnames(a)<-colnames(q)
+rownames(b)<-rownames(sss)
+colnames(b)<-colnames(sss)
+rownames(c)<-rownames(y)
+colnames(c)<-colnames(y)
+rownames(tt)<-rownames(z)
+colnames(tt)<-colnames(z)
+a<-as.matrix(a)
+b<-as.matrix(b)
+c<-as.matrix(c)
+e<-as.matrix(tt)
+e<-dfun(a) 
+u<-dfun(t(a))
+m<-dfun(b) 
+n<-dfun(t(b)) 
+v<-dfun(c) 
+b<-dfun(t(c)) 
+j<-dfun(tt) 
+g<-dfun(t(tt))
+e1<-as.data.frame(e)
+u1<-as.data.frame(u)
+m1<-as.data.frame(m)
+n1<-as.data.frame(n)
+v1<-as.data.frame(v)
+b1<-as.data.frame(b)
+j1<-as.data.frame(j)
+g1<-as.data.frame(g)
+e1$dprime <- NULL
+e1$dmin <- NULL
+e1$dmax <- NULL
+u1$dprime <- NULL
+u1$dmin <- NULL
+u1$dmax <- NULL
+m1$dprime <- NULL
+m1$dmin <- NULL
+m1$dmax <- NULL
+n1$dprime <- NULL
+n1$dmin <- NULL
+n1$dmax <- NULL
+v1$dprime <- NULL
+v1$dmin <- NULL
+v1$dmax <- NULL
+b1$dprime <- NULL
+b1$dmin <- NULL
+b1$dmax <- NULL
+j1$dprime <- NULL
+j1$dmin <- NULL
+j1$dmax <- NULL
+g1$dprime <- NULL
+g1$dmin <- NULL
+g1$dmax <- NULL
+qq<-rbind(e1, u1)
+qq$season<-"dry"
+qq$elevation<-"cl"
+ss<-rbind(m1, n1)
+ss$season<-"wet"
+ss$elevation<-"cl"
+yy<-rbind(v1, b1)
+yy$season<-"dry"
+yy$elevation<-"ms"
+hh<-rbind(j1, g1)
+hh$season<-"wet"
+hh$elevation<-"ms"
+qq <- cbind(species = rownames(qq), qq)
+colnames(attr.CLDRYFINAL24.10.2018) <- c("species", "ID")
+qq$ID <- attr.CLDRYFINAL24.10.2018$ID[match(qq$species, attr.CLDRYFINAL24.10.2018$species)]
+ss <- cbind(species = rownames(ss), ss)
+colnames(attr.CLWETFINAL24.10.2018) <- c("species", "ID")
+ss$ID <- attr.CLWETFINAL24.10.2018$ID[match(ss$species, attr.CLWETFINAL24.10.2018$species)]
+yy <- cbind(species = rownames(yy), yy)
+colnames(attr.MSDRYFINAL24.10.2018) <- c("species", "ID")
+yy$ID <- attr.MSDRYFINAL24.10.2018$ID[match(yy$species, attr.MSDRYFINAL24.10.2018$species)]
+hh <- cbind(species = rownames(hh), hh)
+colnames(attr.MSWETFINAL24.10.2018) <- c("species", "ID")
+hh$ID <- attr.MSWETFINAL24.10.2018$ID[match(hh$species, attr.MSWETFINAL24.10.2018$species)]
+www<-rbind(qq, ss, yy, hh)
+lmmm<-lmer(d ~ season + elevation + (1 | species), data = www,
+           REML = FALSE)
+x[i]<-coef(lmmm)
+}
+
+x
+
+
+a<-nullmodel(q, method=3, N=1)
+b<-nullmodel(sss, method=3, N=1)
+c<-nullmodel(y, method=3, N=1)
+tt<-nullmodel(z, method=3, N=1)
+aa<-as.data.frame(a)
+bb<-as.data.frame(b)
+cc<-as.data.frame(c)
+ee<-as.data.frame(tt)
+rownames(aa)<-rownames(q)
+colnames(aa)<-colnames(q)
+rownames(bb)<-rownames(sss)
+colnames(bb)<-colnames(sss)
+rownames(cc)<-rownames(y)
+colnames(cc)<-colnames(y)
+rownames(ee)<-rownames(z)
+colnames(ee)<-colnames(z)
+aaa<-as.matrix(aa)
+bbb<-as.matrix(bb)
+ccc<-as.matrix(cc)
+eee<-as.matrix(ee)
+e<-dfun(aaa) 
+u<-dfun(t(aaa))
+m<-dfun(bbb) 
+n<-dfun(t(bbb)) 
+v<-dfun(ccc) 
+b<-dfun(t(ccc)) 
+j<-dfun(eee) 
+g<-dfun(t(eee))
+e1<-as.data.frame(e)
+u1<-as.data.frame(u)
+m1<-as.data.frame(m)
+n1<-as.data.frame(n)
+v1<-as.data.frame(v)
+b1<-as.data.frame(b)
+j1<-as.data.frame(j)
+g1<-as.data.frame(g)
+e1$dprime <- NULL
+e1$dmin <- NULL
+e1$dmax <- NULL
+u1$dprime <- NULL
+u1$dmin <- NULL
+u1$dmax <- NULL
+m1$dprime <- NULL
+m1$dmin <- NULL
+m1$dmax <- NULL
+n1$dprime <- NULL
+n1$dmin <- NULL
+n1$dmax <- NULL
+v1$dprime <- NULL
+v1$dmin <- NULL
+v1$dmax <- NULL
+b1$dprime <- NULL
+b1$dmin <- NULL
+b1$dmax <- NULL
+j1$dprime <- NULL
+j1$dmin <- NULL
+j1$dmax <- NULL
+g1$dprime <- NULL
+g1$dmin <- NULL
+g1$dmax <- NULL
+qq<-rbind(e1, u1)
+qq$season<-"dry"
+qq$elevation<-"cl"
+ss<-rbind(m1, n1)
+ss$season<-"wet"
+ss$elevation<-"cl"
+yy<-rbind(v1, b1)
+yy$season<-"dry"
+yy$elevation<-"ms"
+hh<-rbind(j1, g1)
+hh$season<-"wet"
+hh$elevation<-"ms"
+qq <- cbind(species = rownames(qq), qq)
+colnames(attr.CLDRYFINAL24.10.2018) <- c("species", "ID")
+qq$ID <- attr.CLDRYFINAL24.10.2018$ID[match(qq$species, attr.CLDRYFINAL24.10.2018$species)]
+ss <- cbind(species = rownames(ss), ss)
+colnames(attr.CLWETFINAL24.10.2018) <- c("species", "ID")
+ss$ID <- attr.CLWETFINAL24.10.2018$ID[match(ss$species, attr.CLWETFINAL24.10.2018$species)]
+yy <- cbind(species = rownames(yy), yy)
+colnames(attr.MSDRYFINAL24.10.2018) <- c("species", "ID")
+yy$ID <- attr.MSDRYFINAL24.10.2018$ID[match(yy$species, attr.MSDRYFINAL24.10.2018$species)]
+hh <- cbind(species = rownames(hh), hh)
+colnames(attr.MSWETFINAL24.10.2018) <- c("species", "ID")
+hh$ID <- attr.MSWETFINAL24.10.2018$ID[match(hh$species, attr.MSWETFINAL24.10.2018$species)]
+www<-rbind(qq, ss, yy, hh)
+lmmm<-lmer(d ~ season + elevation + (1 | species), data = www,
+           REML = FALSE)
+x[i]<-coef(lmmm)
+
+lmmm
+
+
+########### How to generate a random matrix according to the null model 2 from Bascompte et al. (2003)
+
+#Transforms a weighted matrix to a binary matrix
+dados<-read.table("CLDRYFINAL24.10.2018.txt", h=T)
+dados
+dados1<- ifelse(dados==0,0,1)
+dados_neo=as.matrix(dados1)
+dados_neo
+
+#Creates a matrix with the same dimensions of the observed matrix 
+randommat <- matrix(0, nrow = nrow(dados_neo), ncol =ncol(dados_neo))
+colnames(randommat)<-colnames(dados_neo)
+rownames(randommat)<-rownames(dados_neo)
+randommat
+
+#Randomly fills the matrix with the probabilities coming out of the observed binary matrix
+for (i in 1:nrow(dados_neo)) {
+  for (j in 1:ncol(dados_neo)) {
+    randommat[i,j]<-sample(0:1, 1, replace=T, prob=c(
+      1-(sum(dados_neo[i,])/ncol(dados_neo) + sum(dados_neo[,j])/nrow(dados_neo))/2,
+      (sum(dados_neo[i,])/ncol(dados_neo) + sum(dados_neo[,j])/nrow(dados_neo))/2))
+  }
+}
+
+randommat
+networklevel(randommat, index="connectance")
+networklevel(dados_neo, index="connectance")
+
+
+sum(randommat)
+sum(dados_neo)
+
+sum(dados_neo[i,])
+
+dados_neo[1,]
+dados_neo[,1]
+
+sum(dados_neo[,j])
+(sum(dados_neo[i,]))
+@*(&@(*))
+
+dados_neo[1,]
+dados_neo[,1]
+
+(sum(dados_neo[i,])/nrow(dados_neo) + sum(dados_neo[,j])/ncol(dados_neo))/2
+
+sum(randommat)
+
+z <- matrix(NA, ncol=100, nrow=100)
+z
+q <- 1:100
+for(n in 1:nrow(z)){
+  z[n,] = q
+}
+z
+nrow(z)
+
+
+sum(randommat)
+sum(dados_neo)
+ncol(dados_neo)
+nrow(dados_neo)
+
+for (j in 1:nrow(dados_neo)) {j
+}
+j
+ncol(dados_neo)
+
+i
+j
+
+sum(dados_neo[1,])/nrow(dados_neo)
+
+sum(dados_neo[3,])/nrow(dados_neo)
+dados_neo[3,]
+nrow(dados_neo)
+
+
+sum(dados_neo)/ncol(dados_neo)
+ncol(dados_neo)
+
+sum(dados_neo)/nrow(dados_neo)
+nrow(dados_neo)
+
+
+yyy1
+
+
+options(error=recover)
+reach_full_in <- reachability(randommat[i,j], 'in')
+
+sum(dados_neo[1,])
+
+sum(sample(0:1, 100, replace=T,prob=c(0.95, 0.05)))
+
+
+@*@(*@(*@))
+
+ncol(dados_neo)
+nrow(dados_neo)
+40*213
+
+for (i in 1:nrow(dados_neo)) {
+  for (j in 1:ncol(dados_neo)) {
+    randommat[i,j]<-(sum(dados_neo[i,])+sum(dados_neo[,j]))/(ncol(dados_neo)+nrow(dados_neo))
+  }
+}
+randommat[i,j]<-(sum(dados_neo[i,])/ncol(dados_neo) + (sum(dados_neo[,j]))/nrow(dados_neo))/2
+randommat
+
+randommat[i,j]<-sample(0:1, 10000, replace=T,prob=c(0.95,0.05))
+
+randommat[i,j]<-
+  sample(0:1, 10000, replace=T,prob=c(
+    (sum(dados_neo[i,])/ncol(dados_neo) + (sum(dados_neo[,j]))/nrow(dados_neo))/2, 
+    1-(sum(dados_neo[i,])/ncol(dados_neo) + (sum(dados_neo[,j]))/nrow(dados_neo))/2
+  ))
+
+
+
+sum(randommat)
+sum(dados_neo)
+
+*&@(*@&(@*))
+
+randommat[1,]
+
+randommat
+
+
+sum(dados_neo[1,])
+
+rowSums(dados_neo[1,])
+
+
+In our null model 2, the
+probability of each cell being occupied is the average of the
+probabilities of occupancy of its row and column.
+
+Biologically,
+this means that the probability of drawing an interaction is
+proportional to the level of generalization (degree) of both the
+animal and the plant species. Interestingly enough, the results
+here provided are very robust, and there are not strong qualitative
+differences for both null models (only 6 of 52 networks
+                                  changed in significance status from one model to the other).
+Throughout the paper, we will present the results for null model
+2, which yields the most conservative inference about the
+significance of nestedness (16).
+
+
+
+ncol(dados_neo)
+nrow(dados_neo)
+
+(rowSums(x)/nrow(x))/(colSums(x)/ncol(x))
+
+
+# Create a matrix
+mat <- matrix(data = seq(10, 20, by=1), nrow = 6, ncol =2)
+# Create the loop with r and c to iterate over the matrix
+for (r in 1:nrow(mat))   
+  for (c in 1:ncol(mat))  
+    print(paste("Row", r, "and column",c, "have values of", mat[r,c])) 
+
+
+
+lmmm
+
+lmmmhead(www)
+
+
+for (i in 1:10) {
+  if (!i %% 2){
+    next
+  }
+  print(i)
+}
+
+
+coef(lmmm)
+str(coef(lmmm))
+
+
+i
+
+
+w<-nullmodel(z, method=3, N=1)
+w<-as.data.frame(w)
+rownames(w)<-rownames(z)
+colnames(w)<-colnames(z)
+a<-as.matrix(w)
+e<-dfun(w) #values for the lower trophic level of the network
+u<-dfun(t(w))
+j1<-as.data.frame(j)
+a1<-as.data.frame(a)
+
+
+bothlmm<-lmer(d~ elevation + season + (1 | species), data=rrr, REML=FALSE)  
+coef(lmm)
+
+w<-nullmodel(z, method=3, N=1)
+w<-as.data.frame(w)
+rownames(w)<-rownames(z)
+colnames(w)<-colnames(z)
+a<-as.matrix(w)
+
+
+w <- cbind(species = rownames(w), q)
+w
+colnames(w)<-q[,1]
+str(w)
+rownames(w)<-rownames(q)
+
+w
+
+table(rrr)
+
+head(rrr)
+str(rrr)
+
+#####
+#Script for generating the randomized coefficients of the GLMM
+
+#####
+colnames(e1)
+
+install.packages("tibble")
+library(tibble)
+
+add_column(e1[,2], d=u1[,2])
+
+
+#Substitutes the colnames from species to functional groups (under construction)
+#Multplying the data by 10000 and rounding the data
+CLDRYFINAL24.10.2018<-read.table("CLDRYFINAL24.10.2018.txt", h=T)
+attr.CLDRYFINAL24.10.2018<-read.table("attr.CLDRYFINAL24.10.2018.txt", h=T)
+CLWETFINAL24.10.2018<-read.table("CLWETFINAL24.10.2018.txt", h=T)
+attr.CLWETFINAL24.10.2018<-read.table("attr.CLWETFINAL24.10.2018.txt", h=T)
+MSDRYFINAL24.10.2018<-read.table("MSDRYFINAL24.10.2018.txt", h=T)
+attr.MSDRYFINAL24.10.2018<-read.table("attr.MSDRYFINAL24.10.2018.txt", h=T)
+MSWETFINAL24.10.2018<-read.table("MSWETFINAL24.10.2018.txt", h=T)
+attr.MSWETFINAL24.10.2018<-read.table("attr.MSWETFINAL24.10.2018.txt", h=T)
+
+
+dd<-CLDRYFINAL24.10.2018*10000000
+q<-apply(dd, 2, round)
+
+t<-CLWETFINAL24.10.2018*10000000
+i<-apply(t, 2, round)
+sss<-i
+
+x<-MSDRYFINAL24.10.2018*10000000
+y<-apply(x, 2, round)
+head(y)
+
+w<-MSWETFINAL24.10.2018*10000000
+z<-apply(w, 2, round)
+head(z)
+
+####Merges all functional groups into one data frame to make a histogram of frequency afterwards
+#Changes the colnames of the matrix from species to functional groups
+which(qq$ID !="Plant")
+colnames(q)<-qq[c(41:253),5]
+colnames(q)
+qm<-t(rowsum(t(q), group = colnames(q), na.rm = T))
+qm1<-as.data.frame(colSums(qm))
+qm1
+
+which(ss$ID !="Plant")
+colnames(i)<-ss[c(34:131),5]
+colnames(i)
+qm2<-t(rowsum(t(i), group = colnames(i), na.rm = T))
+qm3<-as.data.frame(colSums(qm2))
+qm3
+
+which(yy$ID !="Plant")
+colnames(y)<-yy[c(22:94),5]
+colnames(y)
+qm4<-t(rowsum(t(y), group = colnames(y), na.rm = T))
+qm5<-as.data.frame(colSums(qm4))
+qm5
+
+which(hh$ID !="Plant")
+colnames(z)<-hh[c(28:76),5]
+colnames(z)
+qm6<-t(rowsum(t(z), group = colnames(z), na.rm = T))
+qm7<-as.data.frame(colSums(qm6))
+qm7
+
+#Merges information from all data frames into just one
+tmp12 <- merge(qm1,qm3 , by=0, all=T)
+rownames(tmp12) <- tmp12$Row.names 
+tmp12$Row.names <- NULL
+tmp12
+
+tmp123 <- merge(tmp12, qm5, by=0, all=T)
+rownames(tmp123) <- tmp123$Row.names 
+tmp123$Row.names <- NULL
+tmp123
+
+tmp1234 <- merge(tmp123, qm7, by=0, all=T)
+rownames(tmp1234) <- tmp1234$Row.names
+tmp1234$Row.names <- NULL
+tmp1234
+
+#Transforms the row names into a column
+setDT(tmp1234, keep.rownames = TRUE)[]
+colnames(tmp1234)<-c("Orders", "CLDRY", "CLWET", "MSDRY", "MSWET")
+tmp1234
+tmp1234[is.na(tmp1234)] <- 0
+tmp1234
+
+yy3<-t(tmp1234)
+
+#Transforms into a matrix and changes the NAs to 0s
+yy4<-as.matrix(tmp1234)
+colnames(yy4)<-c("CLDRY", "CLWET", "MSDRY", "MSWET")
+yy4[is.na(yy4)] <- 0
+
+#Converts numbers from character to nnumeric across the whole dataset
+cols = c(1, 2, 3, 4)
+yy4[,cols] = apply(yy4[,cols], 2, function(x) as.numeric(as.character(x)))
+yy4
+
+#Makes a bar plot with the frequencies of each group within each elevation and season
+barplot(yy4, xlab="Sampling sites", ylab="Frequency of visitation", col = c("red","green", "yellow", 
+                                                                            "blue", "black", "grey",
+                                                                            "white", "orange", "green",
+                                                                            "purple", "pink", "brown"), beside=TRUE)
+legend("topright",
+       c("Chiroptera","Coleoptera", "Diptera_h_fly_", "Diptera_unsp_", "Hymenoptera_Carpenters_",
+         "Hymenoptera_bee_", "Hymenoptera_eusocial_bee_", "Lepidoptera_butterfly_", "Lepidoptera_moth_",
+         "Lepidoptera_sphingid_", "Passeriformes", "Small_mammals"),
+       fill = c("red","green", "yellow", 
+                "blue", "black", "grey",
+                "white", "orange", "green",
+                "purple", "pink", "brown"),  pt.cex=0.7,cex=0.7
+)
+
+
+
+
+####Builds a network with all nodes identifying which nodes are common to different elevations and seasons
+
+#Identifies which species are present in more than one season and elevation
+attr.total<-read.table("attr.total.txt", h=T)
+xxx<-table(attr.total[,1])>1
+xxx
+which(xxx==TRUE)
+
+
+
+
+
+
+
+list(ddd)
+
+#Makes a bar plot with the abundances of each group within each elevation and season
+visitors<-read.table("visitors.txt", h=T)
+visitors1<-as.matrix(visitors)
+barplot(visitors1, xlab="Sampling sites", ylab="Abundance", col = c("red","green", "yellow", 
+                                                                            "blue", "black", "grey",
+                                                                            "white", "orange", "green",
+                                                                            "purple", "pink", "brown"), beside=TRUE)
+legend("top",
+       c("Chiroptera","Coleoptera", "Diptera_h_fly_", "Diptera_unsp_", "Hymenoptera_Carpenters_",
+         "Hymenoptera_bee_", "Hymenoptera_eusocial_bee_", "Lepidoptera_butterfly_", "Lepidoptera_moth_",
+         "Lepidoptera_sphingid_", "Passeriformes", "Small_mammals"),
+       fill = c("red","green", "yellow", 
+                "blue", "black", "grey",
+                "white", "orange", "green",
+                "purple", "pink", "brown"),  pt.cex=0.7,cex=0.7
+)
+
+
+
+
+legend(-2.4, 0.8, legend=c("Plant", "Coleoptera", "Diptera Hoverfly", "Diptera Unspecified", "Hymenoptera (bee)",
+                           "Hymenoptera (carpenters)", "Lepidoptera (butterfly)", "Lepidoptera (moth)",
+                           "Lepidoptera (sphingid)", "Passeriformes", "Small mammals"), 
+       col=c("green", "aliceblue", "blue", "cornsilk", "brown1", "darkgreen", "darkorange", "darkorchid",
+             "deeppink", "grey61", "olivedrab1"), pch=c(16, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15),
+       pt.cex=1.0,cex=1.0, bty="n", title="Pollination network - Crater Lake (Dry season)")
+
+
+rownames(tmp1234)
+
+
+yy4
+
+nrow(yy4)
+
+barplot(titanic.data,
+        main = "Survival of Each Class",
+        xlab = "Class",
+        col = c("red","green")
+)
+
+yy4
+
+install.packages("data.table")
+library(data.table)
+
+barplot(tmp1234,
+        main = "Survival of Each Class",
+        xlab = "Class",
+        col = c("red","green", beside=TRUE)
+)
+
+
+https://www.datamentor.io/r-programming/bar-plot/
+
+counts <- table(mtcars$vs, mtcars$gear)
+barplot(yy4, main="Car Distribution by Gears and VS",
+        xlab="Number of Gears", col=c("darkblue","red"),
+        legend = rownames(yy4))
+
+fix(tmp1234)
+
+table(tmp1234)
+
+multhist(tmp1234)
+
+install.packages("plotrix")
+library(plotrix)
+
+
+
+qq <- cbind(species = rownames(qq), qq)
+colnames(attr.CLDRYFINAL24.10.2018) <- c("species", "ID")
+qq$ID <- attr.CLDRYFINAL24.10.2018$ID[match(qq$species, attr.CLDRYFINAL24.10.2018$species)]
+head(qq)
+qq
+
+ss <- cbind(species = rownames(ss), ss)
+colnames(attr.CLWETFINAL24.10.2018) <- c("species", "ID")
+ss$ID <- attr.CLWETFINAL24.10.2018$ID[match(ss$species, attr.CLWETFINAL24.10.2018$species)]
+head(ss)
+ss
+
+yy <- cbind(species = rownames(yy), yy)
+colnames(attr.MSDRYFINAL24.10.2018) <- c("species", "ID")
+yy$ID <- attr.MSDRYFINAL24.10.2018$ID[match(yy$species, attr.MSDRYFINAL24.10.2018$species)]
+head(yy)
+yy
+
+hh <- cbind(species = rownames(hh), hh)
+colnames(attr.MSWETFINAL24.10.2018) <- c("species", "ID")
+hh$ID <- attr.MSWETFINAL24.10.2018$ID[match(hh$species, attr.MSWETFINAL24.10.2018$species)]
+head(hh)
+hh
+
+
+
+
+
+
+hist(qm1[,1])
+
+qm1[,1]
+qm1
+
+
+
+
+
+
+
+
+t<-merge(e1, u1, by=c("d"), all=TRUE)
+t
+nrow(t)
+
+result <- cbind(e1[,2], u1[,2])
+result
+
+e1
+u1
+
+e$e1<-e1[,2]
+rownames(e)<-rownames(e1)
+
+u1
+
+colnames(u1)
+u1$d<-e1
+
+w<-e1[,2]
+rownames(w)<-rownames(e1)
+w<-rownames(e1)
+w
+
+new.df <- data.frame(cbind(e1[,2], u1[,2] ))
+
+u1[,2]
+
+t<-cbind(u1[,2], e1[,2])
+t<-rownames(e1)
+
+u1[,2]
+
+### combine the year columns into a single column with separate rows for each year; assign to new vector
+pop_long <- gather(e1[,2],u1[,2])
+
+### download the new csv to your working directory
+write.csv(pop_long,"population_data.csv")
+
+e[,2] <- u1[,2]
+
+total <- cbind(u1[,2], e1[,2])
+
+e1
+u1
+
+str(e1)
+str(u1)
+
+result <- rbind(e1[,2], u1[,2])
+result
+
+e<-as.data.frame(e)
+e
+u<-as.data.frame(u)
+e<-rownames(e)
+
+result <- rbind(e[,2], u[,2])
+
+l<-as.data.frame(e)
+result <- rbind(u, ["higher level"])
+l
+l[,2]
+
+result
+
+u<-as.data.frame(e["lower level"])
+u
+o<-as.data.frame(e["higher level"])
+u
+
+#
+str(d)
+as.data.frame(d)
+
+str(specieslevel(q, index="d"))
+
+as.data.frame(specieslevel(q, index="d"))
+as.data.frame(dfun(q))
+
+#Merges data frames including the values of closeness, betweenness and the species ID for each elevation during each season
+ww1$betweenness<-ww2$betweenness[match(ww1$species, ww2$species)]
+colnames(attr.CLDRYFINAL24.10.2018) <- c("species", "ID")
+ww1$ID <- attr.CLDRYFINAL24.10.2018$ID[match(ww1$species, attr.CLDRYFINAL24.10.2018$species)]
+head(ww1)
+ww1
+
+pp1$betweenness<-pp2$betweenness[match(pp1$species, pp2$species)]
+colnames(attr.CLWETFINAL24.10.2018) <- c("species", "ID")
+pp1$ID <- attr.CLWETFINAL24.10.2018$ID[match(pp1$species, attr.CLWETFINAL24.10.2018$species)]
+head(pp1)
+pp1
+
+hh1$betweenness<-hh2$betweenness[match(hh1$species, hh2$species)]
+colnames(attr.MSDRYFINAL24.10.2018) <- c("species", "ID")
+hh1$ID <- attr.MSDRYFINAL24.10.2018$ID[match(hh1$species, attr.MSDRYFINAL24.10.2018$species)]
+head(hh1)
+hh1
+
+kk1$betweenness<-kk2$betweenness[match(kk1$species, kk2$species)]
+colnames(attr.MSWETFINAL24.10.2018) <- c("species", "ID")
+kk1$ID <- attr.MSWETFINAL24.10.2018$ID[match(kk1$species, attr.MSWETFINAL24.10.2018$species)]
+head(kk1)
+kk1
+
+#Adds two new columns with the season and the elevation to the data frame
+ww1$elevation<-do.call("rbind", replicate(nrow(ww1), "cl", simplify = FALSE))
+ww1$season<-do.call("rbind", replicate(nrow(ww1), "dry", simplify = FALSE))
+head(ww1)
+ww1
+
+pp1$elevation<-do.call("rbind", replicate(nrow(pp1), "cl", simplify = FALSE))
+pp1$season<-do.call("rbind", replicate(nrow(pp1), "wet", simplify = FALSE))
+head(pp1)
+pp1
+
+hh1$elevation<-do.call("rbind", replicate(nrow(hh1), "ms", simplify = FALSE))
+hh1$season<-do.call("rbind", replicate(nrow(hh1), "dry", simplify = FALSE))
+head(hh1)
+hh1
+
+kk1$elevation<-do.call("rbind", replicate(nrow(kk1), "ms", simplify = FALSE))
+kk1$season<-do.call("rbind", replicate(nrow(kk1), "wet", simplify = FALSE))
+head(kk1)
+kk1
+
+
+head(kk1)
+
+kk1
+
+
+PQL <- glmmPQL(betweenness.t ~ elevation + season, ~1 | ID, family = gaussian(link = "log"),
+               data = kk1, verbose = FALSE)
+
+
+###Testting to see whicht ype  distribution better fits the distribution of the data
+#Converts the variable by adding 1
+par(mfrow=c(2,2))
+kk1$betweenness.t <- kk1$betweenness + 1
+qqp(kk1$betweenness.t, "norm") #normal 
+qqp(kk1$betweenness.t, "lnorm") #lognormal
+nbinom <- fitdistr(kk1$betweenness.t, "Negative Binomial") #negative binomial
+qqp(kk1$betweenness.t, "nbinom", size = nbinom$estimate[[1]], mu = nbinom$estimate[[2]]) #negative binomial
+poisson <- fitdistr(kk1$betweenness.t, "Poisson") #poisson
+qqp(kk1$betweenness.t, "pois", poisson$estimate) #poisson
+gamma <- fitdistr(kk1$betweenness.t, "gamma") #gamma
+qqp(kk1$betweenness.t, "gamma", shape = gamma$estimate[[1]], rate = gamma$estimate[[2]]) #gamma
+
+
+summary_pca_centralities(tt, scale.unit = TRUE, ncp = 5)
+
+kk1$logbetweenness<-log(kk1$betweenness)
+
+sal<-glmm(logbetweenness~0+ID,random=list(~0+elevation, ~0+season),varcomps.names=c("ms","cl", "dry", "wet"),
+          data=kk1,family.glmm=poisson.glmm,m=m,debug=TRUE,doPQL=FALSE)
+coef(sal)
+
+head(salamander)
+head(kk1)
+
+
+library(glmm)
+data(BoothHobert)
+head(BoothHobert)
+set.seed(1234)
+mod.mcml1<-glmm(y~0+x1,list(y~0+z1),varcomps.names=c("z1"),data=BoothHobert,
+                family.glmm=bernoulli.glmm,m=100,doPQL=TRUE)
+mod.mcml1$beta
+mod.mcml1$nu
+summary(mod.mcml1)
+coef(mod.mcml1)
+
+
+
+#####################
+library(glmm)
+data(salamander)
+names(salamander)
+head(salamander)
+summary(salamander)
+
+
+library(glmm)
+set.seed(1234)
+data(salamander)
+#To get more accurate answers for this model, use m=10^4 or 10^5
+# and doPQL=TRUE.
+m<-10
+sal<-glmm(Mate~0+Cross,random=list(~0+Female,~0+Male),varcomps.names=c("F","M"),
+          data=salamander,family.glmm=bernoulli.glmm,m=m,debug=TRUE,doPQL=FALSE)
+coef(sal)
+
+
+############# Run an NMDS to compare the differences between species and interactions in the networks
+
+############# Remember to include a test about the correlation between the values of betweenness and closeness centrality
+#Run the GLMM and output the coefficients of the analysis
+
+coefs.n <- rep(NA,1000)
+for (i in 1:1000) {
+  
+  # Randomise sex
+  s <- sample(1:N)
+  ids$SEX.temp <- ids$SEX[s]
+  
+  # re-run model
+  coefs.n[i] <- coefficients(lm(DEGREE.r~SEX.temp,data=ids))[2]
+  coefs.n[i] <- coefficients(lm(DEGREE.r~SEX.temp,data=ids))[2]
+} 
+
+
+
+#Creates a data frame with the plants and pollinators in the columns
+y<-as.data.frame(x)
+colnames(y) <- c("Plants", "Pollinators")
+y
+
+#Extracts all values higher than zero of the matrix
+y$weights<-which(as.vector(q)>0)
+y
+
+#Makes the randomization of the pollinators
+s <- sample(1:nrow(y))
+y$Pollinators <- y$Pollinators[s]
+y
+
+head(ll2)
+
+coefs.n <- rep(NA,1000)
+for (i in 1:1000) {
+  
+  # Randomise sex
+  s <- sample(1:253)
+  ll2$species.rand <- ll2$species[s]
+  # re-run model
+  coefs.n[i] <- coefficients(lm(closeness~species.rand,data=ll2))[2]
+}  
+
+#Plots an histogram with the distribution of all the coefficient values from the linear models of the randomization
+hist(coefs.n, breaks=100)
+coef.r <- coefficients(lm(closeness~species,data=ll2))[2]
+abline(v=coef.r,col="red")
+
+mean(coefs.n)
+sd(coefs.n)
+
+# Plot result
+if (i > 1) {
+  a <- hist(coefs.n,xlim=c(-0.4,0.4), ylim=c(0,50), col="black",xlab="Coefficient value",ylab="Frequency",breaks=100,cex.axis=1.3,main=paste(i,"permutations"), tck=0.01)
+} else {
+  plot(NULL, xlim=c(-0.4,0.4), ylim=c(0,50), col="black",xlab="Coefficient value",ylab="Frequency",cex.axis=1.3,main="1 permutation", tck=0.01)
+  segments(coefs.n[i],0,coefs.n[i],1,lwd=2)
+}
+segments(coef.r,0,coef.r,50,col="red")
+box()
+#text(par('usr')[1] + (par('usr')[2]-par('usr')[1])/15,par('usr')[4] - (par('usr')[4]-par('usr')[3])/15, "d)", cex=2) 
+
+
+
+coefs.n <- rep(NA,1000)
+for (i in 1:1000) {
+  
+  # Randomise sex
+  s <- sample(1:N)
+  ids$SEX.temp <- ids$SEX[s]
+  
+  # re-run model
+  coefs.n[i] <- coefficients(lm(DEGREE.r~SEX.temp,data=ids))[2]
+  coefs.n[i] <- coefficients(lm(DEGREE.r~SEX.temp,data=ids))[2]
+}  
+
+DEGREE.r
+coefs.n
+
+
+if (i %in% c(1,10,100,1000)) {
+  
+  # Plot network
+  plot(NULL, xlim=range(coords[,1]), ylim=range(coords[,2]), pch=20,  axes=FALSE, xlab=NA, ylab=NA)
+  edges <- which(network.r > 0, arr.ind=TRUE)
+  segments(coords[edges[,1],1],coords[edges[,1],2],coords[edges[,2],1],coords[edges[,2],2],lwd=1400*network.r[edges]^5, col="#00000055")
+  points(coords, pch=20, col=c("blue","red")[as.numeric(ids$SEX.temp)], cex=ids$DEGREE.r/1.5)
+  
+  # Plot result
+  if (i > 1) {
+    a <- hist(coefs.n,xlim=c(-0.4,0.4), ylim=c(0,50), col="black",xlab="Coefficient value",ylab="Frequency",breaks=100,cex.axis=1.3,main=paste(i,"permutations"), tck=0.01)
+  } else {
+    plot(NULL, xlim=c(-0.4,0.4), ylim=c(0,50), col="black",xlab="Coefficient value",ylab="Frequency",cex.axis=1.3,main="1 permutation", tck=0.01)
+    segments(coefs.n[i],0,coefs.n[i],1,lwd=2)
+  }
+  segments(coef.r,0,coef.r,50,col="red")
+  box()
+  #text(par('usr')[1] + (par('usr')[2]-par('usr')[1])/15,par('usr')[4] - (par('usr')[4]-par('usr')[3])/15, "d)", cex=2) 
+}
+
+}
+
+
+#Plots the randomization as a new graph
+m<-as.matrix(y)
+g=graph.edgelist(m[,1:2]) #We first greate a network from the first two columns, which has the list of vertices
+E(g)$weight=as.numeric(m[,3]) #We then add the edge weights to this network by assigning an edge attribute called 'weight'. 
+plot(g,layout=layout.kamada.kawai,edge.width=E(g)$weight/2000, vertex.size=2, vertex.label=NA)
+
+
+for (i in 1:1000) {
+  s <- sample(1:nrow(y))
+  y$Pollinators <- y$Pollinators[s]
+  y$Plants <- y$Plants[s]
+  
+  nrow(y)
+  
+  ## Node permutations - with plotting
+  coefs.n <- rep(NA,1000)
+  for (i in 1:1000) {
+    
+    # Randomise sex
+    s <- sample(1:nrow(y))
+    y$SEX.temp <- y$Polinators[s]
+    
+    y$SEX.temp
+    
+    # re-run model
+    coefs.n[i] <- coefficients(lm(DEGREE.r~SEX.temp,data=ids))[2]
+    coefs.n[i] <- coefficients(lm(DEGREE.r~SEX.temp,data=ids))[2]
+    coefs.n
+    
+    #####Calculates modularity and makes the randomisation
+    fc <- fastgreedy.community(d1)
+    cw <- cluster_walktrap(d1)
+    membership(fc)
+    membership(cw)
+    modularity(fc)
+    modularity(cw)
+    plot(fc, d1, vertex.size=2, vertex.label=NA)
+    plot(cw, d1, vertex.size=2, vertex.label=NA)
+    plot_dendrogram(fc)
+    plot_dendrogram(cw)
+    
+    d<-closeness(d1)
+    abline(d)
+    betweenness(d1)
+    
+    op<-par(mfrow=c(1,2))
+    ceb <- cluster_edge_betweenness(d1)
+    plot(ceb, d1, main="Edge betweenness")
+    dendPlot(ceb, mode="phylo")
+    length(ceb)
+    sizes(ceb)
+    modularity(ceb)
+    
+    #Comparing communities against null models
+    dieta1<-read.table("CLDRYFINAL24.10.2018.txt", h=T)
+    d1<-graph_from_incidence_matrix(dieta1, weight=TRUE)
+    nv <- vcount(d1)
+    ne <- ecount(d1)
+    degs <- degree(d1)
+    
+    ntrials <- 1000
+    
+    num.comm.rg <- numeric(ntrials)
+    for(i in (1:ntrials)){
+      g.rg<-erdos.renyi.game(nv, ne, type="gnm")
+      c.rg<-fastgreedy.community(g.rg)
+      num.comm.rg[i]<-length(c.rg)}
+    
+    mean(num.comm.rg)
+    sd(num.comm.rg)  
+    
+    
+    rslts<-num.comm.rg
+    indx<-rep(0, ntrials), rep(1, ntrials)
+    counts<-table(indx, rslts)/ntrials
+    barplot(counts, beside=TRUE, col=c("blue", "red"), xlab="Number of Communities", ylab="Relative Frequency",
+            legend=c("Fixed Size", "Fixed Degree Sequence"))
+    
+    fastgreedy.community(d1)
+    counts
+    
+    
+    
+    ## A simple example with a couple of actors
+    ## The typical case is that these tables are read in from files....
+    actors <- data.frame(name=c("Alice", "Bob", "Cecil", "David",
+                                "Esmeralda"),
+                         age=c(48,33,45,34,21),
+                         gender=c("F","M","F","M","F"))
+    relations <- data.frame(from=c("Bob", "Cecil", "Cecil", "David",
+                                   "David", "Esmeralda"),
+                            to=c("Alice", "Bob", "Alice", "Alice", "Bob", "Alice"),
+                            same.dept=c(FALSE,FALSE,TRUE,FALSE,FALSE,TRUE),
+                            friendship=c(4,5,5,2,1,1), advice=c(4,5,5,4,2,3))
+    g <- graph_from_data_frame(relations, directed=TRUE, vertices=actors)
+    print(g, e=TRUE, v=TRUE)
+    ## The opposite operation
+    as_data_frame(g, what="vertices")
+    as_data_frame(g, what="edges")
+    
+    
+    
+    q[(nrow(q), ncol(q)]
+    
+    
+    s <- sample(1:N)
+    ids$SEX.temp <- ids$SEX[s]
+    
+    
+    s <- sample(1:nrow(attr.MSWETFINAL24.10.2018))
+    attr.MSWETFINAL24.10.2018$ID.temp <- attr.MSWETFINAL24.10.2018$ID[s]
+    attr.MSWETFINAL24.10.2018$ID.temp
+    
+    
+    
+    
+    # Set parameters
+    N <- 40
+    n_groups <- 200
+    
+    # Generate nodes
+    ids <- data.frame(ID=1:(N),SEX=sample(c("M","F"),N,replace=TRUE))
+    
+    ids
+    
+    # Generate a distribution of group sizes
+    group_size <- sample(c(1:(N/2)),n_groups,replace=TRUE)
+    
+    # Create blank GBI matrix
+    gbi <- matrix(0,nrow=n_groups,ncol=N)
+    
+    # Allocate individuals to groups, starting with males so that they end up in smaller groups
+    ids$OBS <- rand_vect(N,sum(group_size),pos.only=TRUE)
+    group_size.tmp <- group_size
+    which.males <- which(ids$SEX=="M")
+    for (i in which.males) {
+      
+      g <- sample(1:n_groups,ids$OBS[i],prob=(group_size.tmp>0))
+      group_size.tmp[g] <- group_size.tmp[g]-1
+      gbi[g,i] <- 1
+      
+    }
+    which.females <- which(ids$SEX=="F")
+    for (i in which.females) {
+      if (sum((group_size.tmp>0) < ids$OBS[i])) {
+        g <- sample(1:n_groups,ids$OBS[i],prob=(group_size.tmp>0),replace=TRUE)
+      } else {
+        g <- sample(1:n_groups,ids$OBS[i],prob=(group_size.tmp>0),replace=FALSE)
+      }
+      group_size.tmp[g] <- group_size.tmp[g]-1
+      gbi[g,i] <- 1
+      
+    }
+    
+    # Remove some observations
+    # Generate probability of being observed (males=1,females=0.7)
+    ids$OBS_PROB <- 0.8
+    ids$OBS_PROB[which(ids$SEX=="M")] <- 1
+    
+    # Remove observations from GBI
+    gbi.r <- gbi
+    for (i in 1:N) {
+      gbi.r[which(gbi.r[,i] > 0),i] <- sample(c(0,1),sum(gbi.r[,i]),replace=TRUE,prob=c(1-ids$OBS_PROB[i],ids$OBS_PROB[i]))
+    }
+    
+    # Calculate network
+    network.r <- get_network(gbi.r)
+    
+    str(network.r)
+    network.r
+    
+    # Calculate Degree
+    ids$DEGREE.r <- rowSums(network.r)
+    
+    ids$DEGREE.r
+    
+    # Calculate effects
+    coef.r <- coefficients(lm(DEGREE.r~SEX,data=ids))[2]
+    
+    # Plot
+    layout(matrix(c(1,1,1,1,2,3,4,5,6,7,8,9),nrow=2,ncol=6))
+    par(cex.lab=1.5,mar=c(4,4,1,1), tck=0.01, mgp=c(2.5,0.5,0),las=1)
+    
+    # Plot original network
+    coords <- layout.fruchterman.reingold(graph.adjacency(network.r,mode="undirected",diag=FALSE))
+    plot(NULL, xlim=range(coords[,1]), ylim=range(coords[,2]), pch=20,  axes=FALSE, xlab=NA, ylab=NA)
+    edges <- which(network.r > 0, arr.ind=TRUE)
+    segments(coords[edges[,1],1],coords[edges[,1],2],coords[edges[,2],1],coords[edges[,2],2],lwd=1400*network.r[edges]^5, col="#00000055")
+    points(coords, pch=20, col=c("blue","red")[as.numeric(ids$SEX)], cex=ids$DEGREE.r/1.5)
+    
+    ## Node permutations - with plotting
+    coefs.n <- rep(NA,1000)
+    for (i in 1:1000) {
+      
+      # Randomise sex
+      s <- sample(1:N)
+      ids$SEX.temp <- ids$SEX[s]
+      
+      # re-run model
+      coefs.n[i] <- coefficients(lm(DEGREE.r~SEX.temp,data=ids))[2]
+      coefs.n[i] <- coefficients(lm(DEGREE.r~SEX.temp,data=ids))[2]
+      coefs.n
+      
+      if (i %in% c(1,10,100,1000)) {
+        
+        # Plot network
+        plot(NULL, xlim=range(coords[,1]), ylim=range(coords[,2]), pch=20,  axes=FALSE, xlab=NA, ylab=NA)
+        edges <- which(network.r > 0, arr.ind=TRUE)
+        segments(coords[edges[,1],1],coords[edges[,1],2],coords[edges[,2],1],coords[edges[,2],2],lwd=1400*network.r[edges]^5, col="#00000055")
+        points(coords, pch=20, col=c("blue","red")[as.numeric(ids$SEX.temp)], cex=ids$DEGREE.r/1.5)
+        
+        # Plot result
+        if (i > 1) {
+          a <- hist(coefs.n,xlim=c(-0.4,0.4), ylim=c(0,50), col="black",xlab="Coefficient value",ylab="Frequency",breaks=100,cex.axis=1.3,main=paste(i,"permutations"), tck=0.01)
+        } else {
+          plot(NULL, xlim=c(-0.4,0.4), ylim=c(0,50), col="black",xlab="Coefficient value",ylab="Frequency",cex.axis=1.3,main="1 permutation", tck=0.01)
+          segments(coefs.n[i],0,coefs.n[i],1,lwd=2)
+        }
+        segments(coef.r,0,coef.r,50,col="red")
+        box()
+        #text(par('usr')[1] + (par('usr')[2]-par('usr')[1])/15,par('usr')[4] - (par('usr')[4]-par('usr')[3])/15, "d)", cex=2) 
+      }
+      
+    }
+    
+    
+    
+    s <- sample(1:N)
+    ids$SEX.temp <- ids$SEX[s]
+    
+    ids$SEX[s]
+    
+    ids$SEX.temp
+    
+    
+    
+    
+    
+    
+    #########################################
+    #Plots the networks with the size of the nodes represented by values of centrality
+    # Compute node degrees (#links) and use that to set node size:
+    deg <- degree(q, mode="all")
+    deg <- closeness(q)
+    
+    V(q)$size <- deg*4
+    
+    # The labels are currently node IDs.
+    # Setting them to NA will render no labels:
+    V(q)$label <- NA
+    
+    plot(q) 
