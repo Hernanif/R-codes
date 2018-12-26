@@ -262,7 +262,7 @@ w1
 
 plotweb(q,  col.high =x1, bor.col.high=x1, labsize = 0.6,
         col.low=w1, bor.col.low=w1, text.rot=90, low.y=1.1,
-        high.y=1.5, col.interaction="black")
+        high.y=1.5, col.interaction="black", high.spacing=NULL, low.spacing=NULL)
 legend(0.7, 0.85, legend=c("Coleoptera", "Blattodea", "Chiroptera",
                            "Diptera__h_fly_",
                            "Diptera__unsp_","Hymenoptera__bee_",
