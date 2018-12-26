@@ -391,4 +391,4 @@ col=c("tan1", "blue", "cornsilk", "brown1", "yellow",
       "lightblue", "darkgreen"), pch=c(15, 15, 15, 15, 15, 15, 15, 15,
                                        15, 15, 15, 15, 15, 15, 15, 15),
 pt.cex=1.0,cex=0.6, bty="n", title="Pollination network - Mann's
-Spring (Wet season)")
+Spring (Wet season)") 
