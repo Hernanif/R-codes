@@ -1,0 +1,394 @@
+#### R code to calculate the specialisation values for different networks and plot networks according to the colours of the functional groups
+#Written by: Hernani Oliveira
+#Date: 26/12/2018
+
+install.packages("data.table")
+
+library(tidyr)
+library(bipartite)
+library(igraph)
+library(ade4)
+library(vegan)
+library(ggplot2)
+library(qgraph)
+library(car)
+library(intergraph)
+library(BiRewire)
+library(data.table)
+library(glmm)
+library(MASS)
+library(lme4)
+library(mlmRev)
+library(agridat)
+library(MCMCglmm)
+library(CINNA)
+library(nlme)
+library(taRifx)
+library(gtools)
+library(dplyr)
+library(ResourceSelection)
+library(iNEXT)
+
+
+calculate_centralities(y)
+
+summary_tsne_centralities(y, dims = 2, perplexity = 5, scale = TRUE)
+
+
+#Opening the final data
+CLDRYFINAL20.12.2018<-read.table("CLDRYFINAL20.12.2018.txt", h=T)
+attr.CLDRYFINAL20.12.2018<-read.table("attr.CLDRYFINAL20.12.2018.txt", h=T)
+CLWETFINAL20.12.2018<-read.table("CLWETFINAL20.12.2018.txt", h=T)
+attr.CLWETFINAL20.12.2018<-read.table("attr.CLWETFINAL20.12.2018.txt", h=T)
+MSDRYFINAL20.12.2018<-read.table("MSDRYFINAL20.12.2018.txt", h=T)
+attr.MSDRYFINAL20.12.2018<-read.table("attr.MSDRYFINAL20.12.2018.txt", h=T)
+MSWETFINAL20.12.2018<-read.table("MSWETFINAL20.12.2018.txt", h=T)
+attr.MSWETFINAL20.12.2018<-read.table("attr.MSWETFINAL20.12.2018.txt", h=T)
+
+
+
+#Multplying the data by 10000 and rounding the data
+dd<-CLDRYFINAL20.12.2018*10000000
+q<-apply(dd, 2, round)
+head(q)
+
+t<-CLWETFINAL20.12.2018*10000000
+i<-apply(t, 2, round)
+head(i)
+
+x<-MSDRYFINAL20.12.2018*10000000
+y<-apply(x, 2, round)
+head(y)
+
+w<-MSWETFINAL20.12.2018*10000000
+z<-apply(w, 2, round)
+head(z)
+
+
+#Checking if the conversion of the matrix and rounding was made right
+#by counting the number of numbers higher than zero
+length(which(dd>0))
+length(which(q>0))
+
+length(which(t>0))
+length(which(i>0))
+
+length(which(x>0))
+length(which(y>0))
+
+length(which(w>0))
+length(which(z>0))
+
+
+
+#Calculates the specialisation values for the species at each level of
+the network
+e<-dfun(q) #values for the lower trophic level of the network
+u<-dfun(t(q)) #values for the higher trophic level of the network
+
+m<-dfun(i) #values for the lower trophic level of the network
+n<-dfun(t(i)) #values for the higher trophic level of the network
+
+v<-dfun(y) #values for the lower trophic level of the network
+b<-dfun(t(y)) #values for the higher trophic level of the network
+
+j<-dfun(z) #values for the lower trophic level of the network
+a<-dfun(t(z)) #values for the higher trophic level of the network
+
+e1<-as.data.frame(e)
+u1<-as.data.frame(u)
+
+m1<-as.data.frame(m)
+n1<-as.data.frame(n)
+
+v1<-as.data.frame(v)
+b1<-as.data.frame(b)
+
+j1<-as.data.frame(j)
+a1<-as.data.frame(a)
+
+#Delete the columns with the names below from the data frame
+e1$dprime <- NULL
+e1$dmin <- NULL
+e1$dmax <- NULL
+e1
+
+u1$dprime <- NULL
+u1$dmin <- NULL
+u1$dmax <- NULL
+u1
+
+m1$dprime <- NULL
+m1$dmin <- NULL
+m1$dmax <- NULL
+m1
+
+n1$dprime <- NULL
+n1$dmin <- NULL
+n1$dmax <- NULL
+n1
+
+v1$dprime <- NULL
+v1$dmin <- NULL
+v1$dmax <- NULL
+v1
+
+b1$dprime <- NULL
+b1$dmin <- NULL
+b1$dmax <- NULL
+b1
+
+j1$dprime <- NULL
+j1$dmin <- NULL
+j1$dmax <- NULL
+j1
+
+a1$dprime <- NULL
+a1$dmin <- NULL
+a1$dmax <- NULL
+a1
+
+#Joins the data from both data frames into just one
+qq<-rbind(e1, u1)
+qq$season<-"dry"
+qq$elevation<-"cl"
+qq
+
+ss<-rbind(m1, n1)
+ss$season<-"wet"
+ss$elevation<-"cl"
+ss
+
+yy<-rbind(v1, b1)
+yy$season<-"dry"
+yy$elevation<-"ms"
+yy
+
+hh<-rbind(j1, a1)
+hh$season<-"wet"
+hh$elevation<-"ms"
+hh
+
+###### Obs.: Something is missing in this coding
+qq <- cbind(species = rownames(qq), qq)
+colnames(attr.CLDRYFINAL20.12.2018) <- c("species", "ID")
+qq$ID <- attr.CLDRYFINAL20.12.2018$ID[match(qq$species,
+                                            attr.CLDRYFINAL20.12.2018$species)]
+head(qq)
+qq
+
+ss <- cbind(species = rownames(ss), ss)
+colnames(attr.CLWETFINAL20.12.2018) <- c("species", "ID")
+ss$ID <- attr.CLWETFINAL20.12.2018$ID[match(ss$species,
+                                            attr.CLWETFINAL20.12.2018$species)]
+head(ss)
+ss
+
+yy <- cbind(species = rownames(yy), yy)
+colnames(attr.MSDRYFINAL20.12.2018) <- c("species", "ID")
+yy$ID <- attr.MSDRYFINAL20.12.2018$ID[match(yy$species,
+                                            attr.MSDRYFINAL20.12.2018$species)]
+head(yy)
+yy
+
+hh <- cbind(species = rownames(hh), hh)
+colnames(attr.MSWETFINAL20.12.2018) <- c("species", "ID")
+hh$ID <- attr.MSWETFINAL20.12.2018$ID[match(hh$species,
+                                            attr.MSWETFINAL20.12.2018$species)]
+head(hh)
+hh
+
+rrr<-rbind(yy, hh, qq, ss)
+head(rrr)
+
+
+Running a glmm on the networks using elevation and season as fixed
+effects and functional groups as random effects
+rrr$d.t <- rrr$d + 1
+head(rrr)
+
+qqp(rrr$d.t, "norm") #normal
+qqp(rrr$d.t, "lnorm") #lognormal
+
+nbinom <- fitdistr(rrr$d.t, "Negative Binomial")
+qqp(rrr$d.t, "nbinom", size = nbinom$estimate[[1]], mu = nbinom$estimate[[2]])
+
+poisson <- fitdistr(rrr$d.t, "Poisson")
+qqp(rrr$d.t, "pois", poisson$estimate)
+
+gamma <- fitdistr(rrr$d.t, "gamma")
+qqp(rrr$d.t, "gamma", shape = gamma$estimate[[1]], rate = gamma$estimate[[2]])
+
+
+table(rrr$ID)
+head(rrr)
+rrr
+
+
+
+#######################
+
+library(bipartite)
+data<-read.table("CLDRYFINAL20.12.2018.txt", h=T)
+attributes1<-read.table("attr.CLDRYplants26.12.txt", h=T)
+
+table(attributes1[,2])
+
+x<-gsub("Coleoptera","tan1", attributes1[,2])
+x<-gsub("Blattodea","white", x)
+x<-gsub("Chiroptera","grey", x)
+x<-gsub("Diptera__h_fly_","blue", x)
+x<-gsub("Diptera__unsp_","cornsilk", x)
+x<-gsub("Hymenoptera__bee_","brown1",x)
+x<-gsub("Hymenoptera__eusocial_bee_","yellow",x)
+x<-gsub("Hymenoptera__carpenters_", "khaki1", x)
+x<-gsub("Lepidoptera__butterfly_","darkorange", x)
+x<-gsub("Lepidoptera__moth_","darkorchid",x)
+x<-gsub("Lepidoptera__sphingid_","burlywood", x)
+x<-gsub("Hymenoptera__wasp_","deeppink", x)
+x<-gsub("Passeriformes","lightblue", x)
+x<-gsub("Small_mammals","plum2",x)
+fix(x)
+x
+
+y<-gsub("Shrub","darkgreen",attributes1[,2])
+y<-gsub("Tree","green",y)
+y<-gsub("Epiphyte","lightgreen",y)
+y<-gsub("Herb","palegreen",y)
+y<-gsub("Climber","mediumaquamarine",y)
+fix(y)
+
+
+plotweb(q,  col.high =x, bor.col.high=x, labsize = 0.6,
+        col.low=y, bor.col.low=y, text.rot=90, low.y=1.1,
+        high.y=1.5, col.interaction="black")
+legend(0.7, 0.85, legend=c("Coleoptera", "Blattodea", "Chiroptera",
+                           "Diptera__h_fly_",
+                           "Diptera__unsp_","Hymenoptera__bee_",
+                           "Hymenoptera__eusocial_bee_",
+                           "Hymenoptera__carpenters_",
+                           "Lepidoptera__butterfly_",
+                           "Lepidoptera__moth_",
+                           "Lepidoptera__sphingid_", "Hymenoptera__wasp_",
+                           "Passeriformes", "Small_mammals", "Shrub", "Tree", "Epiphyte", "Herb", "Climber"
+),
+col=c("tan1", "white", "grey", "blue", "cornsilk", "brown1", "yellow", "khaki1",
+      "darkorange", "darkorchid", "burlywood",
+      "deeppink", "lightblue", "plum2", "darkgreen", "green", "lightgreen", "palegreen", "mediumaquamarine"), pch=c(15,
+                                                                15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15),
+pt.cex=0.5, cex=0.6, bty="n", title="Pollination network - Crater Lake
+(Dry season)")
+
+
+
+######
+library(bipartite)
+data1<-read.table("CLWETFINAL20.12.2018.txt", h=T)
+attributes1<-read.table("attr.CLWETFINAL20.12.2018.txt", h=T)
+table(attributes1[,2])
+
+
+x<-gsub("Coleoptera","tan1", attributes1[,2])
+x<-gsub("Blattodea","white", x)
+x<-gsub("Diptera__h_fly_","blue", x)
+x<-gsub("Diptera__unsp_","cornsilk", x)
+x<-gsub("Hymenoptera__bee_","brown1",x)
+x<-gsub("Hymenoptera__eusocial_bee_","yellow",x)
+x<-gsub("Lepidoptera__butterfly_","darkorange", x)
+x<-gsub("Lepidoptera__moth_","darkorchid",x)
+x<-gsub("Lepidoptera__sphingid_","burlywood", x)
+x<-gsub("Passeriformes","lightblue", x)
+x<-gsub("Small_mammals","olivedrab1",x)
+x<-gsub("Plant","darkgreen",x)
+
+plotweb(i, col.high =x, bor.col.high=x, labsize = 0.6,
+        col.low="darkgreen", bor.col.low="darkgreen", text.rot=90, low.y=1.0,
+        high.y=1.4, col.interaction="black")
+legend(0.7, 0.75, legend=c("Coleoptera", "Blattodea", "Diptera__h_fly_",
+                           "Diptera__unsp_","Hymenoptera__bee_",
+                           "Hymenoptera__eusocial_bee_",
+                           "Lepidoptera__butterfly_",
+                           "Lepidoptera__moth_", "Lepidoptera__sphingid_",
+                           "Passeriformes", "Small_mammals", "Plant"
+),
+col=c("tan1", "white", "blue", "cornsilk", "brown1", "yellow",
+      "darkorange", "darkorchid", "burlywood",
+      "lightblue", "olivedrab1","darkgreen"), pch=c(15, 15, 15, 15,
+                                                    15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15),
+pt.cex=1.0,cex=0.6, bty="n", title="Pollination network - Crater Lake
+(Wet season)")
+
+
+
+######
+library(bipartite)
+data2<-read.table("MSDRYFINAL20.12.2018.txt", h=T)
+attributes2<-read.table("attr.MSDRYFINAL20.12.2018.txt", h=T)
+table(attributes2[,2])
+
+
+x<-gsub("Coleoptera","tan1", attributes2[,2])
+x<-gsub("Diptera__h_fly_","blue", x)
+x<-gsub("Diptera__unsp_","cornsilk", x)
+x<-gsub("Hymenoptera__bee_","brown1",x)
+x<-gsub("Hymenoptera__wasp_", "deeppink",x)
+x<-gsub("Hymenoptera__eusocial_bee_","yellow",x)
+x<-gsub("Lepidoptera__butterfly_","darkorange", x)
+x<-gsub("Lepidoptera__moth_","darkorchid",x)
+x<-gsub("Lepidoptera__sphingid_","burlywood", x)
+x<-gsub("Passeriformes","lightblue", x)
+x<-gsub("Small_mammals","olivedrab1",x)
+x<-gsub("Plant","darkgreen",x)
+
+plotweb(y, col.high =x, bor.col.high=x, labsize = 0.6,
+        col.low="darkgreen", bor.col.low="darkgreen", text.rot=90, low.y=1.0,
+        high.y=1.4, col.interaction="black")
+legend(0.7, 0.75, legend=c("Coleoptera", "Diptera__h_fly_",
+                           "Diptera__unsp_","Hymenoptera__bee_",
+                           "Hymenoptera__wasp_", "Hymenoptera__eusocial_bee_",
+                           "Lepidoptera__butterfly_",
+                           "Lepidoptera__moth_", "Lepidoptera__sphingid_",
+                           "Passeriformes", "Small_mammals", "Plant"
+),
+col=c("tan1", "blue", "cornsilk", "brown1", "deeppink", "yellow",
+      "darkorange", "darkorchid", "burlywood",
+      "lightblue", "olivedrab1","darkgreen"), pch=c(15, 15, 15, 15,
+                                                    15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15),
+pt.cex=1.0,cex=0.6, bty="n", title="Pollination network - Mann's
+Spring (Dry season)")
+
+
+
+######
+library(bipartite)
+data3<-read.table("MSWETFINAL20.12.2018.txt", h=T)
+attributes3<-read.table("attr.MSWETFINAL20.12.2018.txt", h=T)
+table(attributes3[,2])
+
+
+x<-gsub("Coleoptera","tan1", attributes3[,2])
+x<-gsub("Diptera__h_fly_","blue", x)
+x<-gsub("Diptera__unsp_","cornsilk", x)
+x<-gsub("Hymenoptera__bee_","brown1",x)
+x<-gsub("Hymenoptera__eusocial_bee_","yellow",x)
+x<-gsub("Lepidoptera__moth_","darkorchid",x)
+x<-gsub("Lepidoptera__sphingid_","burlywood", x)
+x<-gsub("Passeriformes","lightblue", x)
+x<-gsub("Plant","darkgreen",x)
+
+plotweb(z, col.high =x, bor.col.high=x, labsize = 0.6,
+        col.low="darkgreen", bor.col.low="darkgreen", text.rot=90, low.y=1.0,
+        high.y=1.4, col.interaction="black")
+legend(0.7, 0.75, legend=c("Coleoptera", "Diptera__h_fly_",
+                           "Diptera__unsp_","Hymenoptera__bee_",
+                           "Hymenoptera__eusocial_bee_",
+                           
+                           "Lepidoptera__moth_", "Lepidoptera__sphingid_",
+                           "Passeriformes",  "Plant"
+),
+col=c("tan1", "blue", "cornsilk", "brown1", "yellow",
+      "darkorchid", "burlywood",
+      "lightblue", "darkgreen"), pch=c(15, 15, 15, 15, 15, 15, 15, 15,
+                                       15, 15, 15, 15, 15, 15, 15, 15),
+pt.cex=1.0,cex=0.6, bty="n", title="Pollination network - Mann's
+Spring (Wet season)")
