@@ -1,4 +1,4 @@
-#### R code to calculate the specialisation values for different networks and plot networks according to the colours of the functional groups
+#### Network analysis for Robert Tropek
 #Written by: Hernani Oliveira
 #Date: 26/12/2018
 
@@ -298,13 +298,20 @@ x<-gsub("Lepidoptera__butterfly_","darkorange", x)
 x<-gsub("Lepidoptera__moth_","darkorchid",x)
 x<-gsub("Lepidoptera__sphingid_","burlywood", x)
 x<-gsub("Passeriformes","lightblue", x)
-x<-gsub("Small_mammals","olivedrab1",x)
+x<-gsub("Small_mammals","plum2",x)
 x<-gsub("Plant","darkgreen",x)
 
+y<-gsub("Shrub","darkgreen",attributes1[,2])
+y<-gsub("Tree","green",y)
+y<-gsub("Epiphyte","lightgreen",y)
+y<-gsub("Herb","palegreen",y)
+y<-gsub("Climber","mediumaquamarine",y)
+fix(y)
+
 plotweb(i, col.high =x, bor.col.high=x, labsize = 0.6,
-        col.low="darkgreen", bor.col.low="darkgreen", text.rot=90, low.y=1.0,
-        high.y=1.4, col.interaction="black")
-legend(0.7, 0.75, legend=c("Coleoptera", "Blattodea", "Diptera__h_fly_",
+        col.low="darkgreen", bor.col.low="darkgreen", text.rot=90, low.y=1.1,
+        high.y=1.5, col.interaction="black")
+legend(0.7, 0.85, legend=c("Coleoptera", "Blattodea", "Diptera__h_fly_",
                            "Diptera__unsp_","Hymenoptera__bee_",
                            "Hymenoptera__eusocial_bee_",
                            "Lepidoptera__butterfly_",
@@ -313,7 +320,7 @@ legend(0.7, 0.75, legend=c("Coleoptera", "Blattodea", "Diptera__h_fly_",
 ),
 col=c("tan1", "white", "blue", "cornsilk", "brown1", "yellow",
       "darkorange", "darkorchid", "burlywood",
-      "lightblue", "olivedrab1","darkgreen"), pch=c(15, 15, 15, 15,
+      "lightblue", "plum2","darkgreen"), pch=c(15, 15, 15, 15,
                                                     15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15),
 pt.cex=1.0,cex=0.6, bty="n", title="Pollination network - Crater Lake
 (Wet season)")
@@ -337,13 +344,20 @@ x<-gsub("Lepidoptera__butterfly_","darkorange", x)
 x<-gsub("Lepidoptera__moth_","darkorchid",x)
 x<-gsub("Lepidoptera__sphingid_","burlywood", x)
 x<-gsub("Passeriformes","lightblue", x)
-x<-gsub("Small_mammals","olivedrab1",x)
+x<-gsub("Small_mammals","plum2",x)
 x<-gsub("Plant","darkgreen",x)
 
+y<-gsub("Shrub","darkgreen",attributes1[,2])
+y<-gsub("Tree","green",y)
+y<-gsub("Epiphyte","lightgreen",y)
+y<-gsub("Herb","palegreen",y)
+y<-gsub("Climber","mediumaquamarine",y)
+fix(y)
+
 plotweb(y, col.high =x, bor.col.high=x, labsize = 0.6,
-        col.low="darkgreen", bor.col.low="darkgreen", text.rot=90, low.y=1.0,
-        high.y=1.4, col.interaction="black")
-legend(0.7, 0.75, legend=c("Coleoptera", "Diptera__h_fly_",
+        col.low="darkgreen", bor.col.low="darkgreen", text.rot=90, low.y=1.1,
+        high.y=1.5, col.interaction="black")
+legend(0.7, 0.85, legend=c("Coleoptera", "Diptera__h_fly_",
                            "Diptera__unsp_","Hymenoptera__bee_",
                            "Hymenoptera__wasp_", "Hymenoptera__eusocial_bee_",
                            "Lepidoptera__butterfly_",
@@ -352,7 +366,7 @@ legend(0.7, 0.75, legend=c("Coleoptera", "Diptera__h_fly_",
 ),
 col=c("tan1", "blue", "cornsilk", "brown1", "deeppink", "yellow",
       "darkorange", "darkorchid", "burlywood",
-      "lightblue", "olivedrab1","darkgreen"), pch=c(15, 15, 15, 15,
+      "lightblue", "plum2","darkgreen"), pch=c(15, 15, 15, 15,
                                                     15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15),
 pt.cex=1.0,cex=0.6, bty="n", title="Pollination network - Mann's
 Spring (Dry season)")
@@ -376,10 +390,17 @@ x<-gsub("Lepidoptera__sphingid_","burlywood", x)
 x<-gsub("Passeriformes","lightblue", x)
 x<-gsub("Plant","darkgreen",x)
 
+y<-gsub("Shrub","darkgreen",attributes1[,2])
+y<-gsub("Tree","green",y)
+y<-gsub("Epiphyte","lightgreen",y)
+y<-gsub("Herb","palegreen",y)
+y<-gsub("Climber","mediumaquamarine",y)
+fix(y)
+
 plotweb(z, col.high =x, bor.col.high=x, labsize = 0.6,
-        col.low="darkgreen", bor.col.low="darkgreen", text.rot=90, low.y=1.0,
-        high.y=1.4, col.interaction="black")
-legend(0.7, 0.75, legend=c("Coleoptera", "Diptera__h_fly_",
+        col.low="darkgreen", bor.col.low="darkgreen", text.rot=90, low.y=1.1,
+        high.y=1.5, col.interaction="black")
+legend(0.7, 0.85, legend=c("Coleoptera", "Diptera__h_fly_",
                            "Diptera__unsp_","Hymenoptera__bee_",
                            "Hymenoptera__eusocial_bee_",
                            
@@ -391,4 +412,4 @@ col=c("tan1", "blue", "cornsilk", "brown1", "yellow",
       "lightblue", "darkgreen"), pch=c(15, 15, 15, 15, 15, 15, 15, 15,
                                        15, 15, 15, 15, 15, 15, 15, 15),
 pt.cex=1.0,cex=0.6, bty="n", title="Pollination network - Mann's
-Spring (Wet season)") 
+Spring (Wet season)")
