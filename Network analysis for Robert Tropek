@@ -234,33 +234,34 @@ attributes1<-read.table("attr.CLDRYplants26.12.txt", h=T)
 
 table(attributes1[,2])
 
-x<-gsub("Coleoptera","tan1", attributes1[,2])
-x<-gsub("Blattodea","white", x)
-x<-gsub("Chiroptera","grey", x)
-x<-gsub("Diptera__h_fly_","blue", x)
-x<-gsub("Diptera__unsp_","cornsilk", x)
-x<-gsub("Hymenoptera__bee_","brown1",x)
-x<-gsub("Hymenoptera__eusocial_bee_","yellow",x)
-x<-gsub("Hymenoptera__carpenters_", "khaki1", x)
-x<-gsub("Lepidoptera__butterfly_","darkorange", x)
-x<-gsub("Lepidoptera__moth_","darkorchid",x)
-x<-gsub("Lepidoptera__sphingid_","burlywood", x)
-x<-gsub("Hymenoptera__wasp_","deeppink", x)
-x<-gsub("Passeriformes","lightblue", x)
-x<-gsub("Small_mammals","plum2",x)
-fix(x)
-x
+x1<-gsub("Coleoptera","tan1", attributes1[,2])
+x1<-gsub("Blattodea","white", x1)
+x1<-gsub("Chiroptera","grey", x1)
+x1<-gsub("Diptera__h_fly_","blue", x1)
+x1<-gsub("Diptera__unsp_","cornsilk", x1)
+x1<-gsub("Hymenoptera__bee_","brown1",x1)
+x1<-gsub("Hymenoptera__eusocial_bee_","yellow",x1)
+x1<-gsub("Hymenoptera__carpenters_", "khaki1", x1)
+x1<-gsub("Lepidoptera__butterfly_","darkorange", x1)
+x1<-gsub("Lepidoptera__moth_","darkorchid",x1)
+x1<-gsub("Lepidoptera__sphingid_","burlywood", x1)
+x1<-gsub("Hymenoptera__wasp_","deeppink", x1)
+x1<-gsub("Passeriformes","lightblue", x1)
+x1<-gsub("Small_mammals","plum2",x1)
+fix(x1)
+x1
 
-y<-gsub("Shrub","darkgreen",attributes1[,2])
-y<-gsub("Tree","green",y)
-y<-gsub("Epiphyte","lightgreen",y)
-y<-gsub("Herb","palegreen",y)
-y<-gsub("Climber","mediumaquamarine",y)
-fix(y)
+w1<-gsub("Shrub","darkgreen",attributes1[,2])
+w1<-gsub("Tree","green",w1)
+w1<-gsub("Epiphyte","lightgreen",w1)
+w1<-gsub("Herb","palegreen",w1)
+w1<-gsub("Climber","mediumaquamarine",w1)
+fix(w1)
+w1
 
 
-plotweb(q,  col.high =x, bor.col.high=x, labsize = 0.6,
-        col.low=y, bor.col.low=y, text.rot=90, low.y=1.1,
+plotweb(q,  col.high =x1, bor.col.high=x1, labsize = 0.6,
+        col.low=w1, bor.col.low=w1, text.rot=90, low.y=1.1,
         high.y=1.5, col.interaction="black")
 legend(0.7, 0.85, legend=c("Coleoptera", "Blattodea", "Chiroptera",
                            "Diptera__h_fly_",
@@ -288,27 +289,28 @@ attributes2<-read.table("attr.CLWETplants26.12.txt", h=T)
 table(attributes2[,2])
 
 
-x<-gsub("Coleoptera","tan1", attributes2[,2])
-x<-gsub("Blattodea","white", x)
-x<-gsub("Diptera__h_fly_","blue", x)
-x<-gsub("Diptera__unsp_","cornsilk", x)
-x<-gsub("Hymenoptera__bee_","brown1",x)
-x<-gsub("Hymenoptera__eusocial_bee_","yellow",x)
-x<-gsub("Lepidoptera__butterfly_","darkorange", x)
-x<-gsub("Lepidoptera__moth_","darkorchid",x)
-x<-gsub("Lepidoptera__sphingid_","burlywood", x)
-x<-gsub("Passeriformes","lightblue", x)
-x<-gsub("Small_mammals","plum2",x)
-fix(x)
-x
+x2<-gsub("Coleoptera","tan1", attributes2[,2])
+x2<-gsub("Blattodea","white", x2)
+x2<-gsub("Diptera__h_fly_","blue", x2)
+x2<-gsub("Diptera__unsp_","cornsilk", x2)
+x2<-gsub("Hymenoptera__bee_","brown1",x2)
+x2<-gsub("Hymenoptera__eusocial_bee_","yellow",x2)
+x2<-gsub("Lepidoptera__butterfly_","darkorange", x2)
+x2<-gsub("Lepidoptera__moth_","darkorchid",x2)
+x2<-gsub("Lepidoptera__sphingid_","burlywood", x2)
+x2<-gsub("Passeriformes","lightblue", x2)
+x2<-gsub("Small_mammals","plum2",x2)
+fix(x2)
+x2
 
-y<-gsub("Shrub","darkgreen",attributes2[,2])
-y<-gsub("Epiphyte","lightgreen",y)
-y<-gsub("Herb","palegreen",y)
-y<-gsub("Climber","mediumaquamarine",y)
-fix(y)
+w2<-gsub("Shrub","darkgreen",attributes2[,2])
+w2<-gsub("Epiphyte","lightgreen",w2)
+w2<-gsub("Herb","palegreen",w2)
+w2<-gsub("Climber","mediumaquamarine",w2)
+fix(w2)
+w2
 
-plotweb(i, col.high =x, bor.col.high=x, labsize = 0.6, col.low=y, bor.col.low=y,
+plotweb(i, col.high =x2, bor.col.high=x2, labsize = 0.6, col.low=w2, bor.col.low=w2,
           text.rot=90, low.y=1.1,
         high.y=1.5, col.interaction="black")
 legend(0.7, 0.85, legend=c("Coleoptera", "Blattodea", "Diptera__h_fly_",
@@ -334,29 +336,30 @@ attributes3<-read.table("attr.MSDRYplants26.12.txt", h=T)
 table(attributes3[,2])
 
 
-x<-gsub("Coleoptera","tan1", attributes3[,2])
-x<-gsub("Diptera__h_fly_","blue", x)
-x<-gsub("Diptera__unsp_","cornsilk", x)
-x<-gsub("Hymenoptera__bee_","brown1",x)
-x<-gsub("Hymenoptera__wasp_", "deeppink",x)
-x<-gsub("Hymenoptera__eusocial_bee_","yellow",x)
-x<-gsub("Lepidoptera__butterfly_","darkorange", x)
-x<-gsub("Lepidoptera__moth_","darkorchid",x)
-x<-gsub("Lepidoptera__sphingid_","burlywood", x)
-x<-gsub("Passeriformes","lightblue", x)
-x<-gsub("Small_mammals","plum2",x)
-fix(x)
-x
+x3<-gsub("Coleoptera","tan1", attributes3[,2])
+x3<-gsub("Diptera__h_fly_","blue", x3)
+x3<-gsub("Diptera__unsp_","cornsilk", x3)
+x3<-gsub("Hymenoptera__bee_","brown1",x3)
+x3<-gsub("Hymenoptera__wasp_", "deeppink",x3)
+x3<-gsub("Hymenoptera__eusocial_bee_","yellow",x3)
+x3<-gsub("Lepidoptera__butterfly_","darkorange", x3)
+x3<-gsub("Lepidoptera__moth_","darkorchid",x3)
+x3<-gsub("Lepidoptera__sphingid_","burlywood", x3)
+x3<-gsub("Passeriformes","lightblue", x3)
+x3<-gsub("Small_mammals","plum2",x3)
+fix(x3)
+x3
 
-y<-gsub("Shrub","darkgreen",attributes3[,2])
-y<-gsub("Tree","green",y)
-y<-gsub("Epiphyte","lightgreen",y)
-y<-gsub("Herb","palegreen",y)
-y<-gsub("Climber","mediumaquamarine",y)
-fix(y)
+w3<-gsub("Shrub","darkgreen",attributes3[,2])
+w3<-gsub("Tree","green",w3)
+w3<-gsub("Epiphyte","lightgreen",w3)
+w3<-gsub("Herb","palegreen",w3)
+w3<-gsub("Climber","mediumaquamarine",w3)
+fix(w3)
+w3
 
-plotweb(y, col.high =x, bor.col.high=x, labsize = 0.6,
-        col.low=y, bor.col.low=y, text.rot=90, low.y=1.1,
+plotweb(y, col.high =x3, bor.col.high=x3, labsize = 0.6,
+        col.low=w3, bor.col.low=w3, text.rot=90, low.y=1.1,
         high.y=1.5, col.interaction="black")
 legend(0.7, 0.85, legend=c("Coleoptera", "Diptera__h_fly_",
                            "Diptera__unsp_","Hymenoptera__bee_",
@@ -381,26 +384,27 @@ attributes4<-read.table("attr.MSWETplants26.12.txt", h=T)
 table(attributes4[,2])
 
 
-x<-gsub("Coleoptera","tan1", attributes4[,2])
-x<-gsub("Diptera__h_fly_","blue", x)
-x<-gsub("Diptera__unsp_","cornsilk", x)
-x<-gsub("Hymenoptera__bee_","brown1",x)
-x<-gsub("Hymenoptera__eusocial_bee_","yellow",x)
-x<-gsub("Lepidoptera__moth_","darkorchid",x)
-x<-gsub("Lepidoptera__sphingid_","burlywood", x)
-x<-gsub("Passeriformes","lightblue", x)
-fix(x)
-x
+x4<-gsub("Coleoptera","tan1", attributes4[,2])
+x4<-gsub("Diptera__h_fly_","blue", x4)
+x4<-gsub("Diptera__unsp_","cornsilk", x4)
+x4<-gsub("Hymenoptera__bee_","brown1",x4)
+x4<-gsub("Hymenoptera__eusocial_bee_","yellow",x4)
+x4<-gsub("Lepidoptera__moth_","darkorchid",x4)
+x4<-gsub("Lepidoptera__sphingid_","burlywood", x4)
+x4<-gsub("Passeriformes","lightblue", x4)
+fix(x4)
+x4
 
-y<-gsub("Shrub","darkgreen",attributes4[,2])
-y<-gsub("Tree","green",y)
-y<-gsub("Epiphyte","lightgreen",y)
-y<-gsub("Herb","palegreen",y)
-y<-gsub("Climber","mediumaquamarine",y)
-fix(y)
+w4<-gsub("Shrub","darkgreen",attributes4[,2])
+w4<-gsub("Tree","green",w4)
+w4<-gsub("Epiphyte","lightgreen",w4)
+w4<-gsub("Herb","palegreen",w4)
+w4<-gsub("Climber","mediumaquamarine",w4)
+fix(w4)
+w4
 
-plotweb(z, col.high =x, bor.col.high=x, labsize = 0.6,
-        col.low=y, bor.col.low=y, text.rot=90, low.y=1.1,
+plotweb(z, col.high =x4, bor.col.high=x4, labsize = 0.6,
+        col.low=w4, bor.col.low=w4, text.rot=90, low.y=1.1,
         high.y=1.5, col.interaction="black")
 legend(0.7, 0.85, legend=c("Coleoptera", "Diptera__h_fly_",
                            "Diptera__unsp_","Hymenoptera__bee_",
