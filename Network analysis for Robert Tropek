@@ -284,11 +284,11 @@ pt.cex=0.5, cex=0.6, bty="n", title="Pollination network - Crater Lake
 ######
 library(bipartite)
 data1<-read.table("CLWETFINAL20.12.2018.txt", h=T)
-attributes1<-read.table("attr.CLWETFINAL20.12.2018.txt", h=T)
-table(attributes1[,2])
+attributes2<-read.table("attr.CLWETplants26.12.txt", h=T)
+table(attributes2[,2])
 
 
-x<-gsub("Coleoptera","tan1", attributes1[,2])
+x<-gsub("Coleoptera","tan1", attributes2[,2])
 x<-gsub("Blattodea","white", x)
 x<-gsub("Diptera__h_fly_","blue", x)
 x<-gsub("Diptera__unsp_","cornsilk", x)
@@ -299,9 +299,10 @@ x<-gsub("Lepidoptera__moth_","darkorchid",x)
 x<-gsub("Lepidoptera__sphingid_","burlywood", x)
 x<-gsub("Passeriformes","lightblue", x)
 x<-gsub("Small_mammals","plum2",x)
-x<-gsub("Plant","darkgreen",x)
+fix(x)
+x
 
-y<-gsub("Shrub","darkgreen",attributes1[,2])
+y<-gsub("Shrub","darkgreen",attributes2[,2])
 y<-gsub("Tree","green",y)
 y<-gsub("Epiphyte","lightgreen",y)
 y<-gsub("Herb","palegreen",y)
@@ -316,12 +317,12 @@ legend(0.7, 0.85, legend=c("Coleoptera", "Blattodea", "Diptera__h_fly_",
                            "Hymenoptera__eusocial_bee_",
                            "Lepidoptera__butterfly_",
                            "Lepidoptera__moth_", "Lepidoptera__sphingid_",
-                           "Passeriformes", "Small_mammals", "Plant"
+                           "Passeriformes", "Small_mammals", "Shrub", "Tree", "Epiphyte", "Herb", "Climber"
 ),
 col=c("tan1", "white", "blue", "cornsilk", "brown1", "yellow",
       "darkorange", "darkorchid", "burlywood",
-      "lightblue", "plum2","darkgreen"), pch=c(15, 15, 15, 15,
-                                                    15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15),
+      "lightblue", "plum2","darkgreen", "green", "lightgreen", "palegreen", "mediumaquamarine"), pch=c(15, 15, 15, 15,
+                                                    15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15),
 pt.cex=1.0,cex=0.6, bty="n", title="Pollination network - Crater Lake
 (Wet season)")
 
@@ -330,11 +331,11 @@ pt.cex=1.0,cex=0.6, bty="n", title="Pollination network - Crater Lake
 ######
 library(bipartite)
 data2<-read.table("MSDRYFINAL20.12.2018.txt", h=T)
-attributes2<-read.table("attr.MSDRYFINAL20.12.2018.txt", h=T)
-table(attributes2[,2])
+attributes3<-read.table("attr.MSDRYplants26.12.txt", h=T)
+table(attributes3[,2])
 
 
-x<-gsub("Coleoptera","tan1", attributes2[,2])
+x<-gsub("Coleoptera","tan1", attributes3[,2])
 x<-gsub("Diptera__h_fly_","blue", x)
 x<-gsub("Diptera__unsp_","cornsilk", x)
 x<-gsub("Hymenoptera__bee_","brown1",x)
@@ -345,9 +346,10 @@ x<-gsub("Lepidoptera__moth_","darkorchid",x)
 x<-gsub("Lepidoptera__sphingid_","burlywood", x)
 x<-gsub("Passeriformes","lightblue", x)
 x<-gsub("Small_mammals","plum2",x)
-x<-gsub("Plant","darkgreen",x)
+fix(x)
+x
 
-y<-gsub("Shrub","darkgreen",attributes1[,2])
+y<-gsub("Shrub","darkgreen",attributes3[,2])
 y<-gsub("Tree","green",y)
 y<-gsub("Epiphyte","lightgreen",y)
 y<-gsub("Herb","palegreen",y)
@@ -362,12 +364,12 @@ legend(0.7, 0.85, legend=c("Coleoptera", "Diptera__h_fly_",
                            "Hymenoptera__wasp_", "Hymenoptera__eusocial_bee_",
                            "Lepidoptera__butterfly_",
                            "Lepidoptera__moth_", "Lepidoptera__sphingid_",
-                           "Passeriformes", "Small_mammals", "Plant"
+                           "Passeriformes", "Small_mammals", "Shrub", "Tree", "Epiphyte", "Herb", "Climber"
 ),
 col=c("tan1", "blue", "cornsilk", "brown1", "deeppink", "yellow",
       "darkorange", "darkorchid", "burlywood",
-      "lightblue", "plum2","darkgreen"), pch=c(15, 15, 15, 15,
-                                                    15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15),
+      "lightblue", "plum2","darkgreen", "green", "lightgreen", "palegreen", "mediumaquamarine"), pch=c(15, 15, 15, 15,
+                                                    15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15),
 pt.cex=1.0,cex=0.6, bty="n", title="Pollination network - Mann's
 Spring (Dry season)")
 
@@ -376,11 +378,11 @@ Spring (Dry season)")
 ######
 library(bipartite)
 data3<-read.table("MSWETFINAL20.12.2018.txt", h=T)
-attributes3<-read.table("attr.MSWETFINAL20.12.2018.txt", h=T)
-table(attributes3[,2])
+attributes4<-read.table("attr.MSWETplants26.12.txt", h=T)
+table(attributes4[,2])
 
 
-x<-gsub("Coleoptera","tan1", attributes3[,2])
+x<-gsub("Coleoptera","tan1", attributes4[,2])
 x<-gsub("Diptera__h_fly_","blue", x)
 x<-gsub("Diptera__unsp_","cornsilk", x)
 x<-gsub("Hymenoptera__bee_","brown1",x)
@@ -388,9 +390,10 @@ x<-gsub("Hymenoptera__eusocial_bee_","yellow",x)
 x<-gsub("Lepidoptera__moth_","darkorchid",x)
 x<-gsub("Lepidoptera__sphingid_","burlywood", x)
 x<-gsub("Passeriformes","lightblue", x)
-x<-gsub("Plant","darkgreen",x)
+fix(x)
+x
 
-y<-gsub("Shrub","darkgreen",attributes1[,2])
+y<-gsub("Shrub","darkgreen",attributes4[,2])
 y<-gsub("Tree","green",y)
 y<-gsub("Epiphyte","lightgreen",y)
 y<-gsub("Herb","palegreen",y)
@@ -405,11 +408,11 @@ legend(0.7, 0.85, legend=c("Coleoptera", "Diptera__h_fly_",
                            "Hymenoptera__eusocial_bee_",
                            
                            "Lepidoptera__moth_", "Lepidoptera__sphingid_",
-                           "Passeriformes",  "Plant"
+                           "Passeriformes",  "Shrub", "Tree", "Epiphyte", "Herb", "Climber"
 ),
 col=c("tan1", "blue", "cornsilk", "brown1", "yellow",
       "darkorchid", "burlywood",
-      "lightblue", "darkgreen"), pch=c(15, 15, 15, 15, 15, 15, 15, 15,
-                                       15, 15, 15, 15, 15, 15, 15, 15),
+      "lightblue", "darkgreen", "green", "lightgreen", "palegreen", "mediumaquamarine"), pch=c(15, 15, 15, 15, 15, 15, 15, 15,
+                                       15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15),
 pt.cex=1.0,cex=0.6, bty="n", title="Pollination network - Mann's
 Spring (Wet season)")
