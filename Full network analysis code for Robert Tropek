@@ -1,9 +1,10 @@
 ##### Network analysis for Robert Tropek
 #Written by: Hernani Oliveira
-#Date: 18/12/2018
+#Date: 21/12/2018
 
 install.packages("data.table")
 
+library(doBy)
 library(tidyr)
 library(bipartite)
 library(igraph)
@@ -38,12 +39,16 @@ summary_tsne_centralities(y, dims = 2, perplexity = 5, scale = TRUE)
 #Opening the final data 
 CLDRYFINAL20.12.2018<-read.table("CLDRYFINAL20.12.2018.txt", h=T)
 attr.CLDRYFINAL20.12.2018<-read.table("attr.CLDRYFINAL20.12.2018.txt", h=T)
+attr.CLDRYplants20.12<-read.table("attr.CLDRYplants26.12.txt", h=T)
 CLWETFINAL20.12.2018<-read.table("CLWETFINAL20.12.2018.txt", h=T)
 attr.CLWETFINAL20.12.2018<-read.table("attr.CLWETFINAL20.12.2018.txt", h=T)
+attr.CLWETplants20.12<-read.table("attr.CLWETplants26.12.txt", h=T)
 MSDRYFINAL20.12.2018<-read.table("MSDRYFINAL20.12.2018.txt", h=T)
 attr.MSDRYFINAL20.12.2018<-read.table("attr.MSDRYFINAL20.12.2018.txt", h=T)
+attr.MSDRYplants20.12<-read.table("attr.MSDRYplants26.12.txt", h=T)
 MSWETFINAL20.12.2018<-read.table("MSWETFINAL20.12.2018.txt", h=T)
 attr.MSWETFINAL20.12.2018<-read.table("attr.MSWETFINAL20.12.2018.txt", h=T)
+attr.MSWETplants20.12<-read.table("attr.MSWETplants26.12.txt", h=T)
 
 
 
@@ -106,42 +111,42 @@ j1<-as.data.frame(j)
 a1<-as.data.frame(a)
 
 #Delete the columns with the names below from the data frame
-e1$dprime <- NULL
+e1$d <- NULL
 e1$dmin <- NULL
 e1$dmax <- NULL
 e1
 
-u1$dprime <- NULL
+u1$d <- NULL
 u1$dmin <- NULL
 u1$dmax <- NULL
 u1
 
-m1$dprime <- NULL
+m1$d <- NULL
 m1$dmin <- NULL
 m1$dmax <- NULL
 m1
 
-n1$dprime <- NULL
+n1$d <- NULL
 n1$dmin <- NULL
 n1$dmax <- NULL
 n1
 
-v1$dprime <- NULL
+v1$d <- NULL
 v1$dmin <- NULL
 v1$dmax <- NULL
 v1
 
-b1$dprime <- NULL
+b1$d <- NULL
 b1$dmin <- NULL
 b1$dmax <- NULL
 b1
 
-j1$dprime <- NULL
+j1$d <- NULL
 j1$dmin <- NULL
 j1$dmax <- NULL
 j1
 
-a1$dprime <- NULL
+a1$d <- NULL
 a1$dmin <- NULL
 a1$dmax <- NULL
 a1
@@ -194,13 +199,119 @@ hh
 
 rrr<-rbind(yy, hh, qq, ss)
 head(rrr)
+table(rownames(rrr))
 
-str(rrr)
+
+
+
+###### Obs.: Something is missing in this coding
+qq <- cbind(species = rownames(qq), qq)
+colnames(attr.CLDRYplants20.12) <- c("species", "ID")
+qq$ID <- attr.CLDRYplants20.12$ID[match(qq$species, attr.CLDRYplants20.12$species)]
+head(qq)
+qq
+
+
+ss <- cbind(species = rownames(ss), ss)
+colnames(attr.CLWETplants20.12) <- c("species", "ID")
+ss$ID <- attr.CLWETplants20.12$ID[match(ss$species, attr.CLWETplants20.12$species)]
+head(ss)
+ss
+
+yy <- cbind(species = rownames(yy), yy)
+colnames(attr.MSDRYplants20.12) <- c("species", "ID")
+yy$ID <- attr.MSDRYplants20.12$ID[match(yy$species, attr.MSDRYplants20.12$species)]
+head(yy)
+yy
+
+hh <- cbind(species = rownames(hh), hh)
+colnames(attr.MSWETplants20.12) <- c("species", "ID")
+hh$ID <- attr.MSWETplants20.12$ID[match(hh$species, attr.MSWETplants20.12$species)]
+head(hh)
+hh
+
+rrr1<-rbind(yy, hh, qq, ss)
+
+by(rrr1, rrr1$season, summary)
+
+colnames(rrr1)
+
+
+head(rrr1)
+
+
+### group mtcars by cylinders and return some averages
+cars <- rrr1 %>%
+  select(season, elevation, ID, dprime) %>%
+  group_by(ID) %>%
+  summarise(season = mean(season), hp = mean(elevation), dprime=mean(dprime))
+
+head(mtcars)
+head(rrr1)
+
+### group mtcars by cylinders and return some averages
+cars <- mtcars %>%
+  select(cyl, mpg, hp, qsec) %>%
+  group_by(cyl) %>%
+  summarise(mpg = mean(mpg), hp = mean(hp), qsec = mean(qsec))
+cars
+
+head(rrr1)
+
+
+ncol(yy)
+ncol(hh)
+ncol(qq)
+ncol(ss)
+
+rrr
+
+#Makes a plot with the vaues of specialization for each of the functional groups
+p<-ggplot(rrr1, aes(x=rrr1$ID, y=rrr1$d, color=rrr1$ID)) +
+  geom_boxplot()
+p + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + facet_wrap( ~ rrr1$season + rrr1$elevation, scales="free") 
+
+p 
+
 head(rrr)
 
-#Adds the row names as a column
-rrr <- cbind(species = rownames(rrr), rrr)
+
+sapply(rrr, mean, na.rm=TRUE)
+
+install.packages("pastecs")
+library(pastecs)
+stat.desc(rrr)
 head(rrr)
+
+install.packages("doBy")
+library(doBy)
+head(mtcars)
+
+write.csv(summaryBy(d  ~ season + elevation+ ID, data = rrr, 
+          FUN = function(x) { c(m = mean(x), s = sd(x)) } ), file="summarystatistics.csv")
+
+head(rrr)
+
+summaryBy(mpg + wt ~ cyl + vs, data = mtcars, 
+          FUN = function(x) { c(m = mean(x), s = sd(x)) } )
+
+summary(rrr)
+apply(sum(which(rrr$ID)))
+
+head(rrr)
+
+data(iris)
+head(iris)
+
+
+
+
+
+write.csv(rrr, file="rrr.csv")
+
+head(rrr)
+
+s <- rbind(australia, australia, create_new_ids = TRUE)
 
 
 Running a glmm on the networks using elevation and season as fixed effects and functional groups as random effects
@@ -220,29 +331,243 @@ gamma <- fitdistr(rrr$d.t, "gamma")
 qqp(rrr$d.t, "gamma", shape = gamma$estimate[[1]], rate = gamma$estimate[[2]])
 
 
-lm<-lmer(d ~ season + elevation + (1 | ID), data = rrr,
+table(rrr$ID)
+head(rrr)
+rrr
+
+
+######################
+
+
+rrr
+table(rrr$ID)
+
+rrr
+
+#######################
+
+library(bipartite)
+data<-read.table("CLDRYFINAL20.12.2018.txt", h=T)
+attributes<-read.table("attr.CLDRYFINAL20.12.2018.txt", h=T)
+
+table(attributes[,2])
+
+x<-gsub("Coleoptera","tan1", attributes[,2])
+x<-gsub("Blattodea","white", x)
+x<-gsub("Chiroptera","grey", x)
+x<-gsub("Diptera__h_fly_","blue", x)
+x<-gsub("Diptera__unsp_","cornsilk", x)
+x<-gsub("Hymenoptera__bee_","brown1",x)
+x<-gsub("Hymenoptera__eusocial_bee_","yellow",x)
+x<-gsub("Hymenoptera__carpenters_", "khaki1", x)
+x<-gsub("Lepidoptera__butterfly_","darkorange", x)
+x<-gsub("Lepidoptera__moth_","darkorchid",x)
+x<-gsub("Lepidoptera__sphingid_","burlywood", x)
+x<-gsub("Hymenoptera__wasp_","deeppink", x)
+x<-gsub("Passeriformes","lightblue", x)
+x<-gsub("Small_mammals","olivedrab1",x)
+x<-gsub("Plant","darkgreen",x)
+
+plotweb(dd, col.high =x,labsize = 0.6, col.low="darkgreen", text.rot=90, low.y=1.0, high.y=1.4, col.interaction="black")
+legend(0.7, 0.75, legend=c("Coleoptera", "Blattodea", "Chiroptera", "Diptera__h_fly_", 
+                          "Diptera__unsp_","Hymenoptera__bee_", "Hymenoptera__eusocial_bee_",
+                          "Hymenoptera__carpenters_", "Lepidoptera__butterfly_",
+                          "Lepidoptera__moth_", "Lepidoptera__sphingid_", "Hymenoptera__wasp_",
+                          "Passeriformes", "Small_mammals", "Plant"
+                          ), 
+       col=c("tan1", "white", "grey", "blue", "cornsilk", "brown1", "yellow", "khaki1",
+               "darkorange", "darkorchid", "burlywood",
+             "deeppink", "lightblue", "olivedrab1","darkgreen"), pch=c(15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15),
+       pt.cex=1.0,cex=0.6, bty="n", title="Pollination network - Crater Lake (Dry season)")
+
+
+
+######
+library(bipartite)
+data1<-read.table("CLWETFINAL20.12.2018.txt", h=T)
+attributes1<-read.table("attr.CLWETFINAL20.12.2018.txt", h=T)
+table(attributes1[,2])
+
+
+x<-gsub("Coleoptera","tan1", attributes1[,2])
+x<-gsub("Blattodea","white", x)
+x<-gsub("Diptera__h_fly_","blue", x)
+x<-gsub("Diptera__unsp_","cornsilk", x)
+x<-gsub("Hymenoptera__bee_","brown1",x)
+x<-gsub("Hymenoptera__eusocial_bee_","yellow",x)
+x<-gsub("Lepidoptera__butterfly_","darkorange", x)
+x<-gsub("Lepidoptera__moth_","darkorchid",x)
+x<-gsub("Lepidoptera__sphingid_","burlywood", x)
+x<-gsub("Passeriformes","lightblue", x)
+x<-gsub("Small_mammals","olivedrab1",x)
+x<-gsub("Plant","darkgreen",x)
+
+plotweb(i, col.high =x,labsize = 0.6, col.low="darkgreen", text.rot=90, low.y=1.0, high.y=1.4, col.interaction="black")
+legend(0.7, 0.75, legend=c("Coleoptera", "Blattodea", "Diptera__h_fly_", 
+                           "Diptera__unsp_","Hymenoptera__bee_", "Hymenoptera__eusocial_bee_",
+                            "Lepidoptera__butterfly_",
+                           "Lepidoptera__moth_", "Lepidoptera__sphingid_", 
+                           "Passeriformes", "Small_mammals", "Plant"
+), 
+col=c("tan1", "white", "blue", "cornsilk", "brown1", "yellow", 
+      "darkorange", "darkorchid", "burlywood",
+       "lightblue", "olivedrab1","darkgreen"), pch=c(15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15),
+pt.cex=1.0,cex=0.6, bty="n", title="Pollination network - Crater Lake (Wet season)")
+
+
+
+######
+library(bipartite)
+data2<-read.table("MSDRYFINAL20.12.2018.txt", h=T)
+attributes2<-read.table("attr.MSDRYFINAL20.12.2018.txt", h=T)
+table(attributes2[,2])
+
+
+x<-gsub("Coleoptera","tan1", attributes2[,2])
+x<-gsub("Diptera__h_fly_","blue", x)
+x<-gsub("Diptera__unsp_","cornsilk", x)
+x<-gsub("Hymenoptera__bee_","brown1",x)
+x<-gsub("Hymenoptera__wasp_", "deeppink",x)
+x<-gsub("Hymenoptera__eusocial_bee_","yellow",x)
+x<-gsub("Lepidoptera__butterfly_","darkorange", x)
+x<-gsub("Lepidoptera__moth_","darkorchid",x)
+x<-gsub("Lepidoptera__sphingid_","burlywood", x)
+x<-gsub("Passeriformes","lightblue", x)
+x<-gsub("Small_mammals","olivedrab1",x)
+x<-gsub("Plant","darkgreen",x)
+
+plotweb(y, col.high =x,labsize = 0.6, col.low="darkgreen", text.rot=90, low.y=1.0, high.y=1.4, col.interaction="black")
+legend(0.7, 0.75, legend=c("Coleoptera", "Diptera__h_fly_", 
+                           "Diptera__unsp_","Hymenoptera__bee_", "Hymenoptera__wasp_", "Hymenoptera__eusocial_bee_",
+                           "Lepidoptera__butterfly_",
+                           "Lepidoptera__moth_", "Lepidoptera__sphingid_", 
+                           "Passeriformes", "Small_mammals", "Plant"
+), 
+col=c("tan1", "blue", "cornsilk", "brown1", "deeppink", "yellow", 
+      "darkorange", "darkorchid", "burlywood",
+      "lightblue", "olivedrab1","darkgreen"), pch=c(15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15),
+pt.cex=1.0,cex=0.6, bty="n", title="Pollination network - Mann's Spring (Dry season)")
+
+
+
+######
+library(bipartite)
+data3<-read.table("MSWETFINAL20.12.2018.txt", h=T)
+attributes3<-read.table("attr.MSWETFINAL20.12.2018.txt", h=T)
+table(attributes3[,2])
+
+
+x<-gsub("Coleoptera","tan1", attributes3[,2])
+x<-gsub("Diptera__h_fly_","blue", x)
+x<-gsub("Diptera__unsp_","cornsilk", x)
+x<-gsub("Hymenoptera__bee_","brown1",x)
+x<-gsub("Hymenoptera__eusocial_bee_","yellow",x)
+x<-gsub("Lepidoptera__moth_","darkorchid",x)
+x<-gsub("Lepidoptera__sphingid_","burlywood", x)
+x<-gsub("Passeriformes","lightblue", x)
+x<-gsub("Plant","darkgreen",x)
+
+plotweb(z, col.high =x,labsize = 0.6, col.low="darkgreen", text.rot=90, low.y=1.0, high.y=1.4, col.interaction="black")
+legend(0.7, 0.75, legend=c("Coleoptera", "Diptera__h_fly_", 
+                           "Diptera__unsp_","Hymenoptera__bee_", "Hymenoptera__eusocial_bee_",
+                          
+                           "Lepidoptera__moth_", "Lepidoptera__sphingid_", 
+                           "Passeriformes",  "Plant"
+), 
+col=c("tan1", "blue", "cornsilk", "brown1", "yellow", 
+       "darkorchid", "burlywood",
+      "lightblue", "darkgreen"), pch=c(15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15),
+pt.cex=1.0,cex=0.6, bty="n", title="Pollination network - Mann's Spring (Wet season)")
+
+
+
+
+
+
+
+
+
+
+
+
+x<-gsub("Coleoptera","aliceblue", attributes[,2])
+x<-gsub("Blattodea","white", x)
+x<-gsub("Diptera__h_fly_","blue", x)
+x<-gsub("Diptera__unsp_","cornsilk", x)
+x<-gsub("Hymenoptera__bee_","brown1",x)
+x<-gsub("Hymenoptera__eusocial_bee_","yellow",x)
+x<-gsub("Lepidoptera__butterfly_","darkorange", x)
+x<-gsub("Lepidoptera__moth_","darkorchid",x)
+x<-gsub("Lepidoptera__sphingid_","burlywood", x)
+x<-gsub("Passeriformes","grey61", x)
+x<-gsub("Small_mammals","olivedrab1",x)
+x<-gsub("Plant","darkgreen",x)
+
+plotweb(data1, col.high =x, col.low="darkgreen", text.rot=90, low.y=1.0, high.y=1.4)
+legend(0.5, 0.7, legend=c("Coleoptera", "Blattodea", "Diptera__h_fly_", 
+                          "Diptera__unsp_","Hymenoptera__bee_", "Hymenoptera__eusocial_bee_",
+                          "Lepidoptera__butterfly_",
+                          "Lepidoptera__moth_", "Lepidoptera__sphingid_", 
+                          "Passeriformes", "Small_mammals", "Plant"
+), 
+col=c("aliceblue", "white", "blue", "cornsilk", "brown1", "yellow",
+      "darkorange", "darkorchid", "burlywood",
+      "grey61", "olivedrab1","darkgreen"), pch=c(15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15),
+pt.cex=1.0,cex=0.7, bty="n", title="Pollination network - Crater Lake (Wet season)")
+
+
+
+
+
+
+table(rrr1$species)
+
+
+
+############################
+
+
+lm<-lmer(dprime ~ season + elevation + (1 | ID), data = rrr1,
          REML = FALSE)
+lm
 
 summary(lm)
 Anova(lm)
 coef(lm) #coefficients of the fixed effects
+fixef(lmer(dprime ~ season + elevation + (1 | ID), data = rrr1,
+           REML = FALSE))
 ranef(lm) #coefficients of the random effects
+
+
+ms.lsm<-lsmeans(lm, ~ season + elevation)
+plot(ms.lsm, layout =c(2, 3), horizontal=FALSE)
+plot(ms.lsm, layout =c(4, 5), horizontal=FALSE)
+
+
+m2 <- lmer(log(bt) ~ nutrient_add * nutrient_hetero  *  water_add * water_hetero +
+             (water_hetero * water_add | block), data=d)
+m2.lsm <- lsmeans(m2, ~ water_add * water_hetero   | nutrient_hetero  * nutrient_add)
+plot(m2.lsm, layout =c(2, 3), horizontal=TRUE)
+plot(m2.lsm, layout =c(2, 3), horizontal=FALSE)
+
+
+
 
 #Explores the variation in the values of the coefficients of the random effects
 lm1<-ranef(lm)
-dotplot (lm1, rrr)
+dotplot (lm1, rrr1)
 
 dotplot(ranef(lm,condVar=TRUE),
         lattice.options=list(layout=c(1,2)))
 
 
 head(rrr)
-ggplot(lm1, aes(x=d, y=ID)) + 
+ggplot(lm1, aes(x=dprime, y=ID)) + 
   geom_boxplot()+
   geom_dotplot(binaxis='y', stackdir='center')
 
 
-qqmath (lm1, rrr)
+qqmath (lm1, rrr1)
 as.data.frame(lm1)
 
 str(lm)
@@ -253,10 +578,10 @@ plot(lm) # it is expected to be scattered with no obvious pattern at all
 
 
 #Testing for the significance of random effects by subsequent removal of effects
-bothlmm<-lmer(d~ elevation + season + (1 | ID), data=rrr, REML=FALSE) 
-noseasonlmm <- lmer(d ~ elevation + (1 | ID), data = rrr, REML = FALSE)
-noelevationlmm <- lmer(d ~ season + (1 | ID), data = rrr, REML = FALSE)
-nofixedlmm <- lmer(d ~ 1 + (1 | ID), data = rrr, REML = FALSE)
+bothlmm<-lmer(dprime~ elevation + season + (1 | ID), data=rrr1, REML=FALSE) 
+noseasonlmm <- lmer(dprime ~ elevation + (1 | ID), data = rrr1, REML = FALSE)
+noelevationlmm <- lmer(dprime ~ season + (1 | ID), data = rrr1, REML = FALSE)
+nofixedlmm <- lmer(dprime ~ 1 + (1 | ID), data = rrr1, REML = FALSE)
 anova(noseasonlmm, noelevationlmm, nofixedlmm, bothlmm)
 
 
@@ -271,13 +596,51 @@ ranef(lmm)
 as.data.frame(coef(lmm))
 as.data.frame(ranef(lmm))
 
+plot(lmm)
+
+
+#Runs a GLM for the samples
+fit <- glm(d ~ season + elevation, data=rrr, family=gaussian)
+anova(fit)
+summary(fit) #display results
+hoslem.test(rrr$d, fitted(fit)) 
+
+
+
+
+
+
+
+
+
+
+########
+table(rrr1$ID)
+mmmm<-filter(rrr1, ID == "Lepidoptera__moth_")
+mmmm
+lmm<-lmer(dprime ~ season + elevation + (1 | species), data = mmmm,
+          REML = FALSE)
+summary(lmm)
+Anova(lmm)
+coef(lmm)
+ranef(lmm)
+
+install.packages("sjPlot")
+library(sjPlot)
+sjp.lmer(lmm)
+
+sjp.lmer(lmm)
+
+
+
+
 
 #Running a glmm on one of the functional groups of the networks using elevation and season 
 #while selecting only for one functional group (Hymenoptera_bee_)
 table(rrr$ID)
-mmmm<-filter(rrr, ID == "Small_mammals")
+mmmm<-filter(rrr, ID == "Plant")
 mmmm
-lmm<-lmer(d ~ season + elevation + (1 | species), data = mmmm,
+lmm<-lmer(dprime ~ season + elevation + (1 | species), data = mmmm,
           REML = FALSE)
 summary(lmm)
 Anova(lmm)
@@ -4869,9 +5232,9 @@ list(ddd)
 visitors<-read.table("visitors.txt", h=T)
 visitors1<-as.matrix(visitors)
 barplot(visitors1, xlab="Sampling sites", ylab="Abundance", col = c("red","green", "yellow", 
-                                                                            "blue", "black", "grey",
-                                                                            "white", "orange", "green",
-                                                                            "purple", "pink", "brown"), beside=TRUE)
+                                                                    "blue", "black", "grey",
+                                                                    "white", "orange", "green",
+                                                                    "purple", "pink", "brown"), beside=TRUE)
 legend("top",
        c("Chiroptera","Coleoptera", "Diptera_h_fly_", "Diptera_unsp_", "Hymenoptera_Carpenters_",
          "Hymenoptera_bee_", "Hymenoptera_eusocial_bee_", "Lepidoptera_butterfly_", "Lepidoptera_moth_",
@@ -4919,8 +5282,8 @@ barplot(tmp1234,
 
 
 https://www.datamentor.io/r-programming/bar-plot/
-
-counts <- table(mtcars$vs, mtcars$gear)
+  
+  counts <- table(mtcars$vs, mtcars$gear)
 barplot(yy4, main="Car Distribution by Gears and VS",
         xlab="Number of Gears", col=c("darkblue","red"),
         legend = rownames(yy4))
@@ -5527,3 +5890,5 @@ for (i in 1:1000) {
     V(q)$label <- NA
     
     plot(q) 
+    
+    
