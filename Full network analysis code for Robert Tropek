@@ -531,8 +531,12 @@ lm<-lmer(dprime ~ season + elevation + (1 | ID), data = rrr1,
          REML = FALSE)
 lm
 
+
 summary(lm)
 Anova(lm)
+
+
+
 coef(lm) #coefficients of the fixed effects
 fixef(lmer(dprime ~ season + elevation + (1 | ID), data = rrr1,
            REML = FALSE))
@@ -546,246 +550,255 @@ plot(ms.lsm, layout =c(2, 3), horizontal=FALSE)
 plot(ms.lsm, horizontal=FALSE)
 
 
+
+plot(ms.lsm, layout(matrix(c(1,2,3,4),2,2)), horizontal=FALSE) # optional layout 
+
+layout(matrix(c(1,2,3,4),2,2))
+plot(ms.lsm)
+
+
 ####################################
 ###Makes the GLMM for each function group
 #Lepidoptera Moth
 table(rrr1$ID)
-mmmm<-filter(rrr1, ID == "Lepidoptera__moth_")
+mmmm1<-filter(rrr1, ID == "Lepidoptera__moth_")
 head(mmmm)
-lm<-lmer(dprime ~ season + elevation + (1 | species), data = mmmm,
+lm1<-lmer(dprime ~ season + elevation + (1 | species), data = mmmm1,
          REML = FALSE)
-summary(lm)
-Anova(lm)
-coef(lm) #coefficients of the fixed effects
-fixef(lmer(dprime ~ season + elevation + (1 | species), data = mmmm,
+summary(lm1)
+Anova(lm1)
+coef(lm1) #coefficients of the fixed effects
+fixef(lmer(dprime ~ season + elevation + (1 | species), data = mmmm1,
            REML = FALSE))
-ranef(lm) #coefficients of the random effects
+ranef(lm1) #coefficients of the random effects
 
-ms.lsm<-lsmeans(lm, ~ season + elevation)
+ms.lsm1<-lsmeans(lm1, ~ season + elevation)
 head(rrr1)
-ms.lsm
-plot(ms.lsm, layout =c(2, 3), horizontal=FALSE)
-plot(ms.lsm, horizontal=FALSE)
+ms.lsm1
+plot(ms.lsm1, layout =c(2, 3), horizontal=FALSE)
+plot(ms.lsm1, horizontal=FALSE)
 
 
 #Lepidoptera Butterfly
 table(rrr1$ID)
-mmmm<-filter(rrr1, ID == "Lepidoptera__butterfly_")
-head(mmmm)
-lm<-lmer(dprime ~ season + elevation + (1 | species), data = mmmm,
+mmmm2<-filter(rrr1, ID == "Lepidoptera__butterfly_")
+head(mmmm2)
+lm2<-lmer(dprime ~ season + elevation + (1 | species), data = mmmm2,
          REML = FALSE)
-summary(lm)
-Anova(lm)
-coef(lm) #coefficients of the fixed effects
-fixef(lmer(dprime ~ season + elevation + (1 | species), data = mmmm,
+summary(lm2)
+Anova(lm2)
+coef(lm2) #coefficients of the fixed effects
+fixef(lmer(dprime ~ season + elevation + (1 | species), data = mmmm2,
            REML = FALSE))
-ranef(lm) #coefficients of the random effects
+ranef(lm2) #coefficients of the random effects
 
-ms.lsm<-lsmeans(lm, ~ season + elevation)
+ms.lsm2<-lsmeans(lm2, ~ season + elevation)
 head(rrr1)
-ms.lsm
-plot(ms.lsm, layout =c(2, 3), horizontal=FALSE)
-plot(ms.lsm, horizontal=FALSE)
+ms.lsm2
+plot(ms.lsm2, layout =c(2, 3), horizontal=FALSE)
+plot(ms.lsm2, horizontal=FALSE)
 
 
 #Lepidoptera Sphingid
 table(rrr1$ID)
-mmmm<-filter(rrr1, ID == "Lepidoptera__sphingid_")
-head(mmmm)
-lm<-lmer(dprime ~ season + elevation + (1 | species), data = mmmm,
+mmmm3<-filter(rrr1, ID == "Lepidoptera__sphingid_")
+head(mmmm3)
+lm3<-lmer(dprime ~ season + elevation + (1 | species), data = mmmm3,
          REML = FALSE)
-summary(lm)
-Anova(lm)
-coef(lm) #coefficients of the fixed effects
-fixef(lmer(dprime ~ season + elevation + (1 | species), data = mmmm,
+summary(lm3)
+Anova(lm3)
+coef(lm3) #coefficients of the fixed effects
+fixef(lmer(dprime ~ season + elevation + (1 | species), data = mmmm3,
            REML = FALSE))
-ranef(lm) #coefficients of the random effects
+ranef(lm3) #coefficients of the random effects
 
-ms.lsm<-lsmeans(lm, ~ season + elevation)
+ms.lsm3<-lsmeans(lm, ~ season + elevation)
 head(rrr1)
-ms.lsm
-plot(ms.lsm, layout =c(2, 3), horizontal=FALSE)
-plot(ms.lsm, horizontal=FALSE)
+ms.lsm3
+plot(ms.lsm3, layout =c(2, 3), horizontal=FALSE)
+plot(ms.lsm3, horizontal=FALSE)
 
 
 #Climber
 table(rrr1$ID)
-mmmm<-filter(rrr1, ID == "Climber")
-head(mmmm)
-lm<-lmer(dprime ~ season + elevation + (1 | species), data = mmmm,
+mmmm4<-filter(rrr1, ID == "Climber")
+head(mmmm4)
+mmmm4
+lm4<-lmer(dprime ~ season + elevation + (1 | species), data = mmmm4,
          REML = FALSE)
-summary(lm)
-Anova(lm)
-coef(lm) #coefficients of the fixed effects
-fixef(lmer(dprime ~ season + elevation + (1 | species), data = mmmm,
+summary(lm4)
+Anova(lm4)
+coef(lm4) #coefficients of the fixed effects
+fixef(lmer(dprime ~ season + elevation + (1 | species), data = mmmm4,
            REML = FALSE))
-ranef(lm) #coefficients of the random effects
+ranef(lm4) #coefficients of the random effects
 
-ms.lsm<-lsmeans(lm, ~ season + elevation)
+ms.lsm4<-lsmeans(lm4, ~ season + elevation)
 head(rrr1)
-ms.lsm
-plot(ms.lsm, layout =c(2, 3), horizontal=FALSE)
-plot(ms.lsm, horizontal=FALSE)
+ms.lsm4
+plot(ms.lsm4, layout =c(2, 3), horizontal=FALSE)
+plot(ms.lsm4, horizontal=FALSE)
 
 
 #Coleoptera
 table(rrr1$ID)
-mmmm<-filter(rrr1, ID == "Coleoptera")
-head(mmmm)
-lm<-lmer(dprime ~ season + elevation + (1 | species), data = mmmm,
+mmmm5<-filter(rrr1, ID == "Coleoptera")
+head(mmmm5)
+mmmm5
+lm5<-lmer(dprime ~ season + elevation + (1 | species), data = mmmm5,
          REML = FALSE)
-summary(lm)
-Anova(lm)
-coef(lm) #coefficients of the fixed effects
-fixef(lmer(dprime ~ season + elevation + (1 | species), data = mmmm,
+summary(lm5)
+Anova(lm5)
+coef(lm5) #coefficients of the fixed effects
+fixef(lmer(dprime ~ season + elevation + (1 | species), data = mmmm5,
            REML = FALSE))
-ranef(lm) #coefficients of the random effects
+ranef(lm5) #coefficients of the random effects
 
-ms.lsm<-lsmeans(lm, ~ season + elevation)
+ms.lsm5<-lsmeans(lm5, ~ season + elevation)
 head(rrr1)
-ms.lsm
-plot(ms.lsm, layout =c(2, 3), horizontal=FALSE)
-plot(ms.lsm, horizontal=FALSE)
+ms.lsm5
+plot(ms.lsm5, layout =c(2, 3), horizontal=FALSE)
+`plot(ms.lsm5, horizontal=FALSE)
 
 
 #Diptera__h_fly_
 table(rrr1$ID)
-mmmm<-filter(rrr1, ID == "Diptera__h_fly_")
-head(mmmm)
-lm<-lmer(dprime ~ season + elevation + (1 | species), data = mmmm,
+mmmm6<-filter(rrr1, ID == "Diptera__h_fly_")
+head(mmmm6)
+lm6<-lmer(dprime ~ season + elevation + (1 | species), data = mmmm6,
          REML = FALSE)
-summary(lm)
-Anova(lm)
-coef(lm) #coefficients of the fixed effects
-fixef(lmer(dprime ~ season + elevation + (1 | species), data = mmmm,
+summary(lm6)
+Anova(lm6)
+coef(lm6) #coefficients of the fixed effects
+fixef(lmer(dprime ~ season + elevation + (1 | species), data = mmmm6,
            REML = FALSE))
-ranef(lm) #coefficients of the random effects
+ranef(lm6) #coefficients of the random effects
 
-ms.lsm<-lsmeans(lm, ~ season + elevation)
+ms.lsm6<-lsmeans(lm6, ~ season + elevation)
 head(rrr1)
-ms.lsm
-plot(ms.lsm, layout =c(2, 3), horizontal=FALSE)
-plot(ms.lsm, horizontal=FALSE)
+ms.lsm6
+plot(ms.lsm6, layout =c(2, 3), horizontal=FALSE)
+plot(ms.lsm6, horizontal=FALSE)
 
 
 #Diptera__unsp_
 table(rrr1$ID)
-mmmm<-filter(rrr1, ID == "Diptera__unsp_")
-head(mmmm)
-lm<-lmer(dprime ~ season + elevation + (1 | species), data = mmmm,
+mmmm7<-filter(rrr1, ID == "Diptera__unsp_")
+head(mmmm7)
+lm7<-lmer(dprime ~ season + elevation + (1 | species), data = mmmm7,
          REML = FALSE)
-summary(lm)
-Anova(lm)
-coef(lm) #coefficients of the fixed effects
-fixef(lmer(dprime ~ season + elevation + (1 | species), data = mmmm,
+summary(lm7)
+Anova(lm7)
+coef(lm7) #coefficients of the fixed effects
+fixef(lmer(dprime ~ season + elevation + (1 | species), data = mmmm7,
            REML = FALSE))
-ranef(lm) #coefficients of the random effects
+ranef(lm7) #coefficients of the random effects
 
-ms.lsm<-lsmeans(lm, ~ season + elevation)
+ms.lsm7<-lsmeans(lm7, ~ season + elevation)
 head(rrr1)
-ms.lsm
-plot(ms.lsm, layout =c(2, 3), horizontal=FALSE)
-plot(ms.lsm, horizontal=FALSE)
+ms.lsm7
+plot(ms.lsm7, layout =c(2, 3), horizontal=FALSE)
+plot(ms.lsm7, horizontal=FALSE)
 
 
 #Epiphyte
 table(rrr1$ID)
-mmmm<-filter(rrr1, ID == "Epiphyte")
-head(mmmm)
-lm<-lmer(dprime ~ season + elevation + (1 | species), data = mmmm,
+mmmm8<-filter(rrr1, ID == "Epiphyte")
+head(mmmm8)
+lm8<-lmer(dprime ~ season + elevation + (1 | species), data = mmmm8,
          REML = FALSE)
-summary(lm)
-Anova(lm)
-coef(lm) #coefficients of the fixed effects
-fixef(lmer(dprime ~ season + elevation + (1 | species), data = mmmm,
+summary(lm8)
+Anova(lm8)
+coef(lm8) #coefficients of the fixed effects
+fixef(lmer(dprime ~ season + elevation + (1 | species), data = mmmm8,
            REML = FALSE))
-ranef(lm) #coefficients of the random effects
+ranef(lm8) #coefficients of the random effects
 
-ms.lsm<-lsmeans(lm, ~ season + elevation)
+ms.lsm<-lsmeans(lm8, ~ season + elevation)
 head(rrr1)
-ms.lsm
-plot(ms.lsm, layout =c(2, 3), horizontal=FALSE)
-plot(ms.lsm, horizontal=FALSE)
+ms.lsm8
+plot(ms.lsm8, layout =c(2, 3), horizontal=FALSE)
+plot(ms.lsm8, horizontal=FALSE)
 
 
 #Herb
 table(rrr1$ID)
-mmmm<-filter(rrr1, ID == "Herb")
-head(mmmm)
-lm<-lmer(dprime ~ season + elevation + (1 | species), data = mmmm,
+mmmm9<-filter(rrr1, ID == "Herb")
+head(mmmm9)
+lm9<-lmer(dprime ~ season + elevation + (1 | species), data = mmmm9,
          REML = FALSE)
-summary(lm)
-Anova(lm)
-coef(lm) #coefficients of the fixed effects
-fixef(lmer(dprime ~ season + elevation + (1 | species), data = mmmm,
+summary(lm9)
+Anova(lm9)
+coef(lm9) #coefficients of the fixed effects
+fixef(lmer(dprime ~ season + elevation + (1 | species), data = mmmm9,
            REML = FALSE))
-ranef(lm) #coefficients of the random effects
+ranef(lm9) #coefficients of the random effects
 
-ms.lsm<-lsmeans(lm, ~ season + elevation)
+ms.lsm9<-lsmeans(lm9, ~ season + elevation)
 head(rrr1)
-ms.lsm
-plot(ms.lsm, layout =c(2, 3), horizontal=FALSE)
-plot(ms.lsm, horizontal=FALSE)
+ms.lsm9
+plot(ms.lsm9, layout =c(2, 3), horizontal=FALSE)
+plot(ms.lsm9, horizontal=FALSE)
 
 
 #Hymenoptera__bee_
 table(rrr1$ID)
-mmmm<-filter(rrr1, ID == "Hymenoptera__bee_")
-head(mmmm)
-lm<-lmer(dprime ~ season + elevation + (1 | species), data = mmmm,
+mmmm10<-filter(rrr1, ID == "Hymenoptera__bee_")
+head(mmmm10)
+lm10<-lmer(dprime ~ season + elevation + (1 | species), data = mmmm10,
          REML = FALSE)
-summary(lm)
-Anova(lm)
-coef(lm) #coefficients of the fixed effects
-fixef(lmer(dprime ~ season + elevation + (1 | species), data = mmmm,
+summary(lm10)
+Anova(lm10)
+coef(lm10) #coefficients of the fixed effects
+fixef(lmer(dprime ~ season + elevation + (1 | species), data = mmmm10,
            REML = FALSE))
-ranef(lm) #coefficients of the random effects
+ranef(lm10) #coefficients of the random effects
 
-ms.lsm<-lsmeans(lm, ~ season + elevation)
+ms.lsm10<-lsmeans(lm10, ~ season + elevation)
 head(rrr1)
-ms.lsm
-plot(ms.lsm, layout =c(2, 3), horizontal=FALSE)
-plot(ms.lsm, horizontal=FALSE)
+ms.lsm10
+plot(ms.lsm10, layout =c(2, 3), horizontal=FALSE)
+plot(ms.lsm10, horizontal=FALSE)
 
 
 #Passeriformes
 table(rrr1$ID)
-mmmm<-filter(rrr1, ID == "Passeriformes")
-head(mmmm)
-lm<-lmer(dprime ~ season + elevation + (1 | species), data = mmmm,
+mmmm11<-filter(rrr1, ID == "Passeriformes")
+head(mmmm11)
+lm11<-lmer(dprime ~ season + elevation + (1 | species), data = mmmm11,
          REML = FALSE)
-summary(lm)
-Anova(lm)
-coef(lm) #coefficients of the fixed effects
-fixef(lmer(dprime ~ season + elevation + (1 | species), data = mmmm,
+summary(lm11)
+Anova(lm11)
+coef(lm11) #coefficients of the fixed effects
+fixef(lmer(dprime ~ season + elevation + (1 | species), data = mmmm11,
            REML = FALSE))
-ranef(lm) #coefficients of the random effects
+ranef(lm11) #coefficients of the random effects
 
-ms.lsm<-lsmeans(lm, ~ season + elevation)
+ms.lsm11<-lsmeans(lm11, ~ season + elevation)
 head(rrr1)
-ms.lsm
-plot(ms.lsm, layout =c(2, 3), horizontal=FALSE)
-plot(ms.lsm, horizontal=FALSE)
+ms.lsm11
+plot(ms.lsm11, layout =c(2, 3), horizontal=FALSE)
+plot(ms.lsm11, horizontal=FALSE)
 
 
 #Shrub
 table(rrr1$ID)
-mmmm<-filter(rrr1, ID == "Shrub")
-head(mmmm)
-lm<-lmer(dprime ~ season + elevation + (1 | species), data = mmmm,
+mmmm12<-filter(rrr1, ID == "Shrub")
+head(mmmm12)
+lm12<-lmer(dprime ~ season + elevation + (1 | species), data = mmmm12,
          REML = FALSE)
-summary(lm)
-Anova(lm)
-coef(lm) #coefficients of the fixed effects
-fixef(lmer(dprime ~ season + elevation + (1 | species), data = mmmm,
+summary(lm12)
+Anova(lm12)
+coef(lm12) #coefficients of the fixed effects
+fixef(lmer(dprime ~ season + elevation + (1 | species), data = mmmm12,
            REML = FALSE))
-ranef(lm) #coefficients of the random effects
+ranef(lm12) #coefficients of the random effects
 
-ms.lsm<-lsmeans(lm, ~ season + elevation)
+ms.lsm12<-lsmeans(lm12, ~ season + elevation)
 head(rrr1)
-ms.lsm
-plot(ms.lsm, layout =c(2, 3), horizontal=FALSE)
-plot(ms.lsm, horizontal=FALSE)
+ms.lsm12
+plot(ms.lsm12, layout =c(2, 3), horizontal=FALSE)
+plot(ms.lsm12, horizontal=FALSE)
 
 
 
@@ -6146,6 +6159,11 @@ for (i in 1:1000) {
     
     plot(q) 
     
+    -- 
+      p.s.: I am currently participating in the competition about the best Wildlife Blog of the Year with the story about the first time that I saw the endemic and threatened bat species of the photo below. If you like my story in the link below, please vote for me and help me to share it! You will be also helping to raise awareness about bat conservation! Voting goes until 28/12.
+    
+    The cutest bat in the world
+    https://www.terra-incognita.travel/2018/the-cutest-bat-in-the-world-by-hernani-fernandes-magalhaes-de-oliveira
     
     Dr. Hernani F. M. Oliveira
     Postdoctoral researcher - Charles University (Prague - Czech Republic)
