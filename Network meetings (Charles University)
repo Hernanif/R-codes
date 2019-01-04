@@ -1,0 +1,33 @@
+#Network group meetings
+
+#Datasets from the bipartite package
+artic_alpine_Sweeden<-elberling1999 
+Snowy_Mountains_Australia<-inouye1988
+Junker<-junker2013
+Beech_Forest_Japan<-kato1990 
+Ellesmere_Island_Canada<-kevan1970
+Meadow_UK<-memmott1999
+Melville_Island_Canada<-mosquin1967 
+North_Carolina<-motten1982
+AzoresII<-olesen2002aigrettes 
+Azores<-olesen2002flores 
+alpine_meadow_Canada<-olito2015 
+grassland_SA<-ollerton2003
+
+#Exploratory analysis
+head(artic_alpine_Sweeden)
+barplot(colSums(artic_alpine_Sweeden))
+barplot(rowSums(artic_alpine_Sweeden))
+sum(artic_alpine_Sweeden)
+mean(artic_alpine_Sweeden)
+rnorm
+
+#Few a new matrix with the exact values of the old one but at random
+for (i in 1:ncol(artic_alpine_Sweeden)){
+  (j in 1:nrow(artic_alpine_Sweeden)){
+    newmatrix[i,j]<-
+  }
+  
+}
+  
+artic_alpine_Sweeden
