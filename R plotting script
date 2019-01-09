@@ -81,7 +81,6 @@ attributes1<-read.table("attr.CLDRYplants26.12.txt", h=T)
 attributes1
 table(attributes1[,2])
 
-
 V(d1)$ID=as.character(attributes1$ID[match(V(d1)$name,attributes1$Node_ID)]) # This code says to create a vertex attribute called "Sex" by extracting the value of the column "Sex" in the attributes file when the Bird ID number matches the vertex name.
 V(d1)$ID
 
@@ -138,14 +137,14 @@ title("Full mutualistic network - Bat-Plants - Kamada.Kawai")
 
 
 legend(-2.4, 0.8, legend=c("Climber", "Epiphyte", "Herb", "Shrub", "Tree", "Blattodea", "Chiroptera", 
-                           "Coleoptera", "Diptera__h_fly_", "Diptera__unsp_", "Hymenoptera__beee_", 
-                           "Hymenoptera__wasp_", "Hymenoptera__eusocial_bee_", 
-                           "Hymenoptera__carpenters_", "Lepidoptera__butterfly_", "Lepidoptera__moth_",
-                           "Lepidoptera__sphingid_", "Passeriformes", "Small_mammals"), 
+                           "Coleoptera", "Diptera (hoverfly)", "Diptera (unspecified)", "Hymenoptera (bee)", 
+                           "Hymenoptera (wasp)", "Hymenoptera (eusocial bee)", 
+                           "Hymenoptera (carpenter bee)", "Lepidoptera (butterfly)", "Lepidoptera (moth)",
+                           "Lepidoptera (sphingid)", "Passeriformes", "Small mammals"), 
        col=c("green", "green4", "lightgreen", "lightseagreen", "olivedrab4", "khaki1", "black", 
-             "alceblue", "blue", "cornsilk", "brown1", "grey87", "yellow", "darkgreen",  "darkorange",
+             "aliceblue", "blue", "cornsilk", "brown1", "grey87", "yellow", "darkgreen",  "darkorange",
              "darkorchid", "deeppink", "grey61", "indianred3"
-             ), pch=c(16, 16, 16, 16, 16, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15  ),
+       ), pch=c(16, 16, 16, 16, 16, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15  ),
        pt.cex=1.0,cex=1.0, bty="n", title="Pollination network - Crater Lake (Dry season)")
 
 
@@ -569,6 +568,5 @@ legend("topright",
                 "white", "orange", "green",
                 "purple", "pink", "brown"),  pt.cex=0.7,cex=0.7
 )
-
 
 
