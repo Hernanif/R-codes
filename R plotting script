@@ -569,3 +569,6 @@ legend("topright",
                 "white", "orange", "green",
                 "purple", "pink", "brown"),  pt.cex=0.7,cex=0.7
 )
+
+
+
