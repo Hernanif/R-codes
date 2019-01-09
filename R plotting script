@@ -130,6 +130,7 @@ V(d1)$shape=gsub("Small_mammals","square",V(d1)$shape) #Bats will be black
 plot.igraph(d1, vertex.size=3, vertex.label=NA)
 plot(d1, vertex.size=3, vertex.label=NA)
 plot.igraph(d1, vertex.size=3, vertex.label=NA, layout=layout.fruchterman.reingold)
+plot.igraph(d1, vertex.size=3, vertex.label=NA, layout=layout.kamada.kawai)
 
 #PLot the network
 plot.igraph(d1, axes=FALSE, layout=layout.kamada.kawai, edge.width=E(d1)$weight/2, edge.color="grey", vertex.size=5)
@@ -192,6 +193,7 @@ V(d2)$shape=gsub("Small_mammals","square",V(d2)$shape) #Bats will be black
 plot.igraph(d2, vertex.size=3, vertex.label=NA)
 plot(d2, vertex.size=3, vertex.label=NA)
 plot.igraph(d2, vertex.size=3, vertex.label=NA, layout=layout.fruchterman.reingold)
+plot.igraph(d2, vertex.size=3, vertex.label=NA, layout=layout.kamada.kawai)
 
 #PLot the network
 plot.igraph(d2, axes=FALSE, layout=layout.kamada.kawai, edge.width=E(d1)$weight/2, edge.color="grey", vertex.size=5)
@@ -214,43 +216,56 @@ attributes3<-read.table("attr.MSDRYplants26.12.txt", h=T)
 
 table(attributes3[,2])
 
-
 V(d3)$ID=as.character(attributes3$ID[match(V(d3)$name,attributes3$Node_ID)]) # This code says to create a vertex attribute called "Sex" by extracting the value of the column "Sex" in the attributes file when the Bird ID number matches the vertex name.
 V(d3)$ID
 
 V(d3)$color=V(d3)$ID #assign the "Sex" attribute as the vertex color
-V(d3)$color=gsub("Plant","green",V(d3)$color) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
+V(d3)$color=gsub("Climber","green",V(d3)$color) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
+V(d3)$color=gsub("Epiphyte","green4",V(d3)$color) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
+V(d3)$color=gsub("Herb","lightgreen",V(d3)$color) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
+V(d3)$color=gsub("Shrub","lightseagreen",V(d3)$color) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
+V(d3)$color=gsub("Tree","olivedrab4",V(d3)$color) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
 V(d3)$color=gsub("Coleoptera","aliceblue",V(d3)$color) #Bats will be black
 V(d3)$color=gsub("Diptera__h_fly_","blue",V(d3)$color) #Bats will be black
 V(d3)$color=gsub("Diptera__unsp_","cornsilk",V(d3)$color) #Bats will be black
 V(d3)$color=gsub("Hymenoptera__bee_","brown1",V(d3)$color) #Bats will be black
-V(d3)$color=gsub("Hymenoptera__eusocialbee_","yellow",V(d3)$color) #Bats will be black
+V(d3)$color=gsub("Hymenoptera__wasp_","grey87",V(d3)$color) #Bats will be black
+V(d3)$color=gsub("Hymenoptera__eusocial_bee_","yellow",V(d3)$color) #Bats will be black
 V(d3)$color=gsub("Lepidoptera__butterfly_","darkorange",V(d3)$color) #Bats will be black
 V(d3)$color=gsub("Lepidoptera__moth_","darkorchid",V(d3)$color) #Bats will be black
 V(d3)$color=gsub("Lepidoptera__sphingid_","deeppink",V(d3)$color) #Bats will be black
 V(d3)$color=gsub("Passeriformes","grey61",V(d3)$color) #Bats will be black
-V(d3)$color=gsub("Small_mammals","olivedrab1",V(d3)$color) #Bats will be black
+V(d3)$color=gsub("Small_mammals","indianred3",V(d3)$color) #Bats will be black
 
 V(d3)$shape=V(d3)$ID
-V(d3)$shape=gsub("Plant","circle",V(d3)$shape) #Bats will be black
+V(d3)$shape=V(d3)$ID #assign the "Sex" attribute as the vertex shape
+V(d3)$shape=gsub("Climber","circle",V(d3)$shape) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
+V(d3)$shape=gsub("Epiphyte","circle",V(d3)$shape) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
+V(d3)$shape=gsub("Herb","circle",V(d3)$shape) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
+V(d3)$shape=gsub("Shrub","circle",V(d3)$shape) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
+V(d3)$shape=gsub("Tree","circle",V(d3)$shape) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
 V(d3)$shape=gsub("Coleoptera","square",V(d3)$shape) #Bats will be black
 V(d3)$shape=gsub("Diptera__h_fly_","square",V(d3)$shape) #Bats will be black
 V(d3)$shape=gsub("Diptera__unsp_","square",V(d3)$shape) #Bats will be black
 V(d3)$shape=gsub("Hymenoptera__bee_","square",V(d3)$shape) #Bats will be black
-V(d3)$shape=gsub("Hymenoptera__eusocialbee_","square",V(d3)$shape) #Bats will be black
+V(d3)$shape=gsub("Hymenoptera__wasp_","square",V(d3)$shape) #Bats will be black
+V(d3)$shape=gsub("Hymenoptera__eusocial_bee_","square",V(d3)$shape) #Bats will be black
 V(d3)$shape=gsub("Lepidoptera__butterfly_","square",V(d3)$shape) #Bats will be black
 V(d3)$shape=gsub("Lepidoptera__moth_","square",V(d3)$shape) #Bats will be black
 V(d3)$shape=gsub("Lepidoptera__sphingid_","square",V(d3)$shape) #Bats will be black
 V(d3)$shape=gsub("Passeriformes","square",V(d3)$shape) #Bats will be black
 V(d3)$shape=gsub("Small_mammals","square",V(d3)$shape) #Bats will be black
 
+
 plot.igraph(d3, vertex.size=3, vertex.label=NA)
 plot(d3, vertex.size=3, vertex.label=NA)
+plot.igraph(d3, vertex.size=3, vertex.label=NA, layout=layout.fruchterman.reingold)
 plot.igraph(d3, vertex.size=3, vertex.label=NA, layout=layout.kamada.kawai)
 
 
+
 #PLot the network
-plot.igraph(d3, axes=FALSE, layout=layout.kamada.kawai, edge.width=E(d1)$weight/2, edge.color="grey", vertex.size=5)
+plot.igraph(d3, axes=FALSE, layout=layout.kamada.kawai, edge.width=E(d3)$weight/2, edge.color="grey", vertex.size=5)
 title("Full mutualistic network - Bat-Plants - Kamada.Kawai")
 
 
@@ -273,35 +288,43 @@ V(d4)$ID=as.character(attributes4$ID[match(V(d4)$name,attributes4$Node_ID)]) # T
 V(d4)$ID
 
 V(d4)$color=V(d4)$ID #assign the "Sex" attribute as the vertex color
-V(d4)$color=gsub("Plant","green",V(d4)$color) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
+V(d4)$color=gsub("Climber","green",V(d4)$color) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
+V(d4)$color=gsub("Epiphyte","green4",V(d4)$color) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
+V(d4)$color=gsub("Herb","lightgreen",V(d4)$color) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
+V(d4)$color=gsub("Shrub","lightseagreen",V(d4)$color) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
+V(d4)$color=gsub("Tree","olivedrab4",V(d4)$color) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
 V(d4)$color=gsub("Coleoptera","aliceblue",V(d4)$color) #Bats will be black
-V(d4)$color=gsub("Diptera_h_fly_","blue",V(d4)$color) #Bats will be black
-V(d4)$color=gsub("Diptera_unsp_","cornsilk",V(d4)$color) #Bats will be black
-V(d4)$color=gsub("Hymenoptera_bee_","brown1",V(d4)$color) #Bats will be black
-V(d4)$color=gsub("Hymenoptera_eusocial_bee_","yellow",V(d4)$color) #Bats will be black
-V(d4)$color=gsub("Lepidoptera_moth_","darkorchid",V(d4)$color) #Bats will be black
-V(d4)$color=gsub("Lepidoptera_sphingid_","deeppink",V(d4)$color) #Bats will be black
+V(d4)$color=gsub("Diptera__h_fly_","blue",V(d4)$color) #Bats will be black
+V(d4)$color=gsub("Diptera__unsp_","cornsilk",V(d4)$color) #Bats will be black
+V(d4)$color=gsub("Hymenoptera__bee_","brown1",V(d4)$color) #Bats will be black
+V(d4)$color=gsub("Hymenoptera__eusocial_bee_","yellow",V(d4)$color) #Bats will be black
+V(d4)$color=gsub("Lepidoptera__moth_","darkorchid",V(d4)$color) #Bats will be black
+V(d4)$color=gsub("Lepidoptera__sphingid_","deeppink",V(d4)$color) #Bats will be black
 V(d4)$color=gsub("Passeriformes","grey61",V(d4)$color) #Bats will be black
 
-V(d4)$shape=V(d4)$ID
-V(d4)$shape=gsub("Plant","circle",V(d4)$shape) #Bats will be black
+V(d4)$shape=V(d4)$ID #assign the "Sex" attribute as the vertex shape
+V(d4)$shape=gsub("Climber","circle",V(d4)$shape) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
+V(d4)$shape=gsub("Epiphyte","circle",V(d4)$shape) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
+V(d4)$shape=gsub("Herb","circle",V(d4)$shape) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
+V(d4)$shape=gsub("Shrub","circle",V(d4)$shape) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
+V(d4)$shape=gsub("Tree","circle",V(d4)$shape) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
 V(d4)$shape=gsub("Coleoptera","square",V(d4)$shape) #Bats will be black
-V(d4)$shape=gsub("Diptera_h_fly_","square",V(d4)$shape) #Bats will be black
-V(d4)$shape=gsub("Diptera_unsp_","square",V(d4)$shape) #Bats will be black
-V(d4)$shape=gsub("Hymenoptera_bee_","square",V(d4)$shape) #Bats will be black
-V(d4)$shape=gsub("Hymenoptera_eusocial_bee_","square",V(d4)$shape) #Bats will be black
-V(d4)$shape=gsub("Lepidoptera_moth_","square",V(d4)$shape) #Bats will be black
-V(d4)$shape=gsub("Lepidoptera_sphingid_","square",V(d4)$shape) #Bats will be black
+V(d4)$shape=gsub("Diptera__h_fly_","square",V(d4)$shape) #Bats will be black
+V(d4)$shape=gsub("Diptera__unsp_","square",V(d4)$shape) #Bats will be black
+V(d4)$shape=gsub("Hymenoptera__bee_","square",V(d4)$shape) #Bats will be black
+V(d4)$shape=gsub("Hymenoptera__eusocial_bee_","square",V(d4)$shape) #Bats will be black
+V(d4)$shape=gsub("Lepidoptera__moth_","square",V(d4)$shape) #Bats will be black
+V(d4)$shape=gsub("Lepidoptera__sphingid_","square",V(d4)$shape) #Bats will be black
 V(d4)$shape=gsub("Passeriformes","square",V(d4)$shape) #Bats will be black
-
 
 plot.igraph(d4, vertex.size=3, vertex.label=NA)
 plot(d4, vertex.size=3, vertex.label=NA)
+plot.igraph(d4, vertex.size=3, vertex.label=NA, layout=layout.fruchterman.reingold)
 plot.igraph(d4, vertex.size=3, vertex.label=NA, layout=layout.kamada.kawai)
 
 
 #PLot the network
-plot.igraph(d4, axes=FALSE, layout=layout.kamada.kawai, edge.width=E(d1)$weight/2, edge.color="grey", vertex.size=5)
+plot.igraph(d4, axes=FALSE, layout=layout.kamada.kawai, edge.width=E(d4)$weight/2, edge.color="grey", vertex.size=5)
 title("Full mutualistic network - Bat-Plants - Kamada.Kawai")
 
 
