@@ -1,6 +1,6 @@
 ##### R script for plotting 
 #Written by: Hernani Oliveira
-#Date: 18/12/2018
+#Date: 09/01/2018
 
 install.packages("data.table")
 
