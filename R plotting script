@@ -81,34 +81,45 @@ attributes1<-read.table("attr.CLDRYplants26.12.txt", h=T)
 attributes1
 table(attributes1[,2])
 
-attributes1[1]
 
 V(d1)$ID=as.character(attributes1$ID[match(V(d1)$name,attributes1$Node_ID)]) # This code says to create a vertex attribute called "Sex" by extracting the value of the column "Sex" in the attributes file when the Bird ID number matches the vertex name.
 V(d1)$ID
 
 V(d1)$color=V(d1)$ID #assign the "Sex" attribute as the vertex color
-V(d1)$color=gsub("Plant","green",V(d1)$color) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
+V(d1)$color=gsub("Climber","green",V(d1)$color) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
+V(d1)$color=gsub("Epiphyte","green4",V(d1)$color) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
+V(d1)$color=gsub("Herb","lightgreen",V(d1)$color) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
+V(d1)$color=gsub("Shrub","lightseagreen",V(d1)$color) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
+V(d1)$color=gsub("Tree","olivedrab4",V(d1)$color) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
+V(d1)$color=gsub("Blattodea","khaki1",V(d1)$color) #Bats will be black
 V(d1)$color=gsub("Chiroptera","black",V(d1)$color) #Bats will be black
 V(d1)$color=gsub("Coleoptera","aliceblue",V(d1)$color) #Bats will be black
 V(d1)$color=gsub("Diptera__h_fly_","blue",V(d1)$color) #Bats will be black
 V(d1)$color=gsub("Diptera__unsp_","cornsilk",V(d1)$color) #Bats will be black
 V(d1)$color=gsub("Hymenoptera__bee_","brown1",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Hymenoptera__wasp_","grey87",V(d1)$color) #Bats will be black
 V(d1)$color=gsub("Hymenoptera__eusocial_bee_","yellow",V(d1)$color) #Bats will be black
 V(d1)$color=gsub("Hymenoptera__carpenters_","darkgreen",V(d1)$color) #Bats will be black
 V(d1)$color=gsub("Lepidoptera__butterfly_","darkorange",V(d1)$color) #Bats will be black
 V(d1)$color=gsub("Lepidoptera__moth_","darkorchid",V(d1)$color) #Bats will be black
 V(d1)$color=gsub("Lepidoptera__sphingid_","deeppink",V(d1)$color) #Bats will be black
 V(d1)$color=gsub("Passeriformes","grey61",V(d1)$color) #Bats will be black
-V(d1)$color=gsub("Small_mammals","olivedrab1",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Small_mammals","indianred3",V(d1)$color) #Bats will be black
 
 V(d1)$shape=V(d1)$ID
-V(d1)$shape=gsub("Plant","circle",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Climber","circle",V(d1)$shape) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
+V(d1)$shape=gsub("Epiphyte","circle",V(d1)$shape) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
+V(d1)$shape=gsub("Herb","circle",V(d1)$shape) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
+V(d1)$shape=gsub("Shrub","circle",V(d1)$shape) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
+V(d1)$shape=gsub("Tree","circle",V(d1)$shape) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
+V(d1)$shape=gsub("Blattodea","square",V(d1)$shape) #Bats will be black
 V(d1)$shape=gsub("Chiroptera","square",V(d1)$shape) #Bats will be black
 V(d1)$shape=gsub("Coleoptera","square",V(d1)$shape) #Bats will be black
 V(d1)$shape=gsub("Diptera__h_fly_","square",V(d1)$shape) #Bats will be black
 V(d1)$shape=gsub("Diptera__unsp_","square",V(d1)$shape) #Bats will be black
-V(d1)$shape=gsub("Hymenoptera__eusocial_bee_","square",V(d1)$shape) #Bats will be black
 V(d1)$shape=gsub("Hymenoptera__bee_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Hymenoptera__wasp_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Hymenoptera__eusocial_bee_","square",V(d1)$shape) #Bats will be black
 V(d1)$shape=gsub("Hymenoptera__carpenters_","square",V(d1)$shape) #Bats will be black
 V(d1)$shape=gsub("Lepidoptera__butterfly_","square",V(d1)$shape) #Bats will be black
 V(d1)$shape=gsub("Lepidoptera__moth_","square",V(d1)$shape) #Bats will be black
@@ -118,7 +129,7 @@ V(d1)$shape=gsub("Small_mammals","square",V(d1)$shape) #Bats will be black
 
 plot.igraph(d1, vertex.size=3, vertex.label=NA)
 plot(d1, vertex.size=3, vertex.label=NA)
-plot.igraph(d1, vertex.size=3, vertex.label=NA, layout=layout.kamada.kawai)
+plot.igraph(d1, vertex.size=3, vertex.label=NA, layout=layout.fruchterman.reingold)
 
 #PLot the network
 plot.igraph(d1, axes=FALSE, layout=layout.kamada.kawai, edge.width=E(d1)$weight/2, edge.color="grey", vertex.size=5)
@@ -487,6 +498,7 @@ tmp1234
 yy3<-t(tmp1234)
 yy3
 
+tmp1234$Orders
 
 #Transforms into a matrix and changes the NAs to 0s
 yy4<-as.matrix(tmp1234)
@@ -500,12 +512,14 @@ cols = c(2, 3, 4, 5)
 yy4[,cols] = apply(yy4[,cols], 2, function(x) as.numeric(as.character(x)))
 
 yy4
-matrix(as.numeric(unlist(yy4[,2:5])),nrow=nrow(yy4))
+yy5<-matrix(as.numeric(unlist(yy4[,2:5])),nrow=nrow(yy4))
+colnames(yy5)<-c("CLDRY", "CLWET", "MSDRY", "MSWET")
 
-yy4
+rownames(yy5)<-tmp1234$Orders
+yy5
 
 #Makes a bar plot with the frequencies of each group within each elevation and season
-barplot(yy4, xlab="Sampling sites", ylab="Frequency of visitation", col = c("red","green", "yellow", 
+barplot(yy5, xlab="Sampling sites", ylab="Frequency of visitation", col = c("red","green", "yellow", 
                                                                             "blue", "black", "grey",
                                                                             "white", "orange", "green",
                                                                             "purple", "pink", "brown"), beside=TRUE)
@@ -518,4 +532,6 @@ legend("topright",
                 "white", "orange", "green",
                 "purple", "pink", "brown"),  pt.cex=0.7,cex=0.7
 )
+
+
 
