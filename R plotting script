@@ -1,0 +1,521 @@
+##### R script for plotting 
+#Written by: Hernani Oliveira
+#Date: 18/12/2018
+
+install.packages("data.table")
+
+library(tidyr)
+library(bipartite)
+library(igraph)
+library(ade4)
+library(vegan)
+library(ggplot2)
+library(qgraph)
+library(car)
+library(intergraph)
+library(BiRewire)
+library(data.table)
+library(glmm)
+library(MASS)
+library(lme4)
+library(mlmRev)
+library(agridat)
+library(MCMCglmm)
+library(CINNA)
+library(nlme)
+library(taRifx)
+library(gtools)
+library(dplyr)
+library(ResourceSelection)
+library(iNEXT)
+
+
+#Opening the final data 
+CLDRYFINAL20.12.2018<-read.table("CLDRYFINAL20.12.2018.txt", h=T)
+attr.CLDRYplants26.12<-read.table("attr.CLDRYplants26.12.txt", h=T)
+CLWETFINAL20.12.2018<-read.table("CLWETFINAL20.12.2018.txt", h=T)
+attr.CLWETplants26.12<-read.table("attr.CLWETplants26.12.txt", h=T)
+MSDRYFINAL20.12.2018<-read.table("MSDRYFINAL20.12.2018.txt", h=T)
+attr.MSDRYplants26.12<-read.table("attr.MSDRYplants26.12.txt", h=T)
+MSWETFINAL20.12.2018<-read.table("MSWETFINAL20.12.2018.txt", h=T)
+attr.MSWETplants26.12<-read.table("attr.MSWETplants26.12.txt", h=T)
+
+
+#Multplying the data by 10000 and rounding the data
+dd<-CLDRYFINAL20.12.2018*10000000
+q<-apply(dd, 2, round)
+head(q)
+
+t<-CLWETFINAL20.12.2018*10000000
+i<-apply(t, 2, round)
+head(i)
+
+x<-MSDRYFINAL20.12.2018*10000000
+y<-apply(x, 2, round)
+head(y)
+
+w<-MSWETFINAL20.12.2018*10000000
+z<-apply(w, 2, round)
+head(z)
+
+
+#Checking if the conversion of the matrix and rounding was made right by counting the number of numbers higher than zero 
+length(which(dd>0))
+length(which(q>0))
+
+length(which(t>0))
+length(which(i>0))
+
+length(which(x>0))
+length(which(y>0))
+
+length(which(w>0))
+length(which(z>0))
+
+#####################################
+
+data<-read.table("CLDRYFINAL20.12.2018.txt", h=T)
+d1<-graph_from_incidence_matrix(data, weight=TRUE)
+attributes1<-read.table("attr.CLDRYplants26.12.txt", h=T)
+
+attributes1
+table(attributes1[,2])
+
+attributes1[1]
+
+V(d1)$ID=as.character(attributes1$ID[match(V(d1)$name,attributes1$Node_ID)]) # This code says to create a vertex attribute called "Sex" by extracting the value of the column "Sex" in the attributes file when the Bird ID number matches the vertex name.
+V(d1)$ID
+
+V(d1)$color=V(d1)$ID #assign the "Sex" attribute as the vertex color
+V(d1)$color=gsub("Plant","green",V(d1)$color) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
+V(d1)$color=gsub("Chiroptera","black",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Coleoptera","aliceblue",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Diptera__h_fly_","blue",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Diptera__unsp_","cornsilk",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Hymenoptera__bee_","brown1",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Hymenoptera__eusocial_bee_","yellow",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Hymenoptera__carpenters_","darkgreen",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Lepidoptera__butterfly_","darkorange",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Lepidoptera__moth_","darkorchid",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Lepidoptera__sphingid_","deeppink",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Passeriformes","grey61",V(d1)$color) #Bats will be black
+V(d1)$color=gsub("Small_mammals","olivedrab1",V(d1)$color) #Bats will be black
+
+V(d1)$shape=V(d1)$ID
+V(d1)$shape=gsub("Plant","circle",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Chiroptera","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Coleoptera","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Diptera__h_fly_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Diptera__unsp_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Hymenoptera__eusocial_bee_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Hymenoptera__bee_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Hymenoptera__carpenters_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Lepidoptera__butterfly_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Lepidoptera__moth_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Lepidoptera__sphingid_","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Passeriformes","square",V(d1)$shape) #Bats will be black
+V(d1)$shape=gsub("Small_mammals","square",V(d1)$shape) #Bats will be black
+
+plot.igraph(d1, vertex.size=3, vertex.label=NA)
+plot(d1, vertex.size=3, vertex.label=NA)
+plot.igraph(d1, vertex.size=3, vertex.label=NA, layout=layout.kamada.kawai)
+
+#PLot the network
+plot.igraph(d1, axes=FALSE, layout=layout.kamada.kawai, edge.width=E(d1)$weight/2, edge.color="grey", vertex.size=5)
+title("Full mutualistic network - Bat-Plants - Kamada.Kawai")
+
+
+legend(-2.4, 0.8, legend=c("Plant", "Coleoptera", "Diptera Hoverfly", "Diptera Unspecified", "Hymenoptera (bee)",
+                           "Hymenoptera (carpenters)", "Lepidoptera (butterfly)", "Lepidoptera (moth)",
+                           "Lepidoptera (sphingid)", "Passeriformes", "Small mammals"), 
+       col=c("green", "aliceblue", "blue", "cornsilk", "brown1", "darkgreen", "darkorange", "darkorchid",
+             "deeppink", "grey61", "olivedrab1"), pch=c(16, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15),
+       pt.cex=1.0,cex=1.0, bty="n", title="Pollination network - Crater Lake (Dry season)")
+
+######################################
+
+data2<-read.table("CLWETFINAL20.12.2018.txt", h=T)
+d2<-graph_from_incidence_matrix(data2, weight=TRUE)
+attributes2<-read.table("attr.CLWETplants26.12.txt", h=T)
+
+table(attributes[,2])
+
+V(d2)$ID=as.character(attributes2$ID[match(V(d2)$name,attributes2$Node_ID)]) # This code says to create a vertex attribute called "Sex" by extracting the value of the column "Sex" in the attributes file when the Bird ID number matches the vertex name.
+V(d2)$ID
+
+V(d2)$color=V(d2)$ID #assign the "Sex" attribute as the vertex color
+V(d2)$color=gsub("Plant","green",V(d2)$color) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
+V(d2)$color=gsub("Coleoptera","aliceblue",V(d2)$color) #Bats will be black
+V(d2)$color=gsub("Diptera__h_fly_","blue",V(d2)$color) #Bats will be black
+V(d2)$color=gsub("Diptera__unsp_","cornsilk",V(d2)$color) #Bats will be black
+V(d2)$color=gsub("Hymenoptera__bee_","brown1",V(d2)$color) #Bats will be black
+V(d2)$color=gsub("Hymenoptera__eusocial_bee_","yellow",V(d2)$color) #Bats will be black
+V(d2)$color=gsub("Lepidoptera__butterfly_","darkorange",V(d2)$color) #Bats will be black
+V(d2)$color=gsub("Lepidoptera__moth_","darkorchid",V(d2)$color) #Bats will be black
+V(d2)$color=gsub("Lepidoptera__sphingid_","deeppink",V(d2)$color) #Bats will be black
+V(d2)$color=gsub("Passeriformes","grey61",V(d2)$color) #Bats will be black
+V(d2)$color=gsub("Small_mammals","olivedrab1",V(d2)$color) #Bats will be black
+
+V(d2)$shape=V(d2)$ID
+V(d2)$shape=gsub("Plant","circle",V(d2)$shape) #Bats will be black
+V(d2)$shape=gsub("Coleoptera","square",V(d2)$shape) #Bats will be black
+V(d2)$shape=gsub("Diptera__h_fly_","square",V(d2)$shape) #Bats will be black
+V(d2)$shape=gsub("Diptera__unsp_","square",V(d2)$shape) #Bats will be black
+V(d2)$shape=gsub("Hymenoptera__bee_","square",V(d2)$shape) #Bats will be black
+V(d2)$shape=gsub("Hymenoptera__eusocial_bee_","square",V(d2)$shape) #Bats will be black
+V(d2)$shape=gsub("Lepidoptera__butterfly_","square",V(d2)$shape) #Bats will be black
+V(d2)$shape=gsub("Lepidoptera__moth_","square",V(d2)$shape) #Bats will be black
+V(d2)$shape=gsub("Lepidoptera__sphingid_","square",V(d2)$shape) #Bats will be black
+V(d2)$shape=gsub("Passeriformes","square",V(d2)$shape) #Bats will be black
+V(d2)$shape=gsub("Small_mammals","square",V(d2)$shape) #Bats will be black
+
+plot.igraph(d2, vertex.size=3, vertex.label=NA)
+plot(d2, vertex.size=3, vertex.label=NA)
+plot.igraph(d2, vertex.size=3, vertex.label=NA, layout=layout.kamada.kawai)
+plot.igraph(d2, vertex.size=3, vertex.label=NA, layout=layout.kamada.kawai)
+
+#PLot the network
+plot.igraph(d2, axes=FALSE, layout=layout.kamada.kawai, edge.width=E(d1)$weight/2, edge.color="grey", vertex.size=5)
+title("Full mutualistic network - Bat-Plants - Kamada.Kawai")
+
+
+legend(-2.4, 0.8, legend=c("Plant", "Coleoptera", "Diptera Hoverfly", "Diptera Unspecified", "Hymenoptera (bee)",
+                           "Hymenoptera (eusocial bee)", "Lepidoptera (butterfly)", "Lepidoptera (moth)",
+                           "Lepidoptera (sphingid)", "Passeriformes", "Small mammals"), 
+       col=c("green", "aliceblue", "blue", "cornsilk", "brown1", "yellow", "darkorange", "darkorchid",
+             "deeppink", "grey61", "olivedrab1"), pch=c(16, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15),
+       pt.cex=1.0,cex=1.0, bty="n", title="Pollination network - Crater Lake (Wet season)")
+
+
+################################
+
+data3<-read.table("MSDRYFINAL20.12.2018.txt", h=T)
+d3<-graph_from_incidence_matrix(data3, weight=TRUE)
+attributes3<-read.table("attr.MSDRYplants26.12.txt", h=T)
+
+table(attributes3[,2])
+
+
+V(d3)$ID=as.character(attributes3$ID[match(V(d3)$name,attributes3$Node_ID)]) # This code says to create a vertex attribute called "Sex" by extracting the value of the column "Sex" in the attributes file when the Bird ID number matches the vertex name.
+V(d3)$ID
+
+V(d3)$color=V(d3)$ID #assign the "Sex" attribute as the vertex color
+V(d3)$color=gsub("Plant","green",V(d3)$color) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
+V(d3)$color=gsub("Coleoptera","aliceblue",V(d3)$color) #Bats will be black
+V(d3)$color=gsub("Diptera__h_fly_","blue",V(d3)$color) #Bats will be black
+V(d3)$color=gsub("Diptera__unsp_","cornsilk",V(d3)$color) #Bats will be black
+V(d3)$color=gsub("Hymenoptera__bee_","brown1",V(d3)$color) #Bats will be black
+V(d3)$color=gsub("Hymenoptera__eusocialbee_","yellow",V(d3)$color) #Bats will be black
+V(d3)$color=gsub("Lepidoptera__butterfly_","darkorange",V(d3)$color) #Bats will be black
+V(d3)$color=gsub("Lepidoptera__moth_","darkorchid",V(d3)$color) #Bats will be black
+V(d3)$color=gsub("Lepidoptera__sphingid_","deeppink",V(d3)$color) #Bats will be black
+V(d3)$color=gsub("Passeriformes","grey61",V(d3)$color) #Bats will be black
+V(d3)$color=gsub("Small_mammals","olivedrab1",V(d3)$color) #Bats will be black
+
+V(d3)$shape=V(d3)$ID
+V(d3)$shape=gsub("Plant","circle",V(d3)$shape) #Bats will be black
+V(d3)$shape=gsub("Coleoptera","square",V(d3)$shape) #Bats will be black
+V(d3)$shape=gsub("Diptera__h_fly_","square",V(d3)$shape) #Bats will be black
+V(d3)$shape=gsub("Diptera__unsp_","square",V(d3)$shape) #Bats will be black
+V(d3)$shape=gsub("Hymenoptera__bee_","square",V(d3)$shape) #Bats will be black
+V(d3)$shape=gsub("Hymenoptera__eusocialbee_","square",V(d3)$shape) #Bats will be black
+V(d3)$shape=gsub("Lepidoptera__butterfly_","square",V(d3)$shape) #Bats will be black
+V(d3)$shape=gsub("Lepidoptera__moth_","square",V(d3)$shape) #Bats will be black
+V(d3)$shape=gsub("Lepidoptera__sphingid_","square",V(d3)$shape) #Bats will be black
+V(d3)$shape=gsub("Passeriformes","square",V(d3)$shape) #Bats will be black
+V(d3)$shape=gsub("Small_mammals","square",V(d3)$shape) #Bats will be black
+
+plot.igraph(d3, vertex.size=3, vertex.label=NA)
+plot(d3, vertex.size=3, vertex.label=NA)
+plot.igraph(d3, vertex.size=3, vertex.label=NA, layout=layout.kamada.kawai)
+
+
+#PLot the network
+plot.igraph(d3, axes=FALSE, layout=layout.kamada.kawai, edge.width=E(d1)$weight/2, edge.color="grey", vertex.size=5)
+title("Full mutualistic network - Bat-Plants - Kamada.Kawai")
+
+
+legend(-2.4, 0.8, legend=c("Plant", "Coleoptera", "Diptera Hoverfly", "Diptera Unspecified", "Hymenoptera (bee)",
+                           "Hymenoptera (eusocial bee)", "Lepidoptera (butterfly)", "Lepidoptera (moth)",
+                           "Lepidoptera (sphingid)", "Passeriformes", "Small mammals"), 
+       col=c("green", "aliceblue", "blue", "cornsilk", "brown1", "yellow", "darkorange", "darkorchid",
+             "deeppink", "grey61", "olivedrab1"), pch=c(16, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15),
+       pt.cex=1.0,cex=1.0, bty="n", title="Pollination network - Mann's Spring (Dry season)")
+
+#########################################################
+
+data4<-read.table("MSWETFINAL20.12.2018.txt", h=T)
+d4<-graph_from_incidence_matrix(data4, weight=TRUE)
+attributes4<-read.table("attr.MSWETplants26.12.txt", h=T)
+
+table(attributes4[,2])
+
+V(d4)$ID=as.character(attributes4$ID[match(V(d4)$name,attributes4$Node_ID)]) # This code says to create a vertex attribute called "Sex" by extracting the value of the column "Sex" in the attributes file when the Bird ID number matches the vertex name.
+V(d4)$ID
+
+V(d4)$color=V(d4)$ID #assign the "Sex" attribute as the vertex color
+V(d4)$color=gsub("Plant","green",V(d4)$color) #Plants will be green #gsub() function replaces all matches of a string, if the parameter is a string vector, returns a string vector of the same length and with the same attributes (after possible coercion to character). Elements of string vectors which are not substituted will be returned unchanged (including any declared encoding). 
+V(d4)$color=gsub("Coleoptera","aliceblue",V(d4)$color) #Bats will be black
+V(d4)$color=gsub("Diptera_h_fly_","blue",V(d4)$color) #Bats will be black
+V(d4)$color=gsub("Diptera_unsp_","cornsilk",V(d4)$color) #Bats will be black
+V(d4)$color=gsub("Hymenoptera_bee_","brown1",V(d4)$color) #Bats will be black
+V(d4)$color=gsub("Hymenoptera_eusocial_bee_","yellow",V(d4)$color) #Bats will be black
+V(d4)$color=gsub("Lepidoptera_moth_","darkorchid",V(d4)$color) #Bats will be black
+V(d4)$color=gsub("Lepidoptera_sphingid_","deeppink",V(d4)$color) #Bats will be black
+V(d4)$color=gsub("Passeriformes","grey61",V(d4)$color) #Bats will be black
+
+V(d4)$shape=V(d4)$ID
+V(d4)$shape=gsub("Plant","circle",V(d4)$shape) #Bats will be black
+V(d4)$shape=gsub("Coleoptera","square",V(d4)$shape) #Bats will be black
+V(d4)$shape=gsub("Diptera_h_fly_","square",V(d4)$shape) #Bats will be black
+V(d4)$shape=gsub("Diptera_unsp_","square",V(d4)$shape) #Bats will be black
+V(d4)$shape=gsub("Hymenoptera_bee_","square",V(d4)$shape) #Bats will be black
+V(d4)$shape=gsub("Hymenoptera_eusocial_bee_","square",V(d4)$shape) #Bats will be black
+V(d4)$shape=gsub("Lepidoptera_moth_","square",V(d4)$shape) #Bats will be black
+V(d4)$shape=gsub("Lepidoptera_sphingid_","square",V(d4)$shape) #Bats will be black
+V(d4)$shape=gsub("Passeriformes","square",V(d4)$shape) #Bats will be black
+
+
+plot.igraph(d4, vertex.size=3, vertex.label=NA)
+plot(d4, vertex.size=3, vertex.label=NA)
+plot.igraph(d4, vertex.size=3, vertex.label=NA, layout=layout.kamada.kawai)
+
+
+#PLot the network
+plot.igraph(d4, axes=FALSE, layout=layout.kamada.kawai, edge.width=E(d1)$weight/2, edge.color="grey", vertex.size=5)
+title("Full mutualistic network - Bat-Plants - Kamada.Kawai")
+
+
+legend(-2.4, 0.8, legend=c("Plant", "Coleoptera", "Diptera Hoverfly", "Diptera Unspecified", "Hymenoptera (bee)",
+                           "Hymenoptera (eusocial bee)", "Lepidoptera (moth)",
+                           "Lepidoptera (sphingid)", "Passeriformes"), 
+       col=c("green", "aliceblue", "blue", "cornsilk", "brown1", "yellow", "darkorchid",
+             "deeppink", "grey61"), pch=c(16, 15, 15, 15, 15, 15, 15, 15, 15),
+       pt.cex=1.0,cex=1.0, bty="n", title="Pollination network - Mann's Spring (Wet season)")
+
+#######
+
+#Calculates the specialisation values for the species at each level of the network
+e<-dfun(q) #values for the lower trophic level of the network
+u<-dfun(t(q)) #values for the higher trophic level of the network
+
+m<-dfun(i) #values for the lower trophic level of the network
+n<-dfun(t(i)) #values for the higher trophic level of the network
+
+v<-dfun(y) #values for the lower trophic level of the network
+b<-dfun(t(y)) #values for the higher trophic level of the network
+
+j<-dfun(z) #values for the lower trophic level of the network
+a<-dfun(t(z)) #values for the higher trophic level of the network
+
+e1<-as.data.frame(e)
+u1<-as.data.frame(u)
+
+m1<-as.data.frame(m)
+n1<-as.data.frame(n)
+
+v1<-as.data.frame(v)
+b1<-as.data.frame(b)
+
+j1<-as.data.frame(j)
+a1<-as.data.frame(a)
+
+#Delete the columns with the names below from the data frame
+e1$d <- NULL
+e1$dmin <- NULL
+e1$dmax <- NULL
+e1
+
+u1$d <- NULL
+u1$dmin <- NULL
+u1$dmax <- NULL
+u1
+
+m1$d <- NULL
+m1$dmin <- NULL
+m1$dmax <- NULL
+m1
+
+n1$d <- NULL
+n1$dmin <- NULL
+n1$dmax <- NULL
+n1
+
+v1$d <- NULL
+v1$dmin <- NULL
+v1$dmax <- NULL
+v1
+
+b1$d <- NULL
+b1$dmin <- NULL
+b1$dmax <- NULL
+b1
+
+j1$d <- NULL
+j1$dmin <- NULL
+j1$dmax <- NULL
+j1
+
+a1$d <- NULL
+a1$dmin <- NULL
+a1$dmax <- NULL
+a1
+
+#Joins the data from both data frames into just one
+qq<-rbind(e1, u1)
+qq$season<-"dry"
+qq$elevation<-"cl"
+qq
+
+ss<-rbind(m1, n1)
+ss$season<-"wet"
+ss$elevation<-"cl"
+ss
+
+yy<-rbind(v1, b1)
+yy$season<-"dry"
+yy$elevation<-"ms"
+yy
+
+hh<-rbind(j1, a1)
+hh$season<-"wet"
+hh$elevation<-"ms"
+hh
+
+###### Obs.: Something is missing in this coding
+qq <- cbind(species = rownames(qq), qq)
+colnames(attr.CLDRYplants26.12) <- c("species", "ID")
+qq$ID <- attr.CLDRYplants26.12$ID[match(qq$species, attr.CLDRYplants26.12$species)]
+head(qq)
+qq
+
+ss <- cbind(species = rownames(ss), ss)
+colnames(attr.CLWETplants26.12) <- c("species", "ID")
+ss$ID <- attr.CLWETplants26.12$ID[match(ss$species, attr.CLWETplants26.12$species)]
+head(ss)
+ss
+
+yy <- cbind(species = rownames(yy), yy)
+colnames(attr.MSDRYplants26.12) <- c("species", "ID")
+yy$ID <- attr.MSDRYplants26.12$ID[match(yy$species, attr.MSDRYplants26.12$species)]
+head(yy)
+yy
+
+hh <- cbind(species = rownames(hh), hh)
+colnames(attr.MSWETplants26.12) <- c("species", "ID")
+hh$ID <- attr.MSWETplants26.12$ID[match(hh$species, attr.MSWETplants26.12$species)]
+head(hh)
+hh
+
+rrr1<-rbind(yy, hh, qq, ss)
+head(rrr1)
+
+
+####Merges all functional groups into one data frame to make a histogram of frequency afterwards
+#Changes the colnames of the matrix from species to functional groups
+dim(qq)
+table(qq$ID)
+which(qq$ID %in% c("Blattodea", "Chiroptera", "Coleoptera", "Diptera__h_fly_", "Diptera__unsp_", "Hymenoptera__bee_",
+                   "Hymenoptera__eusocial_bee_", "Hymenoptera__wasp_", "Lepidoptera__butterfly_",
+                   "Lepidoptera__moth_", "Lepidoptera__sphingid_", "Passeriformes", "Hymenoptera__carpernters_", "Small_mammals"))
+
+ncol(q)
+colnames(q)<-qq[41:261,5]
+colnames(q)
+qm<-t(rowsum(t(q), group = colnames(q), na.rm = T))
+qm1<-as.data.frame(colSums(qm))
+qm1
+
+table(ss$ID)
+which(ss$ID %in% c("Blattodea","Coleoptera", "Diptera__h_fly_", "Diptera__unsp_", "Hymenoptera__bee_",
+                   "Hymenoptera__eusocial_bee_", "Lepidoptera__butterfly_",
+                   "Lepidoptera__moth_", "Lepidoptera__sphingid_", "Passeriformes", "Small_mammals"))
+colnames(i)<-ss[c(34:134),5]
+colnames(i)
+qm2<-t(rowsum(t(i), group = colnames(i), na.rm = T))
+qm3<-as.data.frame(colSums(qm2))
+qm3
+
+
+
+table(yy$ID)
+which(yy$ID %in% c("Coleoptera", "Diptera__h_fly_", "Diptera__unsp_", "Hymenoptera__bee_",
+                   "Hymenoptera__eusocial_bee_", "Hymenoptera__wasp_", "Lepidoptera__butterfly_",
+                   "Lepidoptera__moth_", "Lepidoptera__sphingid_", "Passeriformes", "Small_mammals"))
+
+colnames(y)<-yy[c(22:97),5]
+colnames(y)
+qm4<-t(rowsum(t(y), group = colnames(y), na.rm = T))
+qm5<-as.data.frame(colSums(qm4))
+qm5
+
+table(hh$ID)
+which(hh$ID %in% c("Coleoptera", "Diptera__h_fly_", "Diptera__unsp_", "Hymenoptera__bee_",
+                   "Hymenoptera__eusocial_bee_",
+                   "Lepidoptera__moth_", "Lepidoptera__sphingid_", "Passeriformes"))
+ncol(z)
+colnames(z)<-hh[c(28:78),5]
+colnames(z)
+qm6<-t(rowsum(t(z), group = colnames(z), na.rm = T))
+qm7<-as.data.frame(colSums(qm6))
+qm7
+
+#Merges information from all data frames into just one
+tmp12 <- merge(qm1,qm3 , by=0, all=T)
+rownames(tmp12) <- tmp12$Row.names 
+tmp12$Row.names <- NULL
+tmp12
+
+tmp123 <- merge(tmp12, qm5, by=0, all=T)
+rownames(tmp123) <- tmp123$Row.names 
+tmp123$Row.names <- NULL
+tmp123
+
+tmp1234 <- merge(tmp123, qm7, by=0, all=T)
+rownames(tmp1234) <- tmp1234$Row.names
+tmp1234$Row.names <- NULL
+tmp1234
+
+#Transforms the row names into a column
+setDT(tmp1234, keep.rownames = TRUE)[]
+tmp1234
+colnames(tmp1234)<-c("Orders", "CLDRY", "CLWET", "MSDRY", "MSWET")
+tmp1234
+tmp1234[is.na(tmp1234)] <- 0
+tmp1234
+
+yy3<-t(tmp1234)
+yy3
+
+
+#Transforms into a matrix and changes the NAs to 0s
+yy4<-as.matrix(tmp1234)
+yy4
+colnames(yy4)<-c("CLDRY", "CLWET", "MSDRY", "MSWET")
+yy4[is.na(yy4)] <- 0
+
+
+#Converts numbers from character to numeric across the whole dataset
+cols = c(2, 3, 4, 5)
+yy4[,cols] = apply(yy4[,cols], 2, function(x) as.numeric(as.character(x)))
+
+yy4
+matrix(as.numeric(unlist(yy4[,2:5])),nrow=nrow(yy4))
+
+yy4
+
+#Makes a bar plot with the frequencies of each group within each elevation and season
+barplot(yy4, xlab="Sampling sites", ylab="Frequency of visitation", col = c("red","green", "yellow", 
+                                                                            "blue", "black", "grey",
+                                                                            "white", "orange", "green",
+                                                                            "purple", "pink", "brown"), beside=TRUE)
+legend("topright",
+       c("Chiroptera","Coleoptera", "Diptera_h_fly_", "Diptera_unsp_", "Hymenoptera_Carpenters_",
+         "Hymenoptera_bee_", "Hymenoptera_eusocial_bee_", "Lepidoptera_butterfly_", "Lepidoptera_moth_",
+         "Lepidoptera_sphingid_", "Passeriformes", "Small_mammals"),
+       fill = c("red","green", "yellow", 
+                "blue", "black", "grey",
+                "white", "orange", "green",
+                "purple", "pink", "brown"),  pt.cex=0.7,cex=0.7
+)
+
