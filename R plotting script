@@ -1,6 +1,6 @@
 ##### R script for plotting 
 #Written by: Hernani Oliveira
-#Date: 18/12/2018
+#Date: 09/01/2018
 
 install.packages("data.table")
 
@@ -137,12 +137,18 @@ plot.igraph(d1, axes=FALSE, layout=layout.kamada.kawai, edge.width=E(d1)$weight/
 title("Full mutualistic network - Bat-Plants - Kamada.Kawai")
 
 
-legend(-2.4, 0.8, legend=c("Plant", "Coleoptera", "Diptera Hoverfly", "Diptera Unspecified", "Hymenoptera (bee)",
-                           "Hymenoptera (carpenters)", "Lepidoptera (butterfly)", "Lepidoptera (moth)",
-                           "Lepidoptera (sphingid)", "Passeriformes", "Small mammals"), 
-       col=c("green", "aliceblue", "blue", "cornsilk", "brown1", "darkgreen", "darkorange", "darkorchid",
-             "deeppink", "grey61", "olivedrab1"), pch=c(16, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15),
+legend(-2.4, 0.8, legend=c("Climber", "Epiphyte", "Herb", "Shrub", "Tree", "Blattodea", "Chiroptera", 
+                           "Coleoptera", "Diptera__h_fly_", "Diptera__unsp_", "Hymenoptera__beee_", 
+                           "Hymenoptera__wasp_", "Hymenoptera__eusocial_bee_", 
+                           "Hymenoptera__carpenters_", "Lepidoptera__butterfly_", "Lepidoptera__moth_",
+                           "Lepidoptera__sphingid_", "Passeriformes", "Small_mammals"), 
+       col=c("green", "green4", "lightgreen", "lightseagreen", "olivedrab4", "khaki1", "black", 
+             "alceblue", "blue", "cornsilk", "brown1", "grey87", "yellow", "darkgreen",  "darkorange",
+             "darkorchid", "deeppink", "grey61", "indianred3"
+             ), pch=c(16, 16, 16, 16, 16, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15  ),
        pt.cex=1.0,cex=1.0, bty="n", title="Pollination network - Crater Lake (Dry season)")
+
+
 
 ######################################
 
@@ -563,7 +569,3 @@ legend("topright",
                 "white", "orange", "green",
                 "purple", "pink", "brown"),  pt.cex=0.7,cex=0.7
 )
-
-
-
-
